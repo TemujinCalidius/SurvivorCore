@@ -26,20 +26,19 @@ The Last Refuge is a demo game built using SurvivorCore. Players must survive in
     - Fork the repository and submit pull requests.
     - Report issues or suggest features in the Issues tab.
 
-Security Measures
-
+## Security Measures
 SurvivorCore includes protections to prevent unauthorized modifications:
 - Prim Creator and Owner Checks: Scripts verify the prim creator and owner before performing sensitive actions.
 - Admin Controls: Only region owners or admins can modify player stats or server settings.
-License
 
+## License
 SurvivorCore is released under the MIT License. Feel free to use, modify, and distribute the code.
-Contributing
 
+## Contributing
 We welcome contributions! Please follow these steps:
 1. Fork the repository.
 2. Make your changes with proper comments and documentation.
 3. Submit a pull request with a detailed description of your changes.
-Contact
 
+## Contact
 For questions or feedback, open an issue or contact us at [your email/contact info].
