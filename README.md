@@ -18,3 +18,28 @@ The Last Refuge is a demo game built using SurvivorCore. Players must survive in
    Clone the repository:
    ```bash
    git clone https://github.com/yourusername/SurvivorCore.git
+2. Install on Your Region:
+- Place the scripts in your region's objects.
+- Follow the setup guide (coming soon) to configure your game.
+
+    Contribute:
+    - Fork the repository and submit pull requests.
+    - Report issues or suggest features in the Issues tab.
+
+Security Measures
+
+SurvivorCore includes protections to prevent unauthorized modifications:
+- Prim Creator and Owner Checks: Scripts verify the prim creator and owner before performing sensitive actions.
+- Admin Controls: Only region owners or admins can modify player stats or server settings.
+License
+
+SurvivorCore is released under the MIT License. Feel free to use, modify, and distribute the code.
+Contributing
+
+We welcome contributions! Please follow these steps:
+1. Fork the repository.
+2. Make your changes with proper comments and documentation.
+3. Submit a pull request with a detailed description of your changes.
+Contact
+
+For questions or feedback, open an issue or contact us at [your email/contact info].
