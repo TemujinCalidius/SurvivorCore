@@ -1,0 +1,73 @@
+integer COMM_CHANNEL = 67890; // Channel for communication with the statistics server
+key playerKey; // The player's UUID
+string playerName; // The player's name
+
+default {
+    state_entry() {
+        playerKey = llGetOwner(); // Get the player's UUID
+        playerName = llKey2Name(playerKey); // Get the player's name
+
+        // Set up a listener for the communication channel
+        llListen(COMM_CHANNEL, "", NULL_KEY, "");
+
+        // Send a request to the statistics server to locate the player's prim
+        llRegionSay(COMM_CHANNEL, "RequestStats|" + (string)playerKey);
+    }
+
+    listen(integer channel, string name, key id, string message) {
+        list parts = llParseString2List(message, ["|"], []);
+        string command = llList2String(parts, 0);
+
+        if (command == "Stats") {
+            // The server has found the player's prim and sent back the description
+            string description = llList2String(parts, 1);
+
+            // Parse the description to extract stats
+            list data = llParseString2List(description, [";", "="], []);
+            string health = llList2String(data, llListFindList(data, ["Health"]) + 1);
+            string stamina = llList2String(data, llListFindList(data, ["Stamina"]) + 1);
+            string role = llList2String(data, llListFindList(data, ["Role"]) + 1);
+
+            // Update floating text on the player's meter
+            updateFloatingText(health, stamina, role);
+        }
+    }
+
+    on_rez(integer start_param) {
+        llResetScript(); // Reset the script when the meter is rezzed or attached
+    }
+
+    attach(key id) {
+        if (id != NULL_KEY) {
+            llResetScript(); // Reset the script when the meter is attached
+        }
+    }
+}
+
+// Update floating text on the player's meter
+updateFloatingText(string health, string stamina, string role) {
+    integer healthValue = (integer)health; // Convert health to an integer
+    string text;
+
+    // Determine the floating text based on health
+    if (healthValue <= 0) {
+        text = "Dead";
+        llSetText(text, <1, 0, 0>, 1.0); // Red text for "Dead"
+        return;
+    } else {
+        text = "Health: " + health + "\nStamina: " + stamina + "\nRole: " + role;
+    }
+
+    // Determine the text colour based on health
+    vector colour;
+    if (healthValue > 50) {
+        colour = <0, 1, 0>; // Green
+    } else if (healthValue > 25) {
+        colour = <1, 1, 0>; // Yellow
+    } else {
+        colour = <1, 0.5, 0>; // Orange
+    }
+
+    // Set floating text with the determined colour
+    llSetText(text, colour, 1.0);
+}
