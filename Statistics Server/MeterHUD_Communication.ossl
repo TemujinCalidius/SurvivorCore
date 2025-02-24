@@ -1,0 +1,32 @@
+integer COMM_CHANNEL = 67890; // Random channel for meter and HUD communication
+
+default {
+    state_entry() {
+        llListen(COMM_CHANNEL, "", NULL_KEY, ""); // Listen for messages on the communication channel
+    }
+
+    listen(integer channel, string name, key id, string message) {
+        list parts = llParseString2List(message, ["|"], []);
+        string command = llList2String(parts, 0);
+
+        if (command == "RequestStats") {
+            key playerKey = llList2Key(parts, 1);
+
+            // Search for the player's prim
+            integer totalPrims = llGetNumberOfPrims();
+            for (integer i = 2; i <= totalPrims; i++) { // Start from link 2 (skip root prim)
+                string desc = llGetLinkPrimitiveParams(i, [PRIM_DESC]);
+
+                // Check if the player's key is in the description
+                if (llSubStringIndex(desc, "UUID=" + (string)playerKey) != -1) {
+                    // Send the description back to the meter or HUD
+                    llRegionSayTo(playerKey, COMM_CHANNEL, "Stats|" + desc);
+                    return;
+                }
+            }
+
+            // If no prim is found, notify the meter or HUD
+            llRegionSayTo(playerKey, COMM_CHANNEL, "Error|PrimNotFound");
+        }
+    }
+}
