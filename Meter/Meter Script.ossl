@@ -2,6 +2,18 @@ integer COMM_CHANNEL = 67890; // Channel for communication with the statistics s
 key playerKey; // The player's UUID
 string playerName; // The player's name
 
+integer stamina = 100; // Current stamina
+integer maxStamina = 100; // Maximum stamina (retrieved from the server)
+integer health = 100; // Current health
+integer maxHealth = 100; // Maximum health (retrieved from the server)
+string role = "Survivor"; // Player's role
+float depletionRate = 5.0; // Stamina depletion per second
+float regenerationRate = 5.0; // Stamina regeneration per second
+integer isRunning = FALSE; // Flag to track running state
+integer isFlying = FALSE; // Flag to track flying state
+integer isExhausted = FALSE; // Flag to track exhaustion state
+integer isDrainingHealth = FALSE; // Flag to track health drain state
+
 default {
     state_entry() {
         playerKey = llGetOwner(); // Get the player's UUID
@@ -10,27 +22,80 @@ default {
         // Set up a listener for the communication channel
         llListen(COMM_CHANNEL, "", NULL_KEY, "");
 
-        // Send a request to the statistics server to locate the player's prim
+        // Send a request to the statistics server to get the player's stats
         llRegionSay(COMM_CHANNEL, "RequestStats|" + (string)playerKey);
+
+        // Start a timer to check the avatar's state
+        llSetTimerEvent(1.0); // Check every second
     }
 
     listen(integer channel, string name, key id, string message) {
+        // Parse the incoming message
         list parts = llParseString2List(message, ["|"], []);
         string command = llList2String(parts, 0);
 
         if (command == "Stats") {
-            // The server has found the player's prim and sent back the description
+            // The server has sent the stats
             string description = llList2String(parts, 1);
 
             // Parse the description to extract stats
             list data = llParseString2List(description, [";", "="], []);
-            string health = llList2String(data, llListFindList(data, ["Health"]) + 1);
-            string stamina = llList2String(data, llListFindList(data, ["Stamina"]) + 1);
-            string role = llList2String(data, llListFindList(data, ["Role"]) + 1);
+            health = (integer)llList2String(data, llListFindList(data, ["Health"]) + 1);
+            maxHealth = 100; // Max health is fixed for now but can be updated later
+            if (!isExhausted) {
+                stamina = (integer)llList2String(data, llListFindList(data, ["Stamina"]) + 1);
+            }
+            maxStamina = 100; // Max stamina is fixed for now but can be updated later
+            role = llList2String(data, llListFindList(data, ["Role"]) + 1);
 
-            // Update floating text on the player's meter
-            updateFloatingText(health, stamina, role);
+            // Update floating text
+            updateFloatingText();
+        } else if (command == "Error") {
+            // Handle errors from the server
+            string errorMessage = llList2String(parts, 1);
+            if (errorMessage == "PrimNotFound") {
+                llOwnerSay("Error: Your stats could not be retrieved. Please check the Statistics Server.");
+            }
         }
+    }
+
+    timer() {
+        integer agentInfo = llGetAgentInfo(playerKey);
+
+        // Check if the avatar is running or flying
+        isRunning = (agentInfo & AGENT_ALWAYS_RUN); // Detect running specifically
+        isFlying = (agentInfo & AGENT_FLYING); // Detect flying
+
+        if (isRunning || isFlying) {
+            // Deplete stamina
+            stamina -= (integer)depletionRate;
+            if (stamina <= 0) {
+                stamina = 0;
+                isExhausted = TRUE;
+
+                // Start draining health if not already doing so
+                if (!isDrainingHealth) {
+                    isDrainingHealth = TRUE;
+                    llOwnerSay("You are exhausted! Health will now start draining.");
+                }
+
+                // Send a message to the Statistics Server to reduce health
+                llRegionSay(COMM_CHANNEL, "ReduceHealth|1|" + (string)playerKey);
+            }
+        } else {
+            // Regenerate stamina if not exhausted
+            if (stamina < maxStamina) {
+                stamina += (integer)regenerationRate;
+                if (stamina > maxStamina) {
+                    stamina = maxStamina;
+                }
+            }
+            isExhausted = FALSE; // Reset exhaustion state when idle
+            isDrainingHealth = FALSE; // Stop health drain when idle
+        }
+
+        // Update floating text
+        updateFloatingText();
     }
 
     on_rez(integer start_param) {
@@ -45,27 +110,36 @@ default {
 }
 
 // Update floating text on the player's meter
-updateFloatingText(string health, string stamina, string role) {
-    integer healthValue = (integer)health; // Convert health to an integer
+updateFloatingText() {
     string text;
 
-    // Determine the floating text based on health
-    if (healthValue <= 0) {
-        text = "Dead";
-        llSetText(text, <1, 0, 0>, 1.0); // Red text for "Dead"
-        return;
+    if (health > 0) {
+        if (stamina > 0) {
+            // Normal state
+            text = "Health: " + (string)health + "/" + (string)maxHealth +
+                   "\nStamina: " + (string)stamina + "/" + (string)maxStamina +
+                   "\nRole: " + role;
+        } else {
+            // Exhausted state
+            text = "Health: " + (string)health + "/" + (string)maxHealth +
+                   "\nStamina: 0/" + (string)maxStamina + " (Exhausted)" +
+                   "\nRole: " + role;
+        }
     } else {
-        text = "Health: " + health + "\nStamina: " + stamina + "\nRole: " + role;
+        // Dead state
+        text = "Dead";
     }
 
     // Determine the text colour based on health
     vector colour;
-    if (healthValue > 50) {
+    if (health > 50) {
         colour = <0, 1, 0>; // Green
-    } else if (healthValue > 25) {
+    } else if (health > 25) {
         colour = <1, 1, 0>; // Yellow
-    } else {
+    } else if (health > 0) {
         colour = <1, 0.5, 0>; // Orange
+    } else {
+        colour = <1, 0, 0>; // Red
     }
 
     // Set floating text with the determined colour
