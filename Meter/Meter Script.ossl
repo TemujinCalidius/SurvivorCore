@@ -3,9 +3,9 @@ key playerKey; // The player's UUID
 string playerName; // The player's name
 
 integer stamina = 100; // Current stamina
-integer maxStamina = 100; // Maximum stamina (retrieved from the server)
+integer maxStamina = 100; // Maximum stamina
 integer health = 100; // Current health
-integer maxHealth = 100; // Maximum health (retrieved from the server)
+integer maxHealth = 100; // Maximum health
 string role = "Survivor"; // Player's role
 float depletionRate = 5.0; // Stamina depletion per second
 float regenerationRate = 5.0; // Stamina regeneration per second
@@ -13,6 +13,12 @@ integer isRunning = FALSE; // Flag to track running state
 integer isFlying = FALSE; // Flag to track flying state
 integer isExhausted = FALSE; // Flag to track exhaustion state
 integer isDrainingHealth = FALSE; // Flag to track health drain state
+integer isRegistered = FALSE; // Flag to track if the player is registered
+integer serverFound = FALSE; // Flag to track if a server is found
+
+// Adjusted cooldown for health drain
+float healthDrainCooldown = 1.0; // Time (in seconds) between health drain updates
+float lastHealthDrainTime = 0.0; // Timestamp of the last health drain
 
 default {
     state_entry() {
@@ -23,7 +29,7 @@ default {
         llListen(COMM_CHANNEL, "", NULL_KEY, "");
 
         // Send a request to the statistics server to get the player's stats
-        llRegionSay(COMM_CHANNEL, "RequestStats|" + (string)playerKey);
+        llRegionSay(COMM_CHANNEL, "RequestStats|" + (string)playerKey + "|" + (string)COMM_CHANNEL);
 
         // Start a timer to check the avatar's state
         llSetTimerEvent(1.0); // Check every second
@@ -36,30 +42,45 @@ default {
 
         if (command == "Stats") {
             // The server has sent the stats
+            serverFound = TRUE; // Server is present
             string description = llList2String(parts, 1);
 
             // Parse the description to extract stats
             list data = llParseString2List(description, [";", "="], []);
-            health = (integer)llList2String(data, llListFindList(data, ["Health"]) + 1);
-            maxHealth = 100; // Max health is fixed for now but can be updated later
-            if (!isExhausted) {
-                stamina = (integer)llList2String(data, llListFindList(data, ["Stamina"]) + 1);
-            }
-            maxStamina = 100; // Max stamina is fixed for now but can be updated later
-            role = llList2String(data, llListFindList(data, ["Role"]) + 1);
+            string uuid = llList2String(data, llListFindList(data, ["UUID"]) + 1);
 
-            // Update floating text
-            updateFloatingText();
+            // Ensure the UUID matches the player's UUID
+            if (uuid == (string)playerKey) {
+                health = (integer)llList2String(data, llListFindList(data, ["Health"]) + 1);
+                maxHealth = 100; // Max health is fixed for now but can be updated later
+                if (!isExhausted) {
+                    stamina = (integer)llList2String(data, llListFindList(data, ["Stamina"]) + 1);
+                }
+                maxStamina = 100; // Max stamina is fixed for now but can be updated later
+                role = llList2String(data, llListFindList(data, ["Role"]) + 1);
+
+                isRegistered = TRUE; // Player is registered
+
+                // Update floating text
+                updateFloatingText();
+            }
         } else if (command == "Error") {
-            // Handle errors from the server
             string errorMessage = llList2String(parts, 1);
             if (errorMessage == "PrimNotFound") {
-                llOwnerSay("Error: Your stats could not be retrieved. Please check the Statistics Server.");
+                // Player is not registered
+                isRegistered = FALSE;
+                llOwnerSay("Error: You are not registered. Please click on a registration board.");
+                llSetText("Not Registered", <1, 0, 0>, 1.0); // Red text
             }
         }
     }
 
     timer() {
+        // Prevent updates if the player is not registered or dead
+        if (!isRegistered || health <= 0) {
+            return; // Do nothing
+        }
+
         integer agentInfo = llGetAgentInfo(playerKey);
 
         // Check if the avatar is running or flying
@@ -68,19 +89,33 @@ default {
 
         if (isRunning || isFlying) {
             // Deplete stamina
-            stamina -= (integer)depletionRate;
-            if (stamina <= 0) {
-                stamina = 0;
-                isExhausted = TRUE;
+            if (!isExhausted) {
+                stamina -= (integer)depletionRate;
+                if (stamina <= 0) {
+                    stamina = 0;
+                    isExhausted = TRUE;
 
-                // Start draining health if not already doing so
-                if (!isDrainingHealth) {
-                    isDrainingHealth = TRUE;
-                    llOwnerSay("You are exhausted! Health will now start draining.");
+                    // Start draining health if not already doing so
+                    if (!isDrainingHealth) {
+                        isDrainingHealth = TRUE;
+                        llOwnerSay("You are exhausted! Health will now start draining.");
+                    }
                 }
+            }
 
-                // Send a message to the Statistics Server to reduce health
-                llRegionSay(COMM_CHANNEL, "ReduceHealth|1|" + (string)playerKey);
+            // Drain health if exhausted
+            if (isExhausted && isDrainingHealth) {
+                float currentTime = llGetUnixTime();
+                if (currentTime - lastHealthDrainTime >= healthDrainCooldown) {
+                    health -= 1; // Reduce health by 1
+                    if (health < 0) health = 0;
+
+                    // Notify the statistics server of health reduction
+                    llRegionSay(COMM_CHANNEL, "ReduceHealth|1|" + (string)playerKey);
+
+                    // Update the cooldown timer
+                    lastHealthDrainTime = currentTime;
+                }
             }
         } else {
             // Regenerate stamina if not exhausted
@@ -90,12 +125,23 @@ default {
                     stamina = maxStamina;
                 }
             }
-            isExhausted = FALSE; // Reset exhaustion state when idle
-            isDrainingHealth = FALSE; // Stop health drain when idle
+
+            // Reset exhaustion state when idle
+            isExhausted = FALSE;
+            isDrainingHealth = FALSE;
         }
 
         // Update floating text
         updateFloatingText();
+    }
+
+    changed(integer change) {
+        if (change & CHANGED_REGION) {
+            // The avatar has entered a new region
+            serverFound = FALSE;
+            isRegistered = FALSE;
+            llRegionSay(COMM_CHANNEL, "RequestStats|" + (string)playerKey + "|" + (string)COMM_CHANNEL);
+        }
     }
 
     on_rez(integer start_param) {
@@ -105,6 +151,25 @@ default {
     attach(key id) {
         if (id != NULL_KEY) {
             llResetScript(); // Reset the script when the meter is attached
+        }
+    }
+
+    // Handle messages from the Security script
+    link_message(integer sender_num, integer num, string str, key id) {
+        if (str == "NotRegistered") {
+            // Update floating text to show "Not Registered"
+            llSetText("Not Registered", <1, 0, 0>, 1.0); // Red text
+            llOwnerSay("You are not registered. Please click on a registration board.");
+            isRegistered = FALSE; // Ensure the meter knows the player is not registered
+        } else if (str == "Registered") {
+            // Update floating text to show normal stats
+            isRegistered = TRUE;
+            updateFloatingText();
+        } else if (str == "NoServer") {
+            // Hide all floating text
+            llSetText("", <0, 0, 0>, 0.0); // Clear text
+            llOwnerSay("No statistics server detected in this region.");
+            isRegistered = FALSE; // Ensure the meter knows the player is inactive
         }
     }
 }
