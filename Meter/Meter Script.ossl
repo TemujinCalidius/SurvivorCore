@@ -72,6 +72,9 @@ default {
                 llOwnerSay("Error: You are not registered. Please click on a registration board.");
                 llSetText("Not Registered", <1, 0, 0>, 1.0); // Red text
             }
+        } else if (command == "InitializeMeter") {
+            // Reinitialize the meter by requesting stats
+            llRegionSay(COMM_CHANNEL, "RequestStats|" + (string)playerKey + "|" + (string)COMM_CHANNEL);
         }
     }
 
