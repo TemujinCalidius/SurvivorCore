@@ -1,5 +1,5 @@
 integer COMM_CHANNEL_UUID = 67892; // Channel for UUID communication with UUID Handler
-float TIMER_INTERVAL = 60.0; // Timer interval (1 minute for testing)
+float TIMER_INTERVAL = 300.0; // Timer interval (1 minute for testing)
 list playerUUIDs; // List to store player UUIDs
 
 default {
