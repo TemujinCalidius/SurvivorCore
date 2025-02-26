@@ -9,7 +9,6 @@ integer isWaitingForResponse = FALSE; // Flag to track if the script is waiting 
 // Function to check for a server
 checkForServer() {
     if (isWaitingForResponse) {
-        llOwnerSay("[Security Script] Already waiting for a response. Ignoring new server check request.");
         return; // Prevent multiple overlapping checks
     }
 
@@ -19,7 +18,6 @@ checkForServer() {
 
     // Send a request to the statistics server with the Security Script's channel
     string message = "RequestStats|" + (string)playerKey + "|" + (string)COMM_CHANNEL;
-    llOwnerSay("[Security Script] Sending message to stats server: " + message); // Debug message
     llRegionSay(67890, message);
 
     // Set up a listener for the communication channel
@@ -40,14 +38,11 @@ default {
     changed(integer change) {
         if (change & CHANGED_REGION) {
             // The avatar has entered a new region
-            llOwnerSay("[Security Script] Region changed. Checking for server...");
             checkForServer(); // Call the function here
         }
     }
 
     listen(integer channel, string name, key id, string message) {
-        llOwnerSay("[Security Script] Received message on channel " + (string)channel + ": " + message);
-
         // Parse the incoming message
         list parts = llParseString2List(message, ["|"], []);
         string command = llList2String(parts, 0);
@@ -67,11 +62,9 @@ default {
             if (uuid == (string)playerKey) {
                 isRegistered = TRUE; // Player is registered
                 llMessageLinked(LINK_THIS, 0, "Stats|" + description, ""); // Notify the meter script with updated stats
-                llOwnerSay("[Security Script] Player is registered with the statistics server.");
             } else {
                 isRegistered = FALSE; // Player is not registered
                 llMessageLinked(LINK_THIS, 0, "NotRegistered", ""); // Notify the meter script
-                llOwnerSay("[Security Script] Player is not registered with the statistics server.");
             }
         } else if (command == "Error") {
             string errorMessage = llList2String(parts, 1);
@@ -82,7 +75,6 @@ default {
                 llListenRemove(listenHandle); // Remove the listener
                 isWaitingForResponse = FALSE; // Reset the waiting flag
                 llMessageLinked(LINK_THIS, 0, "NotRegistered", ""); // Notify the meter script
-                llOwnerSay("[Security Script] No matching prim found for UUID.");
             }
         }
     }
@@ -90,7 +82,6 @@ default {
     link_message(integer sender_num, integer num, string str, key id) {
         // Handle linked messages from other scripts in the same object
         if (str == "Reinitialize") {
-            llOwnerSay("[Security Script] Reinitialize message received via linked message. Checking for server...");
             checkForServer(); // Re-check the server
         }
     }
@@ -100,7 +91,6 @@ default {
         if (!serverFound) {
             llListenRemove(listenHandle); // Remove the listener
             llMessageLinked(LINK_THIS, 0, "NoServer", ""); // Notify the meter script to hide floating text
-            llOwnerSay("[Security Script] No statistics server detected in this region.");
         }
         isWaitingForResponse = FALSE; // Reset the waiting flag
         llSetTimerEvent(0.0); // Stop the timer

@@ -36,7 +36,6 @@ default {
 
         // Send a request to the statistics server to get the player's stats
         llRegionSay(COMM_CHANNEL, "RequestStats|" + (string)playerKey + "|" + (string)COMM_CHANNEL);
-        llOwnerSay("[Meter Script] Initial stats request sent on channel " + (string)COMM_CHANNEL);
 
         // Start a timer to check the avatar's state
         llSetTimerEvent(1.0); // Check every second
@@ -80,7 +79,6 @@ default {
             if (errorMessage == "PrimNotFound") {
                 // Player is not registered
                 isRegistered = FALSE;
-                llOwnerSay("Error: You are not registered. Please click on a registration board.");
                 llSetText("Not Registered", <1, 0, 0>, 1.0); // Red text
             }
         }
@@ -109,7 +107,6 @@ default {
                     // Start draining health if not already doing so
                     if (!isDrainingHealth) {
                         isDrainingHealth = TRUE;
-                        llOwnerSay("You are exhausted! Health will now start draining.");
                     }
                 }
             }
@@ -168,7 +165,6 @@ default {
     // Handle messages from the UUID Handler
     link_message(integer sender_num, integer num, string str, key id) {
         if (str == "ResetMeter") {
-            llOwnerSay("[Meter Script] ResetMeter command received. Resetting script...");
             llResetScript(); // Reset the Meter Script
         }
     }

@@ -6,25 +6,19 @@ default {
     state_entry() {
         llListen(COMM_CHANNEL_UUID, "", NULL_KEY, ""); // Listen for UUID responses
         llSetTimerEvent(TIMER_INTERVAL); // Start the timer
-        llOwnerSay("[Stats Script] Initialized. Timer set to 1 minute for testing.");
     }
 
     timer() {
-        llOwnerSay("[Stats Script] Timer triggered. Sending RequestUUID to all UUID Handlers on channel 67892...");
         playerUUIDs = []; // Clear the list of player UUIDs
         llRegionSay(COMM_CHANNEL_UUID, "RequestUUID"); // Request UUIDs
     }
 
     listen(integer channel, string name, key id, string message) {
-        llOwnerSay("[Stats Script] Received message on channel " + (string)channel + ": " + message);
-
         list parts = llParseString2List(message, ["|"], []);
         string command = llList2String(parts, 0);
 
         if (channel == COMM_CHANNEL_UUID && command == "UUID") {
             key playerKey = llList2Key(parts, 1); // Extract the player's UUID
-            llOwnerSay("[Stats Script] Received UUID from UUID Handler: " + (string)playerKey);
-
             playerUUIDs += [playerKey]; // Add UUID to the list
             integer totalPrims = llGetNumberOfPrims();
 
@@ -32,8 +26,6 @@ default {
                 string desc = llGetLinkPrimitiveParams(i, [PRIM_DESC]);
 
                 if (llSubStringIndex(desc, "UUID=" + (string)playerKey) != -1) {
-                    llOwnerSay("[Stats Script] Found matching prim for player UUID: " + (string)playerKey);
-
                     // Update stats (same logic as before)
                     list data = llParseString2List(desc, [";", "="], []);
                     integer hungerIndex = llListFindList(data, ["Hunger"]) + 1;
@@ -64,11 +56,9 @@ default {
                     updatedDesc = llDeleteSubString(updatedDesc, -1, -1);
 
                     llSetLinkPrimitiveParamsFast(i, [PRIM_DESC, updatedDesc]);
-                    llOwnerSay("[Stats Script] Updated prim description for player: " + updatedDesc);
 
                     // Send reinitialize command to UUID Handler
                     llRegionSay(COMM_CHANNEL_UUID, "Reinitialize|" + (string)playerKey);
-                    llOwnerSay("[Stats Script] Sent reinitialize command to UUID Handler for player UUID: " + (string)playerKey);
                 }
             }
         }
