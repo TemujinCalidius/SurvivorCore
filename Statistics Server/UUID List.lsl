@@ -1,4 +1,4 @@
-integer SHORT_INTERVAL = 10; // Short interval for detecting avatars (in seconds)
+integer SHORT_INTERVAL = 60; // Short interval for detecting avatars (in seconds)
 list detectedUUIDs; // List to store detected UUIDs
 
 // Function to detect avatars and store their UUIDs
