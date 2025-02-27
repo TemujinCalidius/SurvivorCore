@@ -23,8 +23,8 @@ default {
                 // Notify the player of successful registration
                 llInstantMessage(playerKey, "Welcome, " + playerName + "! You have been successfully registered.");
 
-                // Notify the player's meter to initialize and fetch stats
-                llRegionSayTo(playerKey, 67890, "InitializeMeter");
+                // Notify the player's meter to reset itself and fetch stats
+                llRegionSayTo(playerKey, 67890, "ResetMeter");
             } else {
                 // Notify the player if no prims are available
                 llInstantMessage(playerKey, "Sorry, " + playerName + ", no available slots for registration.");

@@ -1,8 +1,6 @@
 integer COMM_CHANNEL = 67891; // Channel for the Security Script
 key playerKey; // The player's UUID
 integer serverFound = FALSE; // Flag to track if a server is found
-integer isRegistered = FALSE; // Flag to track if the player is registered
-float SERVER_TIMEOUT = 5.0; // Timeout in seconds to wait for a server response
 integer listenHandle; // Handle for the listener
 integer isWaitingForResponse = FALSE; // Flag to track if the script is waiting for a response
 
@@ -13,7 +11,6 @@ checkForServer() {
     }
 
     serverFound = FALSE; // Reset server flag
-    isRegistered = FALSE; // Reset registration flag
     isWaitingForResponse = TRUE; // Set the waiting flag
 
     // Send a request to the statistics server with the Security Script's channel
@@ -22,14 +19,12 @@ checkForServer() {
 
     // Set up a listener for the communication channel
     listenHandle = llListen(COMM_CHANNEL, "", NULL_KEY, "");
-
-    // Start a timer to wait for a response
-    llSetTimerEvent(SERVER_TIMEOUT);
 }
 
 default {
     state_entry() {
         playerKey = llGetOwner(); // Get the player's UUID
+        llOwnerSay("Security Script initialized. Player UUID: " + (string)playerKey);
 
         // Call the function to check for a server
         checkForServer();
@@ -38,7 +33,9 @@ default {
     changed(integer change) {
         if (change & CHANGED_REGION) {
             // The avatar has entered a new region
-            checkForServer(); // Call the function here
+            llOwnerSay("Region change detected. Sending ResetMeter command.");
+            llMessageLinked(LINK_THIS, 0, "ResetMeter", ""); // Send ResetMeter command to the Meter Script
+            checkForServer(); // Perform a server check after region change
         }
     }
 
@@ -49,32 +46,17 @@ default {
 
         if (command == "Stats") {
             serverFound = TRUE; // Server is present
-            llSetTimerEvent(0.0); // Stop the timeout timer
             llListenRemove(listenHandle); // Remove the listener
             isWaitingForResponse = FALSE; // Reset the waiting flag
-
-            string description = llList2String(parts, 1);
-
-            // Parse the description to check if the player's UUID matches
-            list data = llParseString2List(description, [";", "="], []);
-            string uuid = llList2String(data, llListFindList(data, ["UUID"]) + 1);
-
-            if (uuid == (string)playerKey) {
-                isRegistered = TRUE; // Player is registered
-                llMessageLinked(LINK_THIS, 0, "Stats|" + description, ""); // Notify the meter script with updated stats
-            } else {
-                isRegistered = FALSE; // Player is not registered
-                llMessageLinked(LINK_THIS, 0, "NotRegistered", ""); // Notify the meter script
-            }
+            llOwnerSay("Server found. Stats received.");
         } else if (command == "Error") {
             string errorMessage = llList2String(parts, 1);
             if (errorMessage == "PrimNotFound") {
-                // Player is not registered
-                isRegistered = FALSE;
-                llSetTimerEvent(0.0); // Stop the timeout timer
+                // No server found
+                serverFound = FALSE;
                 llListenRemove(listenHandle); // Remove the listener
                 isWaitingForResponse = FALSE; // Reset the waiting flag
-                llMessageLinked(LINK_THIS, 0, "NotRegistered", ""); // Notify the meter script
+                llOwnerSay("Error: Prim not found. No server available.");
             }
         }
     }
@@ -84,15 +66,5 @@ default {
         if (str == "Reinitialize") {
             checkForServer(); // Re-check the server
         }
-    }
-
-    timer() {
-        // Timeout occurred, no response from the server
-        if (!serverFound) {
-            llListenRemove(listenHandle); // Remove the listener
-            llMessageLinked(LINK_THIS, 0, "NoServer", ""); // Notify the meter script to hide floating text
-        }
-        isWaitingForResponse = FALSE; // Reset the waiting flag
-        llSetTimerEvent(0.0); // Stop the timer
     }
 }

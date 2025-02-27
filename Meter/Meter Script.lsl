@@ -103,12 +103,25 @@ default {
             if (errorMessage == "PrimNotFound") {
                 // Player is not registered
                 isRegistered = FALSE;
+                serverFound = TRUE; // Server is still present, just not registered
                 llSetText("Not Registered", <1, 0, 0>, 1.0); // Red text
             }
+        } else if (command == "ResetMeter") {
+            // Handle ResetMeter command from region-wide message
+            llResetScript(); // Reset the Meter Script
         }
     }
 
     timer() {
+        // Check if server was found
+        if (!serverFound) {
+            // No server found, make floating text invisible
+            llSetText("", <0, 0, 0>, 0.0); // Make floating text invisible
+        } else if (!isRegistered) {
+            // Server is found but the player is not registered
+            llSetText("Not Registered", <1, 0, 0>, 1.0); // Red text
+        }
+
         // Prevent updates if the player is not registered or dead
         if (!isRegistered || health <= 0) {
             return; // Do nothing
