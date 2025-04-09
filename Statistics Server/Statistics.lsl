@@ -1,85 +1,75 @@
-integer COMM_CHANNEL_UUID = 67892; // Channel for UUID communication with UUID Handler
-float TIMER_INTERVAL = 300.0; // Timer interval (1 minute for testing)
-list playerUUIDs; // List to store player UUIDs
+// SurvivorCore Registration Script
+// Description: Handles player registration with the statistics server
+// Author: Temujin Calidius
+// Date: April 2025
+// Version: 1.0
 
 default {
     state_entry() {
-        llListen(COMM_CHANNEL_UUID, "", NULL_KEY, ""); // Listen for UUID responses
-        llSetTimerEvent(TIMER_INTERVAL); // Start the timer
-    }
-
-    timer() {
-        playerUUIDs = []; // Clear the list of player UUIDs
-        llRegionSay(COMM_CHANNEL_UUID, "RequestUUID"); // Request UUIDs
+        llListen(12345, "", NULL_KEY, ""); // Listen for messages on channel 12345
     }
 
     listen(integer channel, string name, key id, string message) {
         list parts = llParseString2List(message, ["|"], []);
         string command = llList2String(parts, 0);
 
-        if (channel == COMM_CHANNEL_UUID && command == "UUID") {
-            key playerKey = llList2Key(parts, 1); // Extract the player's UUID
-            playerUUIDs += [playerKey]; // Add UUID to the list
-            integer totalPrims = llGetNumberOfPrims();
+        if (command == "Register") {
+            key playerKey = llList2Key(parts, 1);
+            string playerName = llList2String(parts, 2);
 
-            for (integer i = 2; i <= totalPrims; i++) { // Match UUID to linked prim descriptions
+            // Check if the player is already registered
+            integer totalPrims = llGetNumberOfPrims();
+            integer isRegistered = FALSE;
+
+            integer i;
+            for (i = 2; i <= totalPrims && !isRegistered; i++) { // Start from link 2 (skip root prim)
                 string desc = llGetLinkPrimitiveParams(i, [PRIM_DESC]);
 
-                if (llSubStringIndex(desc, "UUID=" + (string)playerKey) != -1) {
-                    // Update stats (same logic as before)
-                    list data = llParseString2List(desc, [";", "="], []);
-                    integer hungerIndex = llListFindList(data, ["Hunger"]) + 1;
-                    integer thirstIndex = llListFindList(data, ["Thirst"]) + 1;
-                    integer staminaIndex = llListFindList(data, ["Stamina"]) + 1;
-                    integer healthIndex = llListFindList(data, ["Health"]) + 1;
-                    integer infectionIndex = llListFindList(data, ["Infection"]) + 1;
-
-                    integer hunger = (integer)llList2String(data, hungerIndex);
-                    integer thirst = (integer)llList2String(data, thirstIndex);
-                    integer stamina = (integer)llList2String(data, staminaIndex);
-                    integer health = (integer)llList2String(data, healthIndex);
-                    integer infection = (integer)llList2String(data, infectionIndex);
-
-                    // Increment Hunger and Thirst
-                    if (hunger < 100) hunger += 1;
-                    if (thirst < 100) thirst += 1;
-
-                    // Increment Infection only if it's above 0
-                    if (infection > 0 && infection < 100) {
-                        infection += 1;
-                    }
-
-                    // Drain stamina if Hunger, Thirst, or Infection are at 100
-                    if (hunger == 100 || thirst == 100 || infection == 100) {
-                        stamina = (stamina > 0) ? stamina - 1 : 0;
-                    }
-
-                    // Drain health if Stamina is 0
-                    if (stamina == 0) {
-                        health = (health > 0) ? health - 1 : 0;
-                    }
-
-                    // Update the stats in the data list
-                    data = llListReplaceList(data, [(string)hunger], hungerIndex, hungerIndex);
-                    data = llListReplaceList(data, [(string)thirst], thirstIndex, thirstIndex);
-                    data = llListReplaceList(data, [(string)stamina], staminaIndex, staminaIndex);
-                    data = llListReplaceList(data, [(string)health], healthIndex, healthIndex);
-                    data = llListReplaceList(data, [(string)infection], infectionIndex, infectionIndex);
-
-                    // Rebuild the updated description string
-                    string updatedDesc = "";
-                    integer dataLength = llGetListLength(data);
-                    for (integer k = 0; k < dataLength; k += 2) {
-                        updatedDesc += llList2String(data, k) + "=" + llList2String(data, k + 1) + ";";
-                    }
-                    updatedDesc = llDeleteSubString(updatedDesc, -1, -1);
-
-                    // Update the prim description with the new stats
-                    llSetLinkPrimitiveParamsFast(i, [PRIM_DESC, updatedDesc]);
-
-                    // Send reinitialize command to UUID Handler
-                    llRegionSay(COMM_CHANNEL_UUID, "Reinitialize|" + (string)playerKey);
+                // Check if the player's key is already in the description (both formats)
+                if (llSubStringIndex(desc, "UUID=" + (string)playerKey) != -1 || 
+                    llSubStringIndex(desc, "ID=" + (string)playerKey) != -1) {
+                    isRegistered = TRUE;
                 }
+            }
+
+            if (isRegistered) {
+                // Notify the player they are already registered
+                llInstantMessage(playerKey, "You are already registered, " + playerName + "!");
+                return;
+            }
+
+            // Assign a pre-rezzed prim to the player
+            integer assigned = FALSE;
+
+            for (i = 2; i <= totalPrims && !assigned; i++) { // Start from link 2 (skip root prim)
+                string desc = llGetLinkPrimitiveParams(i, [PRIM_DESC]);
+
+                // Check if the prim is unassigned (empty description)
+                if (desc == "") {
+                    // Assign the prim to the player using shorthand format
+                    llSetLinkPrimitiveParamsFast(i, [
+                        PRIM_DESC, "ID=" + (string)playerKey + ";LS=0;H=100;S=100;F=0;T=0;I=0;R=Survivor",
+                        PRIM_NAME, playerName // Set the prim's name to the player's name
+                    ]);
+
+                    // Update floating text
+                    llSetLinkPrimitiveParamsFast(i, [
+                        PRIM_TEXT, playerName, <0, 1, 0>, 1.0 // Green text for the username (default)
+                    ]);
+
+                    assigned = TRUE;
+                }
+            }
+
+            if (assigned) {
+                // Notify the player of successful registration
+                llInstantMessage(playerKey, "Welcome, " + playerName + "! You have been successfully registered.");
+
+                // Notify the player's meter to initialize and fetch stats
+                llRegionSayTo(playerKey, 67890, "InitializeMeter");
+            } else {
+                // Notify the player if no prims are available
+                llInstantMessage(playerKey, "Sorry, " + playerName + ", no available slots for registration.");
             }
         }
     }

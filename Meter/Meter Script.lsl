@@ -2,8 +2,8 @@ integer COMM_CHANNEL = 67890; // Channel for communication with the statistics s
 key playerKey; // The player's UUID
 string playerName; // The player's name
 
-integer stamina = 100; // Dynamic stamina (used for running, flying, etc.)
-integer maxStamina = 100; // Maximum stamina (overall energy/fatigue from the stats server)
+integer stamina = 100; // Current stamina
+integer maxStamina = 100; // Maximum stamina
 integer health = 100; // Current health
 integer maxHealth = 100; // Maximum health
 integer hunger = 0; // Current hunger
@@ -21,24 +21,10 @@ integer isExhausted = FALSE; // Flag to track exhaustion state
 integer isDrainingHealth = FALSE; // Flag to track health drain state
 integer isRegistered = FALSE; // Flag to track if the player is registered
 integer serverFound = FALSE; // Flag to track if a server is found
-integer hasNotifiedExhaustion = FALSE; // Flag to track if exhaustion notification has been sent
 
 // Adjusted cooldown for health drain
 float healthDrainCooldown = 1.0; // Time (in seconds) between health drain updates
 float lastHealthDrainTime = 0.0; // Timestamp of the last health drain
-
-// Function to check survival stats and warn the player if necessary
-checkSurvivalStats() {
-    if (hunger == maxHunger) {
-        llOwnerSay("Warning: You are **famished**! Hunger is at maximum, and you are losing stamina. Please eat something.");
-    }
-    if (thirst == maxThirst) {
-        llOwnerSay("Warning: You are **dehydrated**! Thirst is at maximum, and you are losing stamina. Please drink something.");
-    }
-    if (infection == maxInfection) {
-        llOwnerSay("Warning: You are **infected**! Infection is at maximum, and you are losing stamina. Please heal yourself.");
-    }
-}
 
 default {
     state_entry() {
@@ -50,6 +36,7 @@ default {
 
         // Send a request to the statistics server to get the player's stats
         llRegionSay(COMM_CHANNEL, "RequestStats|" + (string)playerKey + "|" + (string)COMM_CHANNEL);
+        llOwnerSay("[Meter Script] Initial stats request sent on channel " + (string)COMM_CHANNEL);
 
         // Start a timer to check the avatar's state
         llSetTimerEvent(1.0); // Check every second
@@ -72,15 +59,8 @@ default {
             // Ensure the UUID matches the player's UUID
             if (uuid == (string)playerKey) {
                 health = (integer)llList2String(data, llListFindList(data, ["Health"]) + 1);
-
-                // Correctly map the server's "Stamina" value to maxStamina
-                maxStamina = (integer)llList2String(data, llListFindList(data, ["Stamina"]) + 1);
-
-                // Keep `stamina` as the dynamic stamina, but ensure it's capped by maxStamina
-                if (stamina > maxStamina) {
-                    stamina = maxStamina;
-                }
-
+                stamina = (integer)llList2String(data, llListFindList(data, ["Stamina"]) + 1);
+                maxStamina = stamina; // Dynamically set maxStamina based on the retrieved Stamina value
                 hunger = (integer)llList2String(data, llListFindList(data, ["Hunger"]) + 1);
                 maxHunger = 100; // Maximum hunger is fixed for now
                 thirst = (integer)llList2String(data, llListFindList(data, ["Thirst"]) + 1);
@@ -92,9 +72,6 @@ default {
 
                 isRegistered = TRUE; // Player is registered
 
-                // Check survival stats and warn the player if necessary
-                checkSurvivalStats();
-
                 // Update floating text
                 updateFloatingText();
             }
@@ -103,25 +80,13 @@ default {
             if (errorMessage == "PrimNotFound") {
                 // Player is not registered
                 isRegistered = FALSE;
-                serverFound = TRUE; // Server is still present, just not registered
+                llOwnerSay("Error: You are not registered. Please click on a registration board.");
                 llSetText("Not Registered", <1, 0, 0>, 1.0); // Red text
             }
-        } else if (command == "ResetMeter") {
-            // Handle ResetMeter command from region-wide message
-            llResetScript(); // Reset the Meter Script
         }
     }
 
     timer() {
-        // Check if server was found
-        if (!serverFound) {
-            // No server found, make floating text invisible
-            llSetText("", <0, 0, 0>, 0.0); // Make floating text invisible
-        } else if (!isRegistered) {
-            // Server is found but the player is not registered
-            llSetText("Not Registered", <1, 0, 0>, 1.0); // Red text
-        }
-
         // Prevent updates if the player is not registered or dead
         if (!isRegistered || health <= 0) {
             return; // Do nothing
@@ -141,15 +106,10 @@ default {
                     stamina = 0;
                     isExhausted = TRUE;
 
-                    // Notify the player about exhaustion
-                    if (!hasNotifiedExhaustion) {
-                        llOwnerSay("You are **exhausted**! Your health will now start draining unless you rest.");
-                        hasNotifiedExhaustion = TRUE; // Ensure the message is sent only once per exhaustion event
-                    }
-
                     // Start draining health if not already doing so
                     if (!isDrainingHealth) {
                         isDrainingHealth = TRUE;
+                        llOwnerSay("You are exhausted! Health will now start draining.");
                     }
                 }
             }
@@ -180,7 +140,6 @@ default {
             // Reset exhaustion state when idle
             isExhausted = FALSE;
             isDrainingHealth = FALSE;
-            hasNotifiedExhaustion = FALSE; // Reset the notification flag
         }
 
         // Update floating text
@@ -209,6 +168,7 @@ default {
     // Handle messages from the UUID Handler
     link_message(integer sender_num, integer num, string str, key id) {
         if (str == "ResetMeter") {
+            llOwnerSay("[Meter Script] ResetMeter command received. Resetting script...");
             llResetScript(); // Reset the Meter Script
         }
     }
