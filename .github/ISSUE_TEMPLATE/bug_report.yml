@@ -1,0 +1,81 @@
+name: Bug report
+description: Something in SurvivorCore behaves incorrectly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug! Please fill in as much as you can — a clear repro is
+        the single biggest factor in getting it fixed quickly.
+
+        Questions and "how do I…" go to [Discussions](../../discussions), not here.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong?
+      placeholder: When I tag a part "Gatherable" and harvest it, the prompt never disappears…
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: How can a maintainer trigger this? Number the steps.
+      placeholder: |
+        1. Serve `demo.project.json` into a place
+        2. Add a Part, tag it "Gatherable", set ItemId="reed", HP=3
+        3. Play, hold the prompt 3 times
+        4. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+  - type: input
+    id: sc-version
+    attributes:
+      label: SurvivorCore version
+      description: Release tag, or the commit SHA if you're on `dev`/`main`.
+      placeholder: v0.1.0 (or a commit SHA)
+    validations:
+      required: true
+  - type: input
+    id: studio-version
+    attributes:
+      label: Roblox Studio version
+      description: Studio → File → About Roblox Studio.
+      placeholder: 0.6XX.0.XXXXXXX
+    validations:
+      required: true
+  - type: input
+    id: rojo-plugin-version
+    attributes:
+      label: Rojo Studio plugin version
+      description: The Rojo plugin version in Studio (pin to 7.6.1 to match the project).
+      placeholder: "7.6.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: consumption
+    attributes:
+      label: How are you consuming SurvivorCore?
+      options:
+        - Rojo (rojo serve / source)
+        - Wally package
+        - Drop-in SurvivorCore.rbxm from a Release
+        - Other (describe below)
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output / errors
+      description: Relevant Studio Output (Server + Client). Paste as text, not a screenshot.
+      render: text
+    validations:
+      required: false

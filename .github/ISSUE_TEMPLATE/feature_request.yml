@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest a mechanic, registry, component, or hook for the engine.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        SurvivorCore ships **mechanics, not content**. The best feature requests describe a
+        reusable engine capability (a registry, a component, a hook, a config section) — not
+        a specific item/world/art asset, which belongs in your own game via `register()` or
+        the component layer.
+
+        Open-ended ideas and discussion are welcome in [Discussions](../../discussions).
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What should SurvivorCore be able to do?
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: Why is this useful? What kind of game needs it, and how would you use it?
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer does this touch?
+      options:
+        - Registry layer (register() API — Items/Recipes/Stats/Mobs/…)
+        - Component layer (tag + attributes on creator-owned objects)
+        - Hooks / EventBridge (lifecycle extension points)
+        - Foundation (Config / Assets / Registry plumbing)
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Can this already be done with a hook or component today? What did you try?
+    validations:
+      required: false
