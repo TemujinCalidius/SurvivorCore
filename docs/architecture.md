@@ -50,3 +50,10 @@ stays small and universal; creativity lives at the edges.
 v0.1.0 is the foundation scaffold. Extraction order (from the boundary map): foundations →
 pure-core lift → registries → SPLIT server systems (incl. the mob/combat cluster) → UI
 layer → harvesting/wildlife sub-engine.
+
+## Related docs
+
+- [Getting Started](getting-started.md) — install via Rojo + Wally or the drop-in `.rbxm`.
+- [Extending SurvivorCore](extending.md) — the `register()` API, the component/attribute
+  model, and Hooks.
+- [CONTRIBUTING](../CONTRIBUTING.md) — local dev setup, code style, and the branching model.

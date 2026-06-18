@@ -37,9 +37,11 @@ end
 
 local function readAttributes(instance: Instance, attributes: { [string]: any }?)
 	local values = {}
-	for attrName, default in attributes or {} do
-		local v = instance:GetAttribute(attrName)
-		values[attrName] = if v == nil then default else v
+	if attributes then
+		for attrName, default in attributes do
+			local v = instance:GetAttribute(attrName)
+			values[attrName] = if v == nil then default else v
+		end
 	end
 	return values
 end

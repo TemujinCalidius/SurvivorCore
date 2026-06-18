@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & discussion
+    url: https://github.com/TemujinCalidius/SurvivorCore/discussions
+    about: 'Ask "how do I…?", share design ideas, and show off what you built — start a Discussion.'

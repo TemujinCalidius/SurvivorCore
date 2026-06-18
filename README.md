@@ -18,6 +18,13 @@ inventory, crafting, cooking, harvesting, hostile mobs & combat, achievements, a
 player persistence — without dictating your *content*. You bring your own items, world, and
 art; the engine wires up the behavior.
 
+## See it live
+
+SurvivorCore powers **[The Counter Earth](https://thecounterearth.com)** — a full survival
+game built on this engine, and its live showcase. The Counter Earth is in **closed Alpha**
+(not yet open to beta testers), but SurvivorCore contributors and engine devs may get early
+access — a good reason to [get involved](CONTRIBUTING.md). 👀
+
 ## Two ways to extend it
 
 **1. Programmatic — register content from code:**
@@ -74,6 +81,12 @@ src/
 demo/                  -- a runnable demo place that consumes the engine
 docs/architecture.md   -- how the layers fit together
 ```
+
+## Sponsor
+
+SurvivorCore is free and open source. If it's useful to you — or you just want to help the
+engine grow — you can support development via
+[GitHub Sponsors](https://github.com/sponsors/TemujinCalidius). 💛
 
 ## License
 

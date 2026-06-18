@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  # Lets the release auto-post an announcement to the Discussions category below.
+  discussions: write
 
 jobs:
   build:
@@ -25,3 +27,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: SurvivorCore.rbxm
+          # Cross-posts each release to Discussions → Announcements (created by default
+          # when Discussions is enabled). The category name must match exactly.
+          discussion_category_name: Announcements
