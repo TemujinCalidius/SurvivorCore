@@ -1,0 +1,12 @@
+# Selene lint configuration — CI runs `selene .` on every push/PR.
+# Uses the Roblox standard library (globals like `game`, `task`, `typeof`, `warn`).
+std = "roblox"
+
+# Generated Wally/Rojo artifacts are not ours to lint.
+exclude = ["Packages", "ServerPackages", "DevPackages"]
+
+[lints]
+# Roblox code legitimately leaves some values unused (e.g. connection handles);
+# keep the high-signal lints and let the formatter own style.
+empty_if = "warn"
+unused_variable = "warn"

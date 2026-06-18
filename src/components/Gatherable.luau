@@ -24,9 +24,7 @@ return Components.define({
 	onSetup = function(instance, values)
 		instance:SetAttribute("_HP", values.HP)
 
-		local host = if instance:IsA("BasePart")
-			then instance
-			else instance:FindFirstChildWhichIsA("BasePart")
+		local host = if instance:IsA("BasePart") then instance else instance:FindFirstChildWhichIsA("BasePart")
 		if not host then
 			warn(`[Gatherable] '{instance:GetFullName()}' has no BasePart to host a prompt`)
 			return

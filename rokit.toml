@@ -1,4 +1,8 @@
 # Toolchain pins (https://github.com/rojo-rbx/rokit). Run `rokit install`.
+# CI installs this exact set; pin versions so local dev and CI stay identical.
 [tools]
 rojo = "rojo-rbx/rojo@7.6.1"
 wally = "UpliftGames/wally@0.3.2"
+stylua = "JohnnyMorganz/stylua@2.5.2"
+selene = "Kampfkarren/selene@0.31.0"
+luau-lsp = "JohnnyMorganz/luau-lsp@1.68.1"
