@@ -1,0 +1,23 @@
+# Rojo / Roblox
+sourcemap.json
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxlx.lock
+
+# Build output (the .rbxm is built in CI and attached to releases)
+*.rbxm
+*.rbxmx
+/build/
+
+# Toolchain managers
+/.rokit/
+
+# Wally
+/Packages/
+/ServerPackages/
+/DevPackages/
+
+# Editor / OS
+.DS_Store
+.vscode/

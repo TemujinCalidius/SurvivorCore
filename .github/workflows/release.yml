@@ -1,0 +1,27 @@
+name: Release
+
+# Build the drop-in .rbxm from source on every version tag and attach it to the release.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain (rojo via rokit)
+        uses: CompeyDev/setup-rokit@v0.1.2
+
+      - name: Build engine model
+        run: rojo build default.project.json --output SurvivorCore.rbxm
+
+      - name: Attach to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SurvivorCore.rbxm

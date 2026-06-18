@@ -1,0 +1,19 @@
+{
+  "name": "SurvivorCore Demo",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "SurvivorCore": {
+        "$path": "src"
+      }
+    },
+    "ServerScriptService": {
+      "Demo": {
+        "$path": "demo/server"
+      }
+    },
+    "Workspace": {
+      "$ignoreUnknownInstances": true
+    }
+  }
+}
