@@ -25,6 +25,8 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
   identically.
 - **Docs** — a getting-started/install guide (Rojo + Wally and the drop-in `.rbxm`) and an
   "Extending SurvivorCore" guide (the `register()` API, the component/attribute model, Hooks).
+- **README** — a "See it live" pointer to [The Counter Earth](https://thecounterearth.com)
+  (the engine's closed-Alpha showcase) and a GitHub Sponsors section.
 
 ### Changed
 - The release workflow now cross-posts each tagged release to Discussions → **Announcements**
