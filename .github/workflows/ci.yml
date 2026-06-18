@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+# Least-privilege token — the job only needs to read the repo.
+permissions:
+  contents: read
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Lint, analyze & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Installs the toolchain pinned in rokit.toml (rojo, wally, stylua, selene, luau-lsp).
+      - name: Install toolchain (rokit)
+        uses: CompeyDev/setup-rokit@v0.1.2
+
+      - name: StyLua (format check)
+        run: stylua --check src demo
+
+      - name: Selene (lint)
+        run: selene .
+
+      # luau-lsp needs a Rojo sourcemap to resolve requires + Roblox API type defs.
+      # The demo project mounts the engine under ReplicatedStorage.SurvivorCore, so the
+      # sourcemap covers both the engine (src) and the demo place that consumes it.
+      - name: Generate Rojo sourcemap
+        run: rojo sourcemap demo.project.json --output sourcemap.json
+
+      - name: Fetch Roblox type definitions
+        run: curl -fsSL -o globalTypes.d.luau https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.luau
+
+      - name: luau-lsp (type analysis)
+        run: |
+          luau-lsp analyze \
+            --sourcemap sourcemap.json \
+            --defs globalTypes.d.luau \
+            --no-strict-dm-types \
+            --ignore "Packages/**" \
+            --ignore "DevPackages/**" \
+            --ignore "ServerPackages/**" \
+            src demo
+
+      # Prove both Rojo targets build: the drop-in engine model and the runnable demo place.
+      - name: Build engine model (default.project.json)
+        run: rojo build default.project.json --output SurvivorCore.rbxm
+
+      - name: Build demo place (demo.project.json)
+        run: rojo build demo.project.json --output demo.rbxl
