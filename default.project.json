@@ -1,6 +1,12 @@
 {
   "name": "SurvivorCore",
   "tree": {
-    "$path": "src"
+    "$path": "src",
+    "Templates": {
+      "$className": "Folder",
+      "SurvivalHud": { "$path": "assets/hud/SurvivalHud.model.json" },
+      "SurvivalStatsConfig": { "$path": "assets/config/SurvivalStatsConfig.model.json" },
+      "HudLoader": { "$path": "assets/client/HudLoader.client.luau" }
+    }
   }
 }

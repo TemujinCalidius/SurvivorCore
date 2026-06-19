@@ -3,7 +3,10 @@
 
 		local SurvivorCore = require(ReplicatedStorage.SurvivorCore)
 		SurvivorCore.Items.register({ id = "reed", name = "Reed" })
-		SurvivorCore.start()
+		SurvivorCore.start()       -- server: boots content + the survival-stats sim
+
+		-- on the client (the built-in HUD template's loader LocalScript does this):
+		SurvivorCore.startClient() -- builds + binds the reactive survival HUD
 
 	Two extension layers:
 	  • Programmatic registries (Items, Recipes, Stats, Mobs, ...) — register content from code.
@@ -16,6 +19,11 @@ local EventBridge = require(script.foundation.EventBridge)
 local Hooks = require(script.foundation.Hooks)
 local Registries = require(script.registries)
 local Components = require(script.components)
+
+-- Eagerly install the built-in survival stats: defines the "SurvivalStats" Config
+-- section and registers the default stats, so Config.override("SurvivalStats", …)
+-- works any time before start(). Runs on both server and client (idempotent per side).
+require(script.stats.StatDefs)
 
 local SurvivorCore = {}
 
@@ -40,6 +48,7 @@ SurvivorCore.Mobs = Registries.Mobs
 SurvivorCore.Components = Components
 
 local started = false
+local clientStarted = false
 
 -- Boot the engine. Call once, from the server, after registering content.
 function SurvivorCore.start(_options: { [string]: any }?)
@@ -51,6 +60,24 @@ function SurvivorCore.start(_options: { [string]: any }?)
 
 	-- TODO (extraction): boot order — Config merge → Assets → persistence → systems.
 	Components.scan()
+
+	-- Survival-stats simulation (server-only): ticks stats as Player Attributes and
+	-- installs the built-in HUD for drop-in consumers that haven't supplied their own.
+	require(script.systems.SurvivalStats).start(_options)
+
+	return SurvivorCore
+end
+
+-- Boot the client layer. Call once per client — the built-in HUD template's loader
+-- LocalScript does this for you. Builds + binds the reactive survival HUD.
+function SurvivorCore.startClient(_options: { [string]: any }?)
+	if clientStarted then
+		warn("[SurvivorCore] startClient() called more than once — ignoring")
+		return SurvivorCore
+	end
+	clientStarted = true
+
+	require(script.client.Hud).start(_options)
 
 	return SurvivorCore
 end

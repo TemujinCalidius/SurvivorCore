@@ -3,13 +3,21 @@
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {
-      "SurvivorCore": {
-        "$path": "src"
-      }
+      "SurvivorCore": { "$path": "src" },
+      "SurvivalStatsConfig": { "$path": "assets/config/SurvivalStatsConfig.model.json" }
     },
     "ServerScriptService": {
-      "Demo": {
-        "$path": "demo/server"
+      "Demo": { "$path": "demo/server" }
+    },
+    "StarterGui": {
+      "$className": "StarterGui",
+      "SurvivalHud": { "$path": "assets/hud/SurvivalHud.model.json" }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "HudLoader": { "$path": "assets/client/HudLoader.client.luau" }
       }
     },
     "Workspace": {

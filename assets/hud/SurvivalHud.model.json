@@ -1,0 +1,1039 @@
+{
+  "className": "ScreenGui",
+  "properties": {
+    "ResetOnSpawn": false,
+    "IgnoreGuiInset": true,
+    "ZIndexBehavior": "Sibling",
+    "DisplayOrder": 2
+  },
+  "children": [
+    {
+      "className": "Frame",
+      "name": "Bars",
+      "properties": {
+        "Position": {
+          "UDim2": [
+            [
+              0,
+              16
+            ],
+            [
+              0,
+              16
+            ]
+          ]
+        },
+        "Size": {
+          "UDim2": [
+            [
+              0,
+              232
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        "AutomaticSize": "Y",
+        "BackgroundTransparency": 1,
+        "BorderSizePixel": 0
+      },
+      "children": [
+        {
+          "className": "UIListLayout",
+          "properties": {
+            "Padding": {
+              "UDim": [
+                0,
+                6
+              ]
+            },
+            "SortOrder": "LayoutOrder",
+            "FillDirection": "Vertical"
+          }
+        },
+        {
+          "className": "Frame",
+          "name": "Health",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  232
+                ],
+                [
+                  0,
+                  22
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BorderSizePixel": 0,
+            "LayoutOrder": 1
+          },
+          "attributes": {
+            "Stat": "Health"
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Thickness": 1,
+                "Transparency": 0.7
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Fill",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundColor3": {
+                  "Color3": [
+                    0.9098,
+                    0.2745,
+                    0.2745
+                  ]
+                },
+                "BorderSizePixel": 0
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "className": "TextLabel",
+              "name": "Label",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -16
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      10
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "Text": "Health",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "TextSize": 13,
+                "Font": "GothamMedium",
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Center",
+                "ZIndex": 2
+              }
+            }
+          ]
+        },
+        {
+          "className": "Frame",
+          "name": "Energy",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  232
+                ],
+                [
+                  0,
+                  22
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BorderSizePixel": 0,
+            "LayoutOrder": 2
+          },
+          "attributes": {
+            "Stat": "Energy"
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Thickness": 1,
+                "Transparency": 0.7
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Fill",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundColor3": {
+                  "Color3": [
+                    0.3529,
+                    0.8039,
+                    0.4706
+                  ]
+                },
+                "BorderSizePixel": 0
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "className": "TextLabel",
+              "name": "Label",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -16
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      10
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "Text": "Energy",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "TextSize": 13,
+                "Font": "GothamMedium",
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Center",
+                "ZIndex": 2
+              }
+            }
+          ]
+        },
+        {
+          "className": "Frame",
+          "name": "Hunger",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  232
+                ],
+                [
+                  0,
+                  22
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BorderSizePixel": 0,
+            "LayoutOrder": 3
+          },
+          "attributes": {
+            "Stat": "Hunger"
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Thickness": 1,
+                "Transparency": 0.7
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Fill",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundColor3": {
+                  "Color3": [
+                    0.8627,
+                    0.549,
+                    0.1569
+                  ]
+                },
+                "BorderSizePixel": 0
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "className": "TextLabel",
+              "name": "Label",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -16
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      10
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "Text": "Hunger",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "TextSize": 13,
+                "Font": "GothamMedium",
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Center",
+                "ZIndex": 2
+              }
+            }
+          ]
+        },
+        {
+          "className": "Frame",
+          "name": "Thirst",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  232
+                ],
+                [
+                  0,
+                  22
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BorderSizePixel": 0,
+            "LayoutOrder": 4
+          },
+          "attributes": {
+            "Stat": "Thirst"
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Thickness": 1,
+                "Transparency": 0.7
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Fill",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundColor3": {
+                  "Color3": [
+                    0.2353,
+                    0.6275,
+                    0.902
+                  ]
+                },
+                "BorderSizePixel": 0
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "className": "TextLabel",
+              "name": "Label",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -16
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      10
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "Text": "Thirst",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "TextSize": 13,
+                "Font": "GothamMedium",
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Center",
+                "ZIndex": 2
+              }
+            }
+          ]
+        },
+        {
+          "className": "Frame",
+          "name": "Fatigue",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  232
+                ],
+                [
+                  0,
+                  22
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BorderSizePixel": 0,
+            "LayoutOrder": 5
+          },
+          "attributes": {
+            "Stat": "Fatigue"
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Thickness": 1,
+                "Transparency": 0.7
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Fill",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundColor3": {
+                  "Color3": [
+                    0.6275,
+                    0.3922,
+                    0.8627
+                  ]
+                },
+                "BorderSizePixel": 0
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "className": "TextLabel",
+              "name": "Label",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -16
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      10
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "Text": "Fatigue",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "TextSize": 13,
+                "Font": "GothamMedium",
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Center",
+                "ZIndex": 2
+              }
+            }
+          ]
+        },
+        {
+          "className": "Frame",
+          "name": "Blood",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  232
+                ],
+                [
+                  0,
+                  22
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BorderSizePixel": 0,
+            "LayoutOrder": 6
+          },
+          "attributes": {
+            "Stat": "Blood"
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Thickness": 1,
+                "Transparency": 0.7
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Fill",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundColor3": {
+                  "Color3": [
+                    0.7059,
+                    0.1569,
+                    0.1569
+                  ]
+                },
+                "BorderSizePixel": 0
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "className": "TextLabel",
+              "name": "Label",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -16
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      10
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "Text": "Blood",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "TextSize": 13,
+                "Font": "GothamMedium",
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Center",
+                "ZIndex": 2
+              }
+            }
+          ]
+        },
+        {
+          "className": "Frame",
+          "name": "Poison",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  232
+                ],
+                [
+                  0,
+                  22
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BorderSizePixel": 0,
+            "LayoutOrder": 7
+          },
+          "attributes": {
+            "Stat": "Poison"
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Thickness": 1,
+                "Transparency": 0.7
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Fill",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundColor3": {
+                  "Color3": [
+                    0.4706,
+                    0.7059,
+                    0.2353
+                  ]
+                },
+                "BorderSizePixel": 0
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "className": "TextLabel",
+              "name": "Label",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      -16
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      10
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "Text": "Poison",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "TextSize": 13,
+                "Font": "GothamMedium",
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Center",
+                "ZIndex": 2
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

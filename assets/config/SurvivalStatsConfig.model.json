@@ -1,0 +1,89 @@
+{
+  "className": "Configuration",
+  "children": [
+    {
+      "className": "Configuration",
+      "name": "Health",
+      "attributes": {
+        "RatePerSecond": 0.0,
+        "Max": 100,
+        "Start": 100,
+        "WarnAt": 25,
+        "Invert": false,
+        "Display": true
+      }
+    },
+    {
+      "className": "Configuration",
+      "name": "Energy",
+      "attributes": {
+        "RatePerSecond": 0.0,
+        "Max": 100,
+        "Start": 100,
+        "WarnAt": 25,
+        "Invert": false,
+        "Display": true
+      }
+    },
+    {
+      "className": "Configuration",
+      "name": "Hunger",
+      "attributes": {
+        "RatePerSecond": 0.055556,
+        "Max": 100,
+        "Start": 0,
+        "WarnAt": 25,
+        "Invert": true,
+        "Display": true
+      }
+    },
+    {
+      "className": "Configuration",
+      "name": "Thirst",
+      "attributes": {
+        "RatePerSecond": 0.083333,
+        "Max": 100,
+        "Start": 0,
+        "WarnAt": 25,
+        "Invert": true,
+        "Display": true
+      }
+    },
+    {
+      "className": "Configuration",
+      "name": "Fatigue",
+      "attributes": {
+        "RatePerSecond": 0.027778,
+        "Max": 100,
+        "Start": 0,
+        "WarnAt": 25,
+        "Invert": true,
+        "Display": true
+      }
+    },
+    {
+      "className": "Configuration",
+      "name": "Blood",
+      "attributes": {
+        "RatePerSecond": 0.0,
+        "Max": 100,
+        "Start": 100,
+        "WarnAt": 25,
+        "Invert": false,
+        "Display": true
+      }
+    },
+    {
+      "className": "Configuration",
+      "name": "Poison",
+      "attributes": {
+        "RatePerSecond": 0.0,
+        "Max": 100,
+        "Start": 0,
+        "WarnAt": 25,
+        "Invert": true,
+        "Display": true
+      }
+    }
+  ]
+}

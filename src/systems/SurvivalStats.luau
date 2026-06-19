@@ -1,0 +1,158 @@
+--[[
+	SurvivalStats — the server-side survival simulation. SERVER-ONLY.
+
+	Stores each stat as a Player Attribute (which auto-replicates to that player's
+	client, so the HUD needs no RemoteEvents), and ticks every stat by its signed
+	`ratePerSecond` toward 0 / max. Owners retune live via the Studio
+	`SurvivalStatsConfig` instance; this service re-resolves when it changes.
+
+	`installHud()` deploys the bundled HUD/config templates for drop-in consumers
+	that haven't supplied their own.
+]]
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+
+assert(RunService:IsServer(), "SurvivorCore.SurvivalStats is server-only — require it via SurvivorCore.start()")
+
+local StatConfig = require(script.Parent.Parent.stats.StatConfig)
+
+local HUD_NAME = "SurvivalHud"
+local LOADER_NAME = "HudLoader"
+local BAR_TAG = "SurvivorStatBar"
+local TICK_INTERVAL = 0.1 -- 10 Hz: smooth bars without flooding attribute replication
+
+local SurvivalStats = {}
+
+local started = false
+local resolved: any = nil -- cached StatConfig.resolve() result
+
+local function refresh()
+	resolved = StatConfig.resolve()
+end
+
+local function initPlayer(player: Player)
+	if not resolved then
+		return
+	end
+	for _, stat in resolved.stats do
+		if player:GetAttribute(stat.attribute) == nil then
+			player:SetAttribute(stat.attribute, stat.start)
+		end
+	end
+end
+
+-- Re-resolve the moment the owner edits the Studio config instance, so no-code
+-- rate tweaks take effect without a restart.
+local function watchConfig()
+	local function bindInstance(instance: Instance)
+		instance.AttributeChanged:Connect(refresh)
+		for _, child in instance:GetChildren() do
+			child.AttributeChanged:Connect(refresh)
+		end
+		instance.ChildAdded:Connect(function(child)
+			child.AttributeChanged:Connect(refresh)
+			refresh()
+		end)
+	end
+
+	local existing = StatConfig.getConfigInstance()
+	if existing then
+		bindInstance(existing)
+	end
+	ReplicatedStorage.ChildAdded:Connect(function(child)
+		if child.Name == StatConfig.CONFIG_INSTANCE_NAME then
+			refresh()
+			bindInstance(child)
+		end
+	end)
+end
+
+local function hudPresentInStarterGui(): boolean
+	if StarterGui:FindFirstChild(HUD_NAME) then
+		return true
+	end
+	for _, instance in CollectionService:GetTagged(BAR_TAG) do
+		if instance:IsDescendantOf(StarterGui) then
+			return true
+		end
+	end
+	return false
+end
+
+-- Deploy the bundled templates if the consumer hasn't supplied their own. No-op for
+-- source/demo consumers (who mount the templates directly) and when an owner HUD
+-- already exists. Cloned into StarterGui so it reaches players via the native
+-- StarterGui -> PlayerGui copy on spawn.
+function SurvivalStats.installHud()
+	local root = script.Parent.Parent -- the SurvivorCore root model
+	local templates = root:FindFirstChild("Templates")
+	if not templates then
+		return
+	end
+
+	local configTemplate = templates:FindFirstChild(StatConfig.CONFIG_INSTANCE_NAME)
+	if configTemplate and not ReplicatedStorage:FindFirstChild(StatConfig.CONFIG_INSTANCE_NAME) then
+		configTemplate:Clone().Parent = ReplicatedStorage
+	end
+
+	local hudTemplate = templates:FindFirstChild(HUD_NAME)
+	if hudTemplate and not hudPresentInStarterGui() then
+		hudTemplate:Clone().Parent = StarterGui
+	end
+
+	-- The client boot loader rides StarterPlayerScripts (copied to each joiner).
+	local loaderTemplate = templates:FindFirstChild(LOADER_NAME)
+	if loaderTemplate then
+		local starterScripts = game:GetService("StarterPlayer"):FindFirstChild("StarterPlayerScripts")
+		if starterScripts and not starterScripts:FindFirstChild(LOADER_NAME) then
+			loaderTemplate:Clone().Parent = starterScripts
+		end
+	end
+end
+
+function SurvivalStats.start(_options: { [string]: any }?)
+	assert(not started, "SurvivalStats.start() called twice")
+	started = true
+
+	SurvivalStats.installHud()
+	refresh()
+	watchConfig()
+
+	for _, player in Players:GetPlayers() do
+		initPlayer(player)
+	end
+	Players.PlayerAdded:Connect(initPlayer)
+
+	local accumulator = 0
+	RunService.Heartbeat:Connect(function(dt)
+		if not resolved then
+			return
+		end
+		accumulator += dt
+		if accumulator < TICK_INTERVAL then
+			return
+		end
+		local step = accumulator
+		accumulator = 0
+
+		for _, player in Players:GetPlayers() do
+			for _, stat in resolved.stats do
+				if stat.ratePerSecond ~= 0 then
+					local current = player:GetAttribute(stat.attribute)
+					if typeof(current) == "number" then
+						local nextValue = math.clamp(current + stat.ratePerSecond * step, 0, stat.max)
+						if nextValue ~= current then
+							player:SetAttribute(stat.attribute, nextValue)
+						end
+					end
+				end
+			end
+		end
+	end)
+end
+
+return SurvivalStats
