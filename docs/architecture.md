@@ -58,4 +58,5 @@ layer → harvesting/wildlife sub-engine.
   model, and Hooks.
 - [Survival Stats + HUD](survival-stats.md) — the stat simulation, no-code tuning, and the
   designer-editable HUD.
+- [Design Language](design-language.md) — the look the project holds to (UI, palette, icons).
 - [CONTRIBUTING](../CONTRIBUTING.md) — local dev setup, code style, and the branching model.
