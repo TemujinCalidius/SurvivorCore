@@ -13,21 +13,33 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
   renders them (no RemoteEvents). The HUD is a real, designer-editable `SurvivalHud` ScreenGui
   in StarterGui — restyle it in Studio with zero code; bars bind by a `Stat` attribute and a
   `Fill` child. It's a translucent panel that shows **Health + Energy** by default and **expands**
-  to the full roster, with per-bar **numeric readouts** (`99/100` / `%`, configurable) and blank
-  **icon slots** (filled from the `Assets` registry — the engine ships none). Afflictions
+  to the full roster, with per-bar **numeric readouts** (`99/100` / `%`, configurable) and per-stat
+  **icons** — the engine ships a free default icon set (baked into `StatDefs` + the HUD template),
+  so the HUD is iconed out of the box and the icons even show in Studio's **Edit** view, no Play
+  needed. Afflictions
   (Hunger/Thirst/Fatigue/Poison) read as empty-when-safe and fill up as they worsen (`dangerHigh`),
   and the header carries a **credits** readout (a bar-less `Counter` bound to a Player attribute).
-  HUD icons update **live** — a bar/counter shows its art the moment its `Icon` attribute is set, so
-  a game can assign icons at runtime (the demo ships an example flat icon set; the engine ships none). Ships with seven default stats (health/energy/hunger/thirst/fatigue/blood/
+  HUD icons resolve per bar/counter and update **live** — a game can swap art at runtime by setting
+  the `Icon` attribute, or override the shipped defaults per stat (config / admin plugin / `Assets`).
+  Ships with seven default stats (health/energy/hunger/thirst/fatigue/blood/
   poison), tunable **without code** via a `SurvivalStatsConfig` Configuration instance (or, for
   developers, `Config.override("SurvivalStats", …)` / `Stats.defineStat`). Works out of the box
   for every distribution — the demo/Rojo source mount it, the drop-in `.rbxm` auto-installs it
   on `start()`, and a runtime fallback guarantees a HUD always appears. Adds the engine's first
   client layer (`SurvivorCore.startClient()`). See [docs/survival-stats.md](docs/survival-stats.md).
+- **Survival Stats admin plugin** (#11, first slice) — a Studio dock widget to tune the survival
+  stats from a validated form instead of hand-editing Attributes. It writes **deltas only** (an
+  attribute only when a field differs from the engine default; removed on reset / edit-back), so
+  owner tuning survives engine updates while untouched fields keep following improvable defaults,
+  and a hard guardrail makes the engine-owned `Invert`/`DangerHigh` semantics impossible to write.
+  Built as a separate `plugin.project.json` Rojo target (install via
+  `rojo build plugin.project.json --plugin …`); CI lints and builds it too.
+  See [docs/admin-plugin.md](docs/admin-plugin.md).
 - **Continuous integration** (`.github/workflows/ci.yml`) — every push to `main`/`dev` and
   every PR runs `stylua --check`, `selene`, `luau-lsp analyze` (against a Rojo sourcemap +
-  Roblox type defs), then builds **both** `default.project.json` (the drop-in engine model)
-  and `demo.project.json` (the runnable demo place) to prove they compile.
+  Roblox type defs), then builds **all three** Rojo targets — `default.project.json` (the drop-in
+  engine model), `demo.project.json` (the runnable demo place), and `plugin.project.json` (the
+  admin plugin) — to prove they compile.
 - **Changelog enforcement** (`.github/workflows/changelog.yml`) — PRs must update
   `CHANGELOG.md` unless they carry the `skip-changelog` label.
 - **Contributor guide** (`CONTRIBUTING.md`) — prerequisites, local dev setup, code style,

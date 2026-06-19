@@ -103,7 +103,8 @@ set only `Stat`): `Max`, `Invert`, `WarnAt`, `FillColor`, `WarnColor`, `FillAxis
 
 **Icons** resolve from the per-bar `Icon` attribute → the stat's `icon` config → the `Assets`
 registry category **`StatIcons`** (key = stat name) — e.g. `SurvivorCore.Assets.register("StatIcons",
-"Hunger", "rbxassetid://…")`. The engine ships none, so slots stay blank until you supply art.
+"Hunger", "rbxassetid://…")`. The engine now ships **default** icons for its built-in stats (as
+each stat's `icon` default), so bars are iconed out of the box; the chain above replaces them.
 
 **Collapse** is wired generically: a `GuiButton` with a **`HudToggle`** attribute (its value names
 the container, e.g. `"Collapsible"`) toggles a container marked **`HudCollapsible`**. Both are also
@@ -115,7 +116,8 @@ To re-skin: edit the `Fill` and surrounding elements however you like. (Bars tag
 
 ## Providing your own HUD art
 
-The engine ships **no** icons (content-free). Supply your own — first match wins:
+The engine ships **default** icons for its built-in stats, so the HUD is iconed out of the box (and
+they show in Studio's Edit view, no Play needed). To use your own art, set any of these — first match wins:
 
 1. set a bar's **`Icon`** attribute (or the credits/counter element's) to an asset id — **live**:
    the HUD renders it the instant it's set, so a game can assign art at runtime;

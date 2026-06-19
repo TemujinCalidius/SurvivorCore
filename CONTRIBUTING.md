@@ -69,11 +69,14 @@ components, hooks, and the foundation. See [Architecture Overview](#architecture
 - **Formatting & linting are enforced by CI.** Before you push, run the same checks CI does
   (see [Making a Pull Request](#making-a-pull-request)). `stylua` owns formatting — don't
   hand-format around it.
-- **Never hardcode asset IDs in `.luau`.** Asset IDs are content. Register them through
-  `Assets` (`Assets.register("Sounds", "Harvest", "rbxassetid://…")`) and read them back, with
-  the empty-string fallback convention. The engine must contain **zero** concrete asset IDs.
-- **Keep the core content-free.** No concrete items, recipes, lore, world strings, or
-  instance-name string matches (`name == "campfire"`) in the engine. Content enters two ways:
+- **Default art is fine; keep it swappable.** Assets in this repo are free to use, so the engine
+  may ship free *default* art IDs (e.g. the HUD stat icons in `StatDefs`) — provided they stay
+  overridable (config / admin plugin / `Assets`) and never get buried in logic. For dynamic or
+  owner-supplied art, still route through the `Assets` registry
+  (`Assets.register("Sounds", "Harvest", "rbxassetid://…")`) with the empty-string fallback.
+- **Keep the core free of game-specific *design*.** No concrete items, recipes, lore, world
+  strings, or instance-name string matches (`name == "campfire"`) in the engine — free default
+  *art* is the one exception (above). Content enters two ways:
   - **Registries** — developers call `register()` from code (`Items`, `Recipes`, `Stats`,
     `Mobs`, …).
   - **Components** — creators tag their own objects and set Attributes (`Gatherable`, and the
@@ -116,7 +119,7 @@ published (which auto-posts to Discussions → Announcements).
    # git checkout -b docs/my-fix main        # documentation only
    ```
 3. **Implement your change.** Write clear, typed Luau. Add comments where the "why" isn't
-   obvious. Keep the engine content-free.
+   obvious. Keep the engine free of game-specific design (free default art is fine).
 4. **Test locally.** Play-test in Studio, then run the same checks CI does:
    ```bash
    stylua --check src demo assets plugin

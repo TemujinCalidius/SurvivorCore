@@ -25,7 +25,7 @@ export type StatDef = {
 	warnAt: number, -- warn within this percent of the dangerous end (0-100)
 	display: boolean, -- show in the HUD by default
 	attribute: string, -- Player attribute name (defaults to `name`)
-	icon: string?, -- HUD icon asset id; ALWAYS "" here (content-free) — owners supply art
+	icon: string?, -- HUD icon asset id; engine ships free default icons (overridable per stat)
 	valueFormat: string?, -- HUD numeric readout: "fraction" | "percent" | "value" | "none"
 }
 
@@ -36,7 +36,7 @@ local function perMinutes(minutes: number): number
 	return 100 / (minutes * 60)
 end
 
--- The shipped defaults. Numbers ported from The Counter Earth; content-free.
+-- The shipped defaults. Numbers + default icons ported from The Counter Earth.
 -- Hunger/Thirst/Fatigue/Poison start at 0 and rise toward 100 = bad (`dangerHigh = true`,
 -- so their bars fill up as they worsen). Health/Energy/Blood are resources (`dangerHigh =
 -- false`: 0 = bad). Health/Energy are display-only here (drain/regen + consequences = #5/#6).
@@ -50,6 +50,7 @@ StatDefs.DEFAULTS = {
 		invert = false,
 		warnAt = 25,
 		display = true,
+		icon = "rbxassetid://88514622686548",
 	},
 	{
 		name = "Energy",
@@ -60,6 +61,7 @@ StatDefs.DEFAULTS = {
 		invert = false,
 		warnAt = 25,
 		display = true,
+		icon = "rbxassetid://129856164091801",
 	},
 	{
 		name = "Hunger",
@@ -70,6 +72,7 @@ StatDefs.DEFAULTS = {
 		invert = false,
 		warnAt = 25,
 		display = true,
+		icon = "rbxassetid://138699077112926",
 	},
 	{
 		name = "Thirst",
@@ -80,6 +83,7 @@ StatDefs.DEFAULTS = {
 		invert = false,
 		warnAt = 25,
 		display = true,
+		icon = "rbxassetid://124374881225649",
 	},
 	{
 		name = "Fatigue",
@@ -90,6 +94,7 @@ StatDefs.DEFAULTS = {
 		invert = false,
 		warnAt = 25,
 		display = true,
+		icon = "rbxassetid://102789813187589",
 	},
 	{
 		name = "Poison",
@@ -100,6 +105,7 @@ StatDefs.DEFAULTS = {
 		invert = false,
 		warnAt = 25,
 		display = true,
+		icon = "rbxassetid://86406240258610",
 	},
 	{
 		name = "Blood",
@@ -110,6 +116,7 @@ StatDefs.DEFAULTS = {
 		invert = false,
 		warnAt = 25,
 		display = true,
+		icon = "rbxassetid://139788071928396",
 	},
 }
 
@@ -135,7 +142,7 @@ function StatDefs.install()
 			invert = def.invert,
 			warnAt = def.warnAt,
 			display = def.display,
-			icon = def.icon or "", -- content-free default; owners supply art via config/Assets
+			icon = def.icon or "", -- engine ships a default icon; owners override via config/Assets
 			valueFormat = def.valueFormat or "fraction",
 		}
 		Registries.Stats.register({

@@ -167,7 +167,8 @@
                 "BorderSizePixel": 0
               },
               "attributes": {
-                "Counter": "Credits"
+                "Counter": "Credits",
+                "Icon": "rbxassetid://137051934393677"
               },
               "children": [
                 {
@@ -201,9 +202,9 @@
                       ]
                     },
                     "BackgroundTransparency": 1,
-                    "Image": "",
+                    "Image": "rbxassetid://137051934393677",
                     "ScaleType": "Fit",
-                    "Visible": false,
+                    "Visible": true,
                     "LayoutOrder": 1
                   }
                 },
@@ -449,9 +450,9 @@
                       ]
                     },
                     "BackgroundTransparency": 1,
-                    "Image": "",
+                    "Image": "rbxassetid://88514622686548",
                     "ScaleType": "Fit",
-                    "Visible": false,
+                    "Visible": true,
                     "ZIndex": 2
                   }
                 },
@@ -668,9 +669,9 @@
                       ]
                     },
                     "BackgroundTransparency": 1,
-                    "Image": "",
+                    "Image": "rbxassetid://129856164091801",
                     "ScaleType": "Fit",
-                    "Visible": false,
+                    "Visible": true,
                     "ZIndex": 2
                   }
                 },
@@ -925,9 +926,9 @@
                       ]
                     },
                     "BackgroundTransparency": 1,
-                    "Image": "",
+                    "Image": "rbxassetid://138699077112926",
                     "ScaleType": "Fit",
-                    "Visible": false,
+                    "Visible": true,
                     "ZIndex": 2
                   }
                 },
@@ -1144,9 +1145,9 @@
                       ]
                     },
                     "BackgroundTransparency": 1,
-                    "Image": "",
+                    "Image": "rbxassetid://124374881225649",
                     "ScaleType": "Fit",
-                    "Visible": false,
+                    "Visible": true,
                     "ZIndex": 2
                   }
                 },
@@ -1363,9 +1364,9 @@
                       ]
                     },
                     "BackgroundTransparency": 1,
-                    "Image": "",
+                    "Image": "rbxassetid://102789813187589",
                     "ScaleType": "Fit",
-                    "Visible": false,
+                    "Visible": true,
                     "ZIndex": 2
                   }
                 },
@@ -1582,9 +1583,9 @@
                       ]
                     },
                     "BackgroundTransparency": 1,
-                    "Image": "",
+                    "Image": "rbxassetid://139788071928396",
                     "ScaleType": "Fit",
-                    "Visible": false,
+                    "Visible": true,
                     "ZIndex": 2
                   }
                 },
@@ -1801,9 +1802,9 @@
                       ]
                     },
                     "BackgroundTransparency": 1,
-                    "Image": "",
+                    "Image": "rbxassetid://86406240258610",
                     "ScaleType": "Fit",
-                    "Visible": false,
+                    "Visible": true,
                     "ZIndex": 2
                   }
                 },

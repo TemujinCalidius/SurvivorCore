@@ -8,8 +8,11 @@ re-skin freely; these are the engine's clean defaults and the rules any shipped 
 
 ## Principles
 
-- **Content-free.** The engine ships **zero** `rbxassetid://`. Art is owner-supplied or
-  generated into the `Assets` registry; defaults are plain colors + text.
+- **Free, swappable defaults.** Assets in this repo are free to use, so the engine ships free
+  **default** art (e.g. the HUD stat icons) — every piece overridable per stat (config / admin
+  plugin) or via the `Assets` registry. No look is hard-coded; where no art resolves, the fallback
+  is plain colors + text. (Game-specific *design* — items, recipes, lore — still never ships in the
+  engine; see [CONTRIBUTING](../CONTRIBUTING.md).)
 - **Owner-editable.** UI is real, restyleable Instances driven by attributes — never hard-coded
   layouts the owner can't change.
 - **Tasteful, not flashy.** Clean, modern, readable. Flat surfaces, soft translucency, restraint.

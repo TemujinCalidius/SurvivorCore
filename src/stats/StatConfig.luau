@@ -72,7 +72,7 @@ export type ResolvedStat = {
 	invert: boolean,
 	warnAt: number,
 	display: boolean,
-	icon: string, -- HUD icon asset id, "" when none (engine ships "" — content-free)
+	icon: string, -- HUD icon asset id, "" when none (engine ships free defaults; overridable)
 	valueFormat: string, -- HUD numeric readout: "fraction" | "percent" | "value" | "none"
 }
 

@@ -17,8 +17,7 @@
       "$className": "StarterPlayer",
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
-        "HudLoader": { "$path": "assets/client/HudLoader.client.luau" },
-        "HudIcons": { "$path": "demo/client/HudIcons.client.luau" }
+        "HudLoader": { "$path": "assets/client/HudLoader.client.luau" }
       }
     },
     "Workspace": {

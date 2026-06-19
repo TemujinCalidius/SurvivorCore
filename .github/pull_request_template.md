@@ -13,6 +13,6 @@
 ## Checklist
 
 - [ ] Added an entry to **`CHANGELOG.md`** under `## Unreleased` (or applied the `skip-changelog` label if no entry is warranted — e.g. a CI-only or trivial docs change)
-- [ ] CI is green — `stylua --check`, `selene`, `luau-lsp analyze`, and **both** `rojo build`s pass
+- [ ] CI is green — `stylua --check`, `selene`, `luau-lsp analyze`, and **all three** `rojo build`s (engine, demo, plugin) pass
 - [ ] No secrets or personal data added (this is a public repo)
-- [ ] **No hardcoded asset IDs** — content comes via `register()` / components / `Assets`, and the core stays content-free
+- [ ] **No game-specific design content** — items / recipes / lore / world strings enter via `register()` / components / `Assets`, not the engine (free *default* art, e.g. HUD icons, is fine)
