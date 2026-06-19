@@ -8,6 +8,16 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
 ## Unreleased
 
 ### Added
+- **Survival-stats engine + built-in HUD** (#8, #2) — a server tick simulates per-stat
+  drain/regen, stored as auto-replicating Player Attributes, and a reactive **top-left HUD**
+  renders them (no RemoteEvents). The HUD is a real, designer-editable `SurvivalHud` ScreenGui
+  in StarterGui — restyle it in Studio with zero code; bars bind by a `Stat` attribute and a
+  `Fill` child. Ships with seven default stats (health/energy/hunger/thirst/fatigue/blood/
+  poison), tunable **without code** via a `SurvivalStatsConfig` Configuration instance (or, for
+  developers, `Config.override("SurvivalStats", …)` / `Stats.defineStat`). Works out of the box
+  for every distribution — the demo/Rojo source mount it, the drop-in `.rbxm` auto-installs it
+  on `start()`, and a runtime fallback guarantees a HUD always appears. Adds the engine's first
+  client layer (`SurvivorCore.startClient()`). See [docs/survival-stats.md](docs/survival-stats.md).
 - **Continuous integration** (`.github/workflows/ci.yml`) — every push to `main`/`dev` and
   every PR runs `stylua --check`, `selene`, `luau-lsp analyze` (against a Rojo sourcemap +
   Roblox type defs), then builds **both** `default.project.json` (the drop-in engine model)

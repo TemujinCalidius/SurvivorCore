@@ -56,4 +56,6 @@ layer → harvesting/wildlife sub-engine.
 - [Getting Started](getting-started.md) — install via Rojo + Wally or the drop-in `.rbxm`.
 - [Extending SurvivorCore](extending.md) — the `register()` API, the component/attribute
   model, and Hooks.
+- [Survival Stats + HUD](survival-stats.md) — the stat simulation, no-code tuning, and the
+  designer-editable HUD.
 - [CONTRIBUTING](../CONTRIBUTING.md) — local dev setup, code style, and the branching model.

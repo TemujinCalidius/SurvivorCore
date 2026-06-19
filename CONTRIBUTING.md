@@ -113,12 +113,12 @@ published (which auto-posts to Discussions → Announcements).
    obvious. Keep the engine content-free.
 4. **Test locally.** Play-test in Studio, then run the same checks CI does:
    ```bash
-   stylua --check src demo
+   stylua --check src demo assets
    selene .
    rojo sourcemap demo.project.json --output sourcemap.json
    curl -fsSL -o globalTypes.d.luau https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.luau
    luau-lsp analyze --sourcemap sourcemap.json --defs globalTypes.d.luau --no-strict-dm-types \
-     --ignore "Packages/**" --ignore "DevPackages/**" --ignore "ServerPackages/**" src demo
+     --ignore "Packages/**" --ignore "DevPackages/**" --ignore "ServerPackages/**" src demo assets/client
    rojo build default.project.json --output SurvivorCore.rbxm
    rojo build demo.project.json --output demo.rbxl
    ```

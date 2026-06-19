@@ -26,7 +26,7 @@ jobs:
         uses: CompeyDev/setup-rokit@v0.1.2
 
       - name: StyLua (format check)
-        run: stylua --check src demo
+        run: stylua --check src demo assets
 
       - name: Selene (lint)
         run: selene .
@@ -49,7 +49,7 @@ jobs:
             --ignore "Packages/**" \
             --ignore "DevPackages/**" \
             --ignore "ServerPackages/**" \
-            src demo
+            src demo assets/client
 
       # Prove both Rojo targets build: the drop-in engine model and the runnable demo place.
       - name: Build engine model (default.project.json)
