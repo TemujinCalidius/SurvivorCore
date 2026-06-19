@@ -75,14 +75,31 @@ instance.
 
 The HUD is the `SurvivalHud` ScreenGui in **StarterGui**. Restyle anything — colors, gradients,
 textures, position, fonts, add or remove bars — in Studio. The engine only ever drives each
-bar's fill, so your styling is untouched.
+bar's fill, value text, and icon, so your styling is untouched.
+
+**Layout.** The shipped template is a translucent **`Panel`** containing a **`Header`** (title +
+the expand `Toggle`), a **`Primary`** group (always visible — Health + Energy), and a
+**`Collapsible`** group (the rest, hidden until the player clicks the toggle). Move a bar between
+`Primary` and `Collapsible` by drag-and-drop to change what shows by default.
 
 **A stat bar** is any `GuiObject` that:
 - carries a **`Stat`** attribute (the player-attribute name, e.g. `"Hunger"`), and
 - contains a child **`GuiObject` named `Fill`** (the part the engine resizes/recolors).
 
-Optional per-bar attributes (each defaults from the stat's config, so usually you set only
-`Stat`): `Max`, `Invert`, `WarnAt`, `FillColor`, `WarnColor`, `FillAxis` (`"X"` or `"Y"`).
+Optional per-bar **children** the binder also drives if present: a `TextLabel` named **`Value`**
+(filled with the numeric readout) and an `ImageLabel` named **`Icon`** (hidden until an icon id
+resolves). Optional per-bar **attributes** (each defaults from the stat's config, so usually you
+set only `Stat`): `Max`, `Invert`, `WarnAt`, `FillColor`, `WarnColor`, `FillAxis` (`"X"`/`"Y"`),
+`ValueFormat` (`"fraction"` `99/100` · `"percent"` `99%` · `"value"` `99` · `"none"`), and `Icon`
+(an asset-id override).
+
+**Icons** resolve from the per-bar `Icon` attribute → the stat's `icon` config → the `Assets`
+registry category **`StatIcons`** (key = stat name) — e.g. `SurvivorCore.Assets.register("StatIcons",
+"Hunger", "rbxassetid://…")`. The engine ships none, so slots stay blank until you supply art.
+
+**Collapse** is wired generically: a `GuiButton` with a **`HudToggle`** attribute (its value names
+the container, e.g. `"Collapsible"`) toggles a container marked **`HudCollapsible`**. Both are also
+discoverable by the names `Toggle`/`Collapsible` or matching CollectionService tags.
 
 To add a bar: duplicate an existing one, change its `Stat` attribute. To remove one: delete it.
 To re-skin: edit the `Fill` and surrounding elements however you like. (Bars tagged
