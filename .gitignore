@@ -1,5 +1,6 @@
 # Rojo / Roblox
 sourcemap.json
+plugin-sourcemap.json
 globalTypes.d.luau
 *.rbxl
 *.rbxlx

@@ -119,14 +119,18 @@ published (which auto-posts to Discussions → Announcements).
    obvious. Keep the engine content-free.
 4. **Test locally.** Play-test in Studio, then run the same checks CI does:
    ```bash
-   stylua --check src demo assets
+   stylua --check src demo assets plugin
    selene .
    rojo sourcemap demo.project.json --output sourcemap.json
    curl -fsSL -o globalTypes.d.luau https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.luau
    luau-lsp analyze --sourcemap sourcemap.json --defs globalTypes.d.luau --no-strict-dm-types \
      --ignore "Packages/**" --ignore "DevPackages/**" --ignore "ServerPackages/**" src demo assets/client
+   # the admin plugin is a separate Rojo tree — analyze it with its own sourcemap
+   rojo sourcemap plugin.project.json --output plugin-sourcemap.json
+   luau-lsp analyze --sourcemap plugin-sourcemap.json --defs globalTypes.d.luau --no-strict-dm-types plugin
    rojo build default.project.json --output SurvivorCore.rbxm
    rojo build demo.project.json --output demo.rbxl
+   rojo build plugin.project.json --output SurvivorCoreStatAdmin.rbxm
    ```
    (`stylua src demo` auto-formats; `sourcemap.json`, `globalTypes.d.luau`, and the build
    outputs are git-ignored.)

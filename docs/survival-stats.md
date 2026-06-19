@@ -32,8 +32,10 @@ is tunable, and the HUD is a real ScreenGui you restyle in Studio with **zero co
 > and the energy/movement coupling arrive in later versions. This version is the stat
 > simulation + HUD + tuning.
 
-`Invert` (per stat) controls only the HUD: an inverted bar shows the *healthy* amount, so Hunger
-(0 = fed) renders as a bar that **depletes** as you get hungry.
+Bar **fill direction is engine-owned**: a stat that's *dangerous when high* (Hunger, Thirst,
+Poison…) fills **up** as it worsens and sits empty when you're safe, while a resource (Health,
+Blood…) depletes toward empty. You don't set this per stat — it follows the stat's semantics. (A
+custom HUD can still flip an individual bar with a per-bar `Invert` attribute; see the HUD section.)
 
 ## Tuning — no code (recommended for creators)
 
@@ -44,12 +46,18 @@ It has one child `Configuration` per stat; edit their **Attributes** in Studio �
 |---|---|
 | `RatePerSecond` | signed change per second (`+` rises toward `Max`, `−` falls toward 0) |
 | `Max` / `Start` | range and spawn value |
-| `WarnAt` | warn when the displayed bar drops below this percent |
-| `Invert` | bar full = healthy |
+| `WarnAt` | warn when the stat is within this percent of its dangerous end |
 | `Display` | show this stat in the HUD |
+| `Icon` | HUD icon asset id for this stat |
+| `ValueFormat` | numeric readout: `fraction` · `percent` · `value` · `none` |
 
-Edits take effect **live** — drag `Thirst.RatePerSecond` up and thirst drains faster
+These seven are the only owner-tunable fields; bar-fill and danger direction are engine-owned (see
+above). Edits take effect **live** — drag `Thirst.RatePerSecond` up and thirst drains faster
 immediately.
+
+**Prefer a form?** The [Survival Stats admin plugin](admin-plugin.md) is a Studio dock that edits
+exactly these fields with validation, per-field reset and undo — and writes only what you change,
+so your tuning survives engine updates.
 
 ## Tuning — code (for developers)
 
@@ -148,4 +156,4 @@ in your place — it persists there normally.
 
 ---
 
-See also: [Extending SurvivorCore](extending.md) · [Architecture](architecture.md).
+See also: [Admin plugin](admin-plugin.md) · [Extending SurvivorCore](extending.md) · [Architecture](architecture.md).
