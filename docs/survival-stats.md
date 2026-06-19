@@ -105,6 +105,25 @@ To add a bar: duplicate an existing one, change its `Stat` attribute. To remove 
 To re-skin: edit the `Fill` and surrounding elements however you like. (Bars tagged
 `SurvivorStatBar` work too — handy for the upcoming Builder UI.)
 
+## Providing your own HUD art
+
+The engine ships **no** icons (content-free). Supply your own — first match wins:
+
+1. set a bar's **`Icon`** attribute (or the credits/counter element's) to an asset id — **live**:
+   the HUD renders it the instant it's set, so a game can assign art at runtime;
+2. set the stat's **`Icon`** on the `SurvivalStatsConfig` instance / via `Stats.defineStat`;
+3. register into the **`Assets`** registry:
+   `SurvivorCore.Assets.register("StatIcons", "Hunger", id)` (category `StatIcons`, key = stat /
+   counter name).
+
+**Upload to your own account.** A Roblox image asset is owned by whoever uploads it, so the clean
+model is **per-game**: each game uploads its own icons (to its account or group) and references
+its own ids. That keeps your art private to your game, avoids cross-experience asset-permission
+gating, and needs no Premium (image uploads are free, just rate-limited). To share a set publicly,
+publish it to the Creator Store (moderated). The demo's example flat set lives in
+`demo/assets/icons/` — drop them in and upload to your account, or generate your own (the icon
+pipeline is in the [design language](design-language.md)).
+
 ## How it ships (and always appears)
 
 You never have to wire the HUD up:

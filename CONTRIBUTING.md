@@ -56,6 +56,12 @@ components, hooks, and the foundation. See [Architecture Overview](#architecture
 > Working on the engine alone (not the demo)? `rojo serve default.project.json` mounts just
 > `src` as the `SurvivorCore` model.
 
+> **Studio + Rojo gotcha — restart before trusting a Play test.** When you change scripts during a
+> `rojo serve` session, Studio updates each script's `Source` in the Edit datamodel, but **Play
+> Solo can run cached old bytecode** — so your change silently doesn't take effect on Play. If a
+> fix isn't showing up, **restart Studio** (clears the script cache) and reconnect, or test from a
+> fresh build: `rojo build demo.project.json -o /tmp/demo.rbxlx` and open that file.
+
 ## Code Style
 
 - **Luau, typed where practical.** Use `--!strict` on new modules when the types are clean;
