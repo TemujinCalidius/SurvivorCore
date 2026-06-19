@@ -16,6 +16,7 @@ local COL_ACCENT = Color3.fromRGB(120, 170, 255) -- marks an overridden field
 local COL_FIELD = Color3.fromRGB(38, 43, 56)
 local FONT = Enum.Font.GothamMedium
 local ROW_H = 26
+local FOOTER_H = 36 -- the Preview / Clear control bar at the bottom
 
 local function make(class: string, props: { [string]: any }, children: { Instance }?): Instance
 	local inst = Instance.new(class)
@@ -124,7 +125,14 @@ end
 -- Mount the widget UI into `container`. Returns { refresh } — call refresh() after any edit
 -- or when the engine sync changes. `StatAdmin` is the logic module; the two callbacks route
 -- writes through the plugin main (ChangeHistory + refresh).
-function StatAdminUi.mount(container: Instance, StatAdmin: any, applyEdit, applyReset): { refresh: () -> () }
+function StatAdminUi.mount(
+	container: Instance,
+	StatAdmin: any,
+	applyEdit,
+	applyReset,
+	applyPreview,
+	applyClear
+): { refresh: () -> () }
 	for _, child in container:GetChildren() do
 		if not child:IsA("UIBase") then
 			child:Destroy()
@@ -162,7 +170,7 @@ function StatAdminUi.mount(container: Instance, StatAdmin: any, applyEdit, apply
 	refreshBtn.Parent = header
 
 	local scroll = make("ScrollingFrame", {
-		Size = UDim2.new(1, 0, 1, -32),
+		Size = UDim2.new(1, 0, 1, -(32 + FOOTER_H)),
 		Position = UDim2.fromOffset(0, 32),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
@@ -179,6 +187,65 @@ function StatAdminUi.mount(container: Instance, StatAdmin: any, applyEdit, apply
 		}),
 	})
 	scroll.Parent = container
+
+	-- Footer: the edit-mode HUD preview controls. Preview paints resolved icons + sample fills
+	-- onto the StarterGui HUD (so you see play-time styling without pressing Play); Clear restores.
+	local footer = make("Frame", {
+		Size = UDim2.new(1, 0, 0, FOOTER_H),
+		Position = UDim2.new(0, 0, 1, -FOOTER_H),
+		BackgroundColor3 = COL_PANEL,
+		BorderSizePixel = 0,
+	})
+	footer.Parent = container
+	local previewBtn = make("TextButton", {
+		Size = UDim2.fromOffset(92, 22),
+		Position = UDim2.new(0, 10, 0.5, -11),
+		BackgroundColor3 = COL_FIELD,
+		AutoButtonColor = true,
+		Text = "Preview HUD",
+		TextColor3 = COL_TEXT,
+		TextSize = 12,
+		Font = FONT,
+		BorderSizePixel = 0,
+	}, { corner(4) })
+	previewBtn.Parent = footer
+	local clearBtn = make("TextButton", {
+		Size = UDim2.fromOffset(56, 22),
+		Position = UDim2.new(0, 108, 0.5, -11),
+		BackgroundColor3 = COL_FIELD,
+		AutoButtonColor = true,
+		Text = "Clear",
+		TextColor3 = COL_DIM,
+		TextSize = 12,
+		Font = FONT,
+		BorderSizePixel = 0,
+	}, { corner(4) })
+	clearBtn.Parent = footer
+	local status = make("TextLabel", {
+		Size = UDim2.new(1, -184, 1, 0),
+		Position = UDim2.fromOffset(174, 0),
+		BackgroundTransparency = 1,
+		Text = "",
+		TextColor3 = COL_DIM,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextSize = 11,
+		Font = FONT,
+	})
+	status.Parent = footer
+
+	previewBtn.MouseButton1Click:Connect(function()
+		local res = applyPreview and applyPreview()
+		if typeof(res) == "table" then
+			status.Text = if res.ok then `previewing {res.count}` else (res.reason or "no HUD found")
+		end
+	end)
+	clearBtn.MouseButton1Click:Connect(function()
+		local res = applyClear and applyClear()
+		if typeof(res) == "table" then
+			status.Text = if res.ok then "cleared" else (res.reason or "")
+		end
+	end)
 
 	local function refresh()
 		for _, child in scroll:GetChildren() do

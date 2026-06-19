@@ -33,7 +33,9 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
   owner tuning survives engine updates while untouched fields keep following improvable defaults,
   and a hard guardrail makes the engine-owned `Invert`/`DangerHigh` semantics impossible to write.
   Built as a separate `plugin.project.json` Rojo target (install via
-  `rojo build plugin.project.json --plugin …`); CI lints and builds it too.
+  `rojo build plugin.project.json --plugin …`); CI lints and builds it too. Includes a reversible
+  **edit-mode HUD preview** (Preview / Clear) that paints resolved icons + sample fills onto the
+  StarterGui HUD, so owners see play-time styling without pressing Play.
   See [docs/admin-plugin.md](docs/admin-plugin.md).
 - **Continuous integration** (`.github/workflows/ci.yml`) — every push to `main`/`dev` and
   every PR runs `stylua --check`, `selene`, `luau-lsp analyze` (against a Rojo sourcemap +

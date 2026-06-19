@@ -58,6 +58,18 @@ It reads the stat roster + defaults live from the engine in the place, so it alw
 version you're running. With no engine synced it shows an instructional empty state and writes
 nothing.
 
+### Preview the HUD in Edit mode
+
+Roblox doesn't run the HUD's client binder in Studio's **Edit** view, so an authored `SurvivalHud`
+normally shows its static template there — full bars, blank readouts, and only the shipped *default*
+icons (an icon override you set above isn't visible until you press Play). The footer's **Preview
+HUD** button paints, in Edit, what the running game *would* render: each bar's resolved icon
+(including your overrides), a sample partial fill, and a sample value readout — so you can tune and
+**see the result without pressing Play**. **Clear** restores the HUD; both are a single **undo**
+step. (Preview resolves icons exactly like the engine — per-bar `Icon` attribute › the stat's
+effective `icon` — and edits the `SurvivalHud` in StarterGui, so on the Rojo-mounted demo a re-sync
+also resets it.)
+
 ## Why your tuning is "locked" — it survives re-syncs and engine updates
 
 This is the important part. The engine resolves each stat as **engine default → `Config.override` →

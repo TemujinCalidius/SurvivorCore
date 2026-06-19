@@ -15,6 +15,7 @@ local ChangeHistoryService = game:GetService("ChangeHistoryService")
 
 local StatAdmin = require(script.StatAdmin)
 local StatAdminUi = require(script.StatAdminUi)
+local HudPreview = require(script.HudPreview)
 
 local toolbar = plugin:CreateToolbar("SurvivorCore")
 local button = toolbar:CreateButton("Survival Stats", "Tune survival-stat rates, thresholds and HUD options", "")
@@ -64,7 +65,22 @@ local function applyReset(statName: string, attr: string): any
 	end)
 end
 
-ui = StatAdminUi.mount(container, StatAdmin, applyEdit, applyReset)
+-- Edit-mode HUD preview (paints resolved icons + sample fills onto the StarterGui HUD) and its
+-- undo-able restore. Each is one ChangeHistory step; both return the HudPreview result so the
+-- footer can show a status.
+local function applyPreview(): any
+	return record("Survival Stats: preview HUD", function()
+		return HudPreview.apply(StatAdmin)
+	end)
+end
+
+local function applyClear(): any
+	return record("Survival Stats: clear HUD preview", function()
+		return HudPreview.clear()
+	end)
+end
+
+ui = StatAdminUi.mount(container, StatAdmin, applyEdit, applyReset, applyPreview, applyClear)
 
 button.Click:Connect(function()
 	widget.Enabled = not widget.Enabled
