@@ -29,6 +29,8 @@ local STUDIO_ATTR_MAP = {
 	WarnAt = "warnAt",
 	Invert = "invert",
 	Display = "display",
+	Icon = "icon",
+	ValueFormat = "valueFormat",
 }
 
 local function applyTable(target: { [string]: any }, override: { [string]: any }?)
@@ -65,6 +67,8 @@ export type ResolvedStat = {
 	invert: boolean,
 	warnAt: number,
 	display: boolean,
+	icon: string, -- HUD icon asset id, "" when none (engine ships "" — content-free)
+	valueFormat: string, -- HUD numeric readout: "fraction" | "percent" | "value" | "none"
 }
 
 -- Returns the merged stat models, both as an ordered array and a name lookup.
@@ -84,6 +88,8 @@ function StatConfig.resolve(): { stats: { ResolvedStat }, byName: { [string]: Re
 			invert = def.invert,
 			warnAt = def.warnAt,
 			display = def.display,
+			icon = def.icon or "",
+			valueFormat = def.valueFormat or "fraction",
 		}
 		if section then
 			applyTable(resolved, section[def.name])

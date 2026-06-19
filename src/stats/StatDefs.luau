@@ -23,6 +23,8 @@ export type StatDef = {
 	warnAt: number, -- warn when the displayed bar drops below this percent (0-100)
 	display: boolean, -- show in the HUD by default
 	attribute: string, -- Player attribute name (defaults to `name`)
+	icon: string?, -- HUD icon asset id; ALWAYS "" here (content-free) — owners supply art
+	valueFormat: string?, -- HUD numeric readout: "fraction" | "percent" | "value" | "none"
 }
 
 local StatDefs = {}
@@ -91,6 +93,8 @@ function StatDefs.install()
 			invert = def.invert,
 			warnAt = def.warnAt,
 			display = def.display,
+			icon = def.icon or "", -- content-free default; owners supply art via config/Assets
+			valueFormat = def.valueFormat or "fraction",
 		}
 		Registries.Stats.register({
 			name = def.name,
@@ -101,6 +105,8 @@ function StatDefs.install()
 			warnAt = def.warnAt,
 			display = def.display,
 			attribute = def.name,
+			icon = def.icon or "",
+			valueFormat = def.valueFormat or "fraction",
 		})
 	end
 	Config.defineSection("SurvivalStats", section)

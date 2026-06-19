@@ -8,12 +8,27 @@
 
 	Per-bar contract (attributes on the tagged Frame; most default from the stat config,
 	so owners usually set only `Stat`):
-	  • Stat (string)    — Player attribute to bind, e.g. "Hunger" (required)
-	  • Max (number)     — fill denominator
-	  • Invert (bool)    — fill = 1 - value/Max (bar full = healthy)
-	  • WarnAt (number)  — warn when the displayed bar drops below this percent
+	  • Stat (string)        — Player attribute to bind, e.g. "Hunger" (required)
+	  • Max (number)         — fill denominator
+	  • Invert (bool)        — fill = 1 - value/Max (bar full = healthy)
+	  • WarnAt (number)      — warn when the displayed bar drops below this percent
 	  • FillColor/WarnColor (Color3), FillAxis ("X"|"Y")
+	  • ValueFormat (string) — numeric readout: "fraction" "99/100" | "percent" "99%"
+	                           | "value" "99" | "none" (hide). Defaults to the stat config.
+	  • Icon (string)        — icon asset id override (defaults to the stat config / Assets).
 	Required child: a GuiObject named `Fill`. Everything else is free-form styling.
+
+	OPTIONAL per-bar children the binder also drives if present (absent => ignored):
+	  • TextLabel `Value` — filled with the formatted number (per ValueFormat above).
+	  • ImageLabel `Icon` — Image set from the resolved icon id; hidden while the id is "".
+
+	OPTIONAL collapse controls (so the default view shows only the primary bars and the
+	rest reveal on click) — all discovered by name/attribute/tag, never by fixed path:
+	  • A GuiButton with a `HudToggle` attribute (or tagged "HudToggle") toggles a
+	    collapsible container. The attribute's string value names the container; empty
+	    falls back to a "Collapsible"-named / "HudCollapsible"-tagged GuiObject.
+	  • The container starts Visible=false; the binder flips it and rotates the chevron.
+	Everything new is optional, so a minimal HUD (or the fallback) binds exactly as before.
 ]]
 
 local CollectionService = game:GetService("CollectionService")
@@ -24,12 +39,53 @@ local RunService = game:GetService("RunService")
 assert(RunService:IsClient(), "SurvivorCore HUD is client-only — boot it via SurvivorCore.startClient()")
 
 local StatConfig = require(script.Parent.Parent.stats.StatConfig)
+local Assets = require(script.Parent.Parent.foundation.Assets)
 local HudFallback = require(script.Parent.HudFallback)
 
 local BAR_TAG = "SurvivorStatBar"
 local HUD_NAME = "SurvivalHud"
 local FALLBACK_WAIT = 1 -- seconds to wait for an authored HUD before building the fallback
 local DEFAULT_WARN_COLOR = Color3.fromRGB(200, 40, 40)
+local DEFAULT_VALUE_FORMAT = "fraction"
+local ICON_CATEGORY = "StatIcons" -- Assets category an owner can populate (key = stat name)
+
+-- Collapse-control discovery (attribute primary, CollectionService tag as a rename-proof
+-- fallback the owner can apply in Studio; the shipped template uses attributes only).
+local TOGGLE_NAME = "Toggle"
+local TOGGLE_TAG = "HudToggle"
+local TOGGLE_ATTR = "HudToggle"
+local COLLAPSIBLE_NAME = "Collapsible"
+local COLLAPSIBLE_TAG = "HudCollapsible"
+local COLLAPSIBLE_ATTR = "HudCollapsible"
+
+-- Resolve the bar's numeric readout string for the given raw value/max. `value` is the
+-- RAW stat (not the inverted fill ratio), so an inverted Hunger bar still reads "12/100".
+local function formatValue(format: string, value: any, max: number): string
+	local n = if typeof(value) == "number" then value else 0
+	if format == "none" then
+		return ""
+	elseif format == "percent" then
+		local pct = if max > 0 then math.floor((n / max) * 100 + 0.5) else 0
+		return string.format("%d%%", math.clamp(pct, 0, 100))
+	elseif format == "value" then
+		return tostring(math.floor(n + 0.5))
+	end
+	-- "fraction" (default / unknown)
+	return string.format("%d/%d", math.floor(n + 0.5), math.floor(max + 0.5))
+end
+
+-- Resolve a bar's icon id: per-bar `Icon` attribute > stat config `icon` > Assets registry
+-- (category "StatIcons", key = stat name). Returns "" when none — never a hardcoded id.
+local function resolveIcon(bar: Instance, statName: string, def: any): string
+	local id = bar:GetAttribute("Icon")
+	if typeof(id) == "string" and id ~= "" then
+		return id
+	end
+	if def and typeof(def.icon) == "string" and def.icon ~= "" then
+		return def.icon
+	end
+	return Assets.tryGet(ICON_CATEGORY, statName) -- silent: "" when unregistered
+end
 
 local Hud = {}
 local started = false
@@ -89,6 +145,10 @@ function Hud.start(_options: { [string]: any }?)
 			end
 		end
 
+		-- Optional per-bar extras (resolved once; absent => the binder no-ops on them).
+		local valueLabel = bar:FindFirstChild("Value")
+		local iconLabel = bar:FindFirstChild("Icon")
+
 		local function render()
 			local def = byName[statName]
 			local max = bar:GetAttribute("Max") or (def and def.max) or 100
@@ -115,6 +175,24 @@ function Hud.start(_options: { [string]: any }?)
 				fillObject.Size = UDim2.new(fillRatio, 0, size.Y.Scale, size.Y.Offset)
 			end
 			setColor(if fillRatio * 100 < warnAt then warnColor else normalColor)
+
+			-- Numeric readout (optional `Value` TextLabel). Uses the RAW value, not the
+			-- inverted fill — owners expect "99/100" to mean the real attribute.
+			if valueLabel and valueLabel:IsA("TextLabel") then
+				local format = bar:GetAttribute("ValueFormat")
+				if typeof(format) ~= "string" then
+					format = (def and def.valueFormat) or DEFAULT_VALUE_FORMAT
+				end
+				valueLabel.Text = formatValue(format, value, max)
+			end
+
+			-- Icon (optional `Icon` ImageLabel). Blank id => hidden, so a fresh engine
+			-- shows no empty box until the owner supplies art.
+			if iconLabel and (iconLabel:IsA("ImageLabel") or iconLabel:IsA("ImageButton")) then
+				local imageId = resolveIcon(bar, statName, def);
+				(iconLabel :: ImageLabel).Image = imageId;
+				(iconLabel :: GuiObject).Visible = imageId ~= ""
+			end
 		end
 
 		local connection = localPlayer:GetAttributeChangedSignal(statName):Connect(render)
@@ -140,14 +218,83 @@ function Hud.start(_options: { [string]: any }?)
 		return instance:IsA("GuiObject") and instance:GetAttribute("Stat") ~= nil
 	end
 
+	-- A collapse toggle = a GuiButton with a `HudToggle` attribute (or tagged "HudToggle").
+	local function isToggle(instance: Instance): boolean
+		if not instance:IsA("GuiButton") then
+			return false
+		end
+		return instance:GetAttribute(TOGGLE_ATTR) ~= nil
+			or instance.Name == TOGGLE_NAME
+			or CollectionService:HasTag(instance, TOGGLE_TAG)
+	end
+
+	-- Find the collapsible container a toggle controls. Prefer the container named by the
+	-- toggle's `HudToggle` attribute (searched from the toggle's HUD root), else fall back
+	-- to a "HudCollapsible"-tagged / `HudCollapsible`-attributed / "Collapsible"-named one.
+	local function findCollapsible(button: Instance): Instance?
+		local hudRoot = button:FindFirstAncestorWhichIsA("ScreenGui") or playerGui
+		local named = button:GetAttribute(TOGGLE_ATTR)
+		if typeof(named) == "string" and named ~= "" then
+			local found = hudRoot:FindFirstChild(named, true)
+			if found and found:IsA("GuiObject") then
+				return found
+			end
+		end
+		for _, tagged in CollectionService:GetTagged(COLLAPSIBLE_TAG) do
+			if tagged:IsDescendantOf(hudRoot) and tagged:IsA("GuiObject") then
+				return tagged
+			end
+		end
+		for _, descendant in hudRoot:GetDescendants() do
+			if descendant:IsA("GuiObject") and descendant:GetAttribute(COLLAPSIBLE_ATTR) ~= nil then
+				return descendant
+			end
+		end
+		local byNameMatch = hudRoot:FindFirstChild(COLLAPSIBLE_NAME, true)
+		if byNameMatch and byNameMatch:IsA("GuiObject") then
+			return byNameMatch
+		end
+		return nil
+	end
+
+	local toggles: { [Instance]: () -> () } = {}
+	local function wireToggle(button: Instance)
+		if toggles[button] or not isToggle(button) or not button:IsDescendantOf(playerGui) then
+			return
+		end
+		local target = findCollapsible(button)
+		if not target or not target:IsA("GuiObject") then
+			return -- minimal HUDs with a button but no container: skip silently
+		end
+		local container: GuiObject = target
+		local guiButton: GuiButton = button :: GuiButton
+
+		local function apply()
+			-- Rotate the same glyph 180° to flip the chevron — no second glyph / asset.
+			guiButton.Rotation = if container.Visible then 180 else 0
+		end
+		apply()
+		local connection = guiButton.Activated:Connect(function()
+			container.Visible = not container.Visible
+			apply()
+		end)
+		toggles[button] = function()
+			connection:Disconnect()
+		end
+	end
+
 	for _, instance in playerGui:GetDescendants() do
 		if isBar(instance) then
 			tryBind(instance)
+		elseif isToggle(instance) then
+			wireToggle(instance)
 		end
 	end
 	playerGui.DescendantAdded:Connect(function(instance)
 		if isBar(instance) then
 			tryBind(instance)
+		elseif isToggle(instance) then
+			wireToggle(instance)
 		end
 	end)
 	playerGui.DescendantRemoving:Connect(function(instance)
@@ -157,12 +304,22 @@ function Hud.start(_options: { [string]: any }?)
 		end
 		bound[instance] = nil
 		renderers[instance] = nil
+		local untoggle = toggles[instance]
+		if untoggle then
+			untoggle()
+			toggles[instance] = nil
+		end
 	end)
 
 	for _, bar in CollectionService:GetTagged(BAR_TAG) do
 		tryBind(bar)
 	end
 	CollectionService:GetInstanceAddedSignal(BAR_TAG):Connect(tryBind)
+
+	for _, button in CollectionService:GetTagged(TOGGLE_TAG) do
+		wireToggle(button)
+	end
+	CollectionService:GetInstanceAddedSignal(TOGGLE_TAG):Connect(wireToggle)
 
 	-- Re-render bars live when the owner edits the Studio config (WarnAt / Max / colors).
 	local function rerenderAll()

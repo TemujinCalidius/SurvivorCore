@@ -10,7 +10,9 @@
         "Start": 100,
         "WarnAt": 25,
         "Invert": false,
-        "Display": true
+        "Display": true,
+        "Icon": "",
+        "ValueFormat": "fraction"
       }
     },
     {
@@ -22,7 +24,9 @@
         "Start": 100,
         "WarnAt": 25,
         "Invert": false,
-        "Display": true
+        "Display": true,
+        "Icon": "",
+        "ValueFormat": "fraction"
       }
     },
     {
@@ -34,7 +38,9 @@
         "Start": 0,
         "WarnAt": 25,
         "Invert": true,
-        "Display": true
+        "Display": true,
+        "Icon": "",
+        "ValueFormat": "fraction"
       }
     },
     {
@@ -46,7 +52,9 @@
         "Start": 0,
         "WarnAt": 25,
         "Invert": true,
-        "Display": true
+        "Display": true,
+        "Icon": "",
+        "ValueFormat": "fraction"
       }
     },
     {
@@ -58,7 +66,9 @@
         "Start": 0,
         "WarnAt": 25,
         "Invert": true,
-        "Display": true
+        "Display": true,
+        "Icon": "",
+        "ValueFormat": "fraction"
       }
     },
     {
@@ -70,7 +80,9 @@
         "Start": 100,
         "WarnAt": 25,
         "Invert": false,
-        "Display": true
+        "Display": true,
+        "Icon": "",
+        "ValueFormat": "fraction"
       }
     },
     {
@@ -82,7 +94,9 @@
         "Start": 0,
         "WarnAt": 25,
         "Invert": true,
-        "Display": true
+        "Display": true,
+        "Icon": "",
+        "ValueFormat": "fraction"
       }
     }
   ]

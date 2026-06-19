@@ -12,7 +12,9 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
   drain/regen, stored as auto-replicating Player Attributes, and a reactive **top-left HUD**
   renders them (no RemoteEvents). The HUD is a real, designer-editable `SurvivalHud` ScreenGui
   in StarterGui — restyle it in Studio with zero code; bars bind by a `Stat` attribute and a
-  `Fill` child. Ships with seven default stats (health/energy/hunger/thirst/fatigue/blood/
+  `Fill` child. It's a translucent panel that shows **Health + Energy** by default and **expands**
+  to the full roster, with per-bar **numeric readouts** (`99/100` / `%`, configurable) and blank
+  **icon slots** (filled from the `Assets` registry — the engine ships none). Ships with seven default stats (health/energy/hunger/thirst/fatigue/blood/
   poison), tunable **without code** via a `SurvivalStatsConfig` Configuration instance (or, for
   developers, `Config.override("SurvivalStats", …)` / `Stats.defineStat`). Works out of the box
   for every distribution — the demo/Rojo source mount it, the drop-in `.rbxm` auto-installs it
