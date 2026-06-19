@@ -16,7 +16,9 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
   to the full roster, with per-bar **numeric readouts** (`99/100` / `%`, configurable) and blank
   **icon slots** (filled from the `Assets` registry — the engine ships none). Afflictions
   (Hunger/Thirst/Fatigue/Poison) read as empty-when-safe and fill up as they worsen (`dangerHigh`),
-  and the header carries a **credits** readout (a bar-less `Counter` bound to a Player attribute). Ships with seven default stats (health/energy/hunger/thirst/fatigue/blood/
+  and the header carries a **credits** readout (a bar-less `Counter` bound to a Player attribute).
+  HUD icons update **live** — a bar/counter shows its art the moment its `Icon` attribute is set, so
+  a game can assign icons at runtime (the demo ships an example flat icon set; the engine ships none). Ships with seven default stats (health/energy/hunger/thirst/fatigue/blood/
   poison), tunable **without code** via a `SurvivalStatsConfig` Configuration instance (or, for
   developers, `Config.override("SurvivalStats", …)` / `Stats.defineStat`). Works out of the box
   for every distribution — the demo/Rojo source mount it, the drop-in `.rbxm` auto-installs it

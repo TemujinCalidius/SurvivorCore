@@ -219,9 +219,12 @@ function Hud.start(_options: { [string]: any }?)
 		end
 
 		local connection = localPlayer:GetAttributeChangedSignal(statName):Connect(render)
+		-- also re-render when the bar's own Icon is set at runtime (lets the game assign art live)
+		local iconConn = bar:GetAttributeChangedSignal("Icon"):Connect(render)
 		renderers[bar] = render
 		bound[bar] = function()
 			connection:Disconnect()
+			iconConn:Disconnect()
 		end
 		render()
 	end
@@ -248,9 +251,11 @@ function Hud.start(_options: { [string]: any }?)
 		end
 
 		local connection = localPlayer:GetAttributeChangedSignal(counterName):Connect(render)
+		local iconConn = element:GetAttributeChangedSignal("Icon"):Connect(render)
 		renderers[element] = render
 		bound[element] = function()
 			connection:Disconnect()
+			iconConn:Disconnect()
 		end
 		render()
 	end
