@@ -109,6 +109,11 @@ Interact with the prompt to see the component + hook flow. The boot script is
 
 ## Next steps
 
+- **[Survival Stats + HUD](survival-stats.md)** — the built-in stat simulation and HUD, and how to
+  tune it with no code.
+- **[Survival Stats admin plugin](admin-plugin.md)** — a Studio form for tuning the stats. It's
+  editor tooling, so it installs **separately** from the engine sync (build it once into your Studio
+  plugins folder) — see its Install section.
 - **[Extending SurvivorCore](extending.md)** — the `register()` API, the component/attribute
   model, and Hooks.
 - **[Architecture](architecture.md)** — how the layers fit together.

@@ -6,16 +6,38 @@ It's the first slice of the [Builder / Admin plugin](https://github.com/TemujinC
 
 ## Install
 
-Build it straight into your Studio plugins folder, then restart Studio:
+> **This is a Studio editor tool, not game content — so syncing the engine does _not_ install it.**
+> A Rojo sync (or the drop-in `SurvivorCore.rbxm`) populates a *place's* `ReplicatedStorage`. The
+> plugin is different: it lives in Studio's **local plugins folder** and runs in the editor across
+> every place you open. You install it **once**, separately from any place.
+
+Build it straight into your local plugins folder:
 
 ```bash
 rojo build plugin.project.json --plugin SurvivorCoreStatAdmin.rbxm
 ```
 
-(Or build to a file — `rojo build plugin.project.json -o SurvivorCoreStatAdmin.rbxm` — and drop it
-into the local Plugins folder yourself: Studio → **Plugins** tab → **Plugins Folder**.)
+The `--plugin` flag writes the built model into Studio's plugins folder for you:
 
-A **SurvivorCore › Survival Stats** button appears in the toolbar; click it to toggle the dock widget.
+| OS | Plugins folder |
+|---|---|
+| macOS | `~/Documents/Roblox/Plugins/` |
+| Windows | `%LOCALAPPDATA%\Roblox\Plugins\` |
+
+(Prefer to place it by hand? Build to a file instead — `rojo build plugin.project.json -o
+SurvivorCoreStatAdmin.rbxm` — and drop it into that folder, or open it from Studio → **Plugins** tab
+→ **Plugins Folder**.)
+
+Then **restart Studio** — a brand-new plugin's toolbar only registers when Studio loads it. (After
+this first install, re-running the `--plugin` build hot-reloads the plugin live, no restart needed.)
+A **SurvivorCore › Survival Stats** button then appears on the **Plugins** ribbon tab; click it to
+toggle the dock widget.
+
+> **Open a place that has the engine in it.** The plugin tunes the stats of whatever place is open,
+> reading the live roster from `ReplicatedStorage.SurvivorCore` — so sync the engine (or drop in
+> `SurvivorCore.rbxm`) first. With no engine present it opens to an instructional empty state and
+> writes nothing. Note that restarting Studio drops an *unsaved* Rojo-synced place, so reconnect
+> Rojo and re-sync (or save the place before restarting) to bring the engine back.
 
 ## Using it
 

@@ -69,6 +69,9 @@ end)
 - **Drop-in** — grab `SurvivorCore.rbxm` from a [Release](../../releases) (auto-built from
   source via `rojo build`), drop it into `ReplicatedStorage`, and add a short bootstrap
   script that `require`s it and calls `.start()`.
+- **Tuning, no code** — owners can adjust the survival stats from a Studio form with the
+  [Survival Stats admin plugin](docs/admin-plugin.md). It's editor tooling, so it installs
+  separately from the engine (built once into your Studio plugins folder).
 
 ## Project layout
 
