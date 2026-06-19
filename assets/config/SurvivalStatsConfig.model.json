@@ -9,8 +9,6 @@
         "Max": 100,
         "Start": 100,
         "WarnAt": 25,
-        "DangerHigh": false,
-        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"
@@ -24,8 +22,6 @@
         "Max": 100,
         "Start": 100,
         "WarnAt": 25,
-        "DangerHigh": false,
-        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"
@@ -39,8 +35,6 @@
         "Max": 100,
         "Start": 0,
         "WarnAt": 25,
-        "DangerHigh": true,
-        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"
@@ -54,8 +48,6 @@
         "Max": 100,
         "Start": 0,
         "WarnAt": 25,
-        "DangerHigh": true,
-        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"
@@ -69,8 +61,6 @@
         "Max": 100,
         "Start": 0,
         "WarnAt": 25,
-        "DangerHigh": true,
-        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"
@@ -84,8 +74,6 @@
         "Max": 100,
         "Start": 0,
         "WarnAt": 25,
-        "DangerHigh": true,
-        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"
@@ -99,8 +87,6 @@
         "Max": 100,
         "Start": 100,
         "WarnAt": 25,
-        "DangerHigh": false,
-        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"

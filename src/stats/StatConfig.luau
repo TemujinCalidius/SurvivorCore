@@ -21,14 +21,17 @@ local StatConfig = {}
 StatConfig.CONFIG_SECTION = "SurvivalStats"
 StatConfig.CONFIG_INSTANCE_NAME = "SurvivalStatsConfig"
 
--- Attribute name on the Studio Configuration child -> resolved field name.
+-- Attribute name on the Studio Configuration child -> resolved field name. Only OWNER-tunable
+-- knobs live here. Stat *semantics* — `invert` (fill direction) and `dangerHigh` (which end is
+-- bad) — are engine-owned and deliberately NOT overridable from the instance, so a stale or
+-- place-saved instance can never freeze them to a wrong value across an engine update (the bug
+-- where Poison/Hunger filled the wrong way). For a one-off display flip, set the per-bar
+-- `Invert` attribute on the HUD bar itself instead.
 local STUDIO_ATTR_MAP = {
 	RatePerSecond = "ratePerSecond",
 	Max = "max",
 	Start = "start",
 	WarnAt = "warnAt",
-	Invert = "invert",
-	DangerHigh = "dangerHigh",
 	Display = "display",
 	Icon = "icon",
 	ValueFormat = "valueFormat",
