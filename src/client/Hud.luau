@@ -47,7 +47,8 @@ local HUD_NAME = "SurvivalHud"
 local FALLBACK_WAIT = 1 -- seconds to wait for an authored HUD before building the fallback
 local DEFAULT_WARN_COLOR = Color3.fromRGB(200, 40, 40)
 local DEFAULT_VALUE_FORMAT = "fraction"
-local ICON_CATEGORY = "StatIcons" -- Assets category an owner can populate (key = stat name)
+local ICON_CATEGORY = "StatIcons" -- Assets category an owner can populate (key = stat / counter name)
+local COUNTER_ATTR = "Counter" -- a bar-less readout (e.g. credits): GuiObject + `Counter` attribute
 
 -- Collapse-control discovery (attribute primary, CollectionService tag as a rename-proof
 -- fallback the owner can apply in Studio; the shipped template uses attributes only).
@@ -85,6 +86,19 @@ local function resolveIcon(bar: Instance, statName: string, def: any): string
 		return def.icon
 	end
 	return Assets.tryGet(ICON_CATEGORY, statName) -- silent: "" when unregistered
+end
+
+-- Format a counter (e.g. credits) as a grouped integer like "1,234".
+local function formatCounter(value: any): string
+	local n = if typeof(value) == "number" then math.floor(value + 0.5) else 0
+	local digits = tostring(math.abs(n))
+	local grouped = ""
+	while #digits > 3 do
+		grouped = "," .. string.sub(digits, -3) .. grouped
+		digits = string.sub(digits, 1, -4)
+	end
+	grouped = digits .. grouped
+	return if n < 0 then "-" .. grouped else grouped
 end
 
 local Hud = {}
@@ -166,7 +180,16 @@ function Hud.start(_options: { [string]: any }?)
 			if typeof(value) == "number" and max > 0 then
 				ratio = math.clamp(value / max, 0, 1)
 			end
+			local dangerHigh = bar:GetAttribute("DangerHigh")
+			if dangerHigh == nil then
+				dangerHigh = (def and def.dangerHigh) or false
+			end
+			-- Fill shows the RAW value by default (empty at 0), so an affliction like
+			-- Hunger/Poison fills UP as it worsens; `invert` flips it for a depleting look.
 			local fillRatio = if invert then 1 - ratio else ratio
+			-- Warn keys off how close the RAW value is to its dangerous end: resources
+			-- (Health/Blood) are dangerous LOW, afflictions (Hunger/Poison) dangerous HIGH.
+			local dangerRatio = if dangerHigh then ratio else 1 - ratio
 
 			local size = fillObject.Size
 			if axis == "Y" then
@@ -174,7 +197,7 @@ function Hud.start(_options: { [string]: any }?)
 			else
 				fillObject.Size = UDim2.new(fillRatio, 0, size.Y.Scale, size.Y.Offset)
 			end
-			setColor(if fillRatio * 100 < warnAt then warnColor else normalColor)
+			setColor(if dangerRatio * 100 >= 100 - warnAt then warnColor else normalColor)
 
 			-- Numeric readout (optional `Value` TextLabel). Uses the RAW value, not the
 			-- inverted fill — owners expect "99/100" to mean the real attribute.
@@ -203,11 +226,47 @@ function Hud.start(_options: { [string]: any }?)
 		render()
 	end
 
+	-- A counter is a bar-less readout (e.g. credits): a GuiObject with a `Counter`
+	-- attribute (the Player attribute to show) and a `Value` TextLabel (+ optional `Icon`).
+	local function bindCounter(element: Instance)
+		local counterName = element:GetAttribute(COUNTER_ATTR)
+		if typeof(counterName) ~= "string" or counterName == "" then
+			return
+		end
+		local valueLabel = element:FindFirstChild("Value")
+		local iconLabel = element:FindFirstChild("Icon")
+
+		local function render()
+			if valueLabel and valueLabel:IsA("TextLabel") then
+				valueLabel.Text = formatCounter(localPlayer:GetAttribute(counterName))
+			end
+			if iconLabel and (iconLabel:IsA("ImageLabel") or iconLabel:IsA("ImageButton")) then
+				local imageId = resolveIcon(element, counterName, nil);
+				(iconLabel :: ImageLabel).Image = imageId;
+				(iconLabel :: GuiObject).Visible = imageId ~= ""
+			end
+		end
+
+		local connection = localPlayer:GetAttributeChangedSignal(counterName):Connect(render)
+		renderers[element] = render
+		bound[element] = function()
+			connection:Disconnect()
+		end
+		render()
+	end
+
 	local function tryBind(bar: Instance)
 		if bound[bar] or not bar:IsA("GuiObject") or not bar:IsDescendantOf(playerGui) then
 			return
 		end
 		bindBar(bar)
+	end
+
+	local function tryBindCounter(element: Instance)
+		if bound[element] or not element:IsA("GuiObject") or not element:IsDescendantOf(playerGui) then
+			return
+		end
+		bindCounter(element)
 	end
 
 	dedupeHuds(playerGui)
@@ -216,6 +275,10 @@ function Hud.start(_options: { [string]: any }?)
 	-- template marks them) OR tagged `SurvivorStatBar` (for the Builder UI / fallback).
 	local function isBar(instance: Instance): boolean
 		return instance:IsA("GuiObject") and instance:GetAttribute("Stat") ~= nil
+	end
+
+	local function isCounter(instance: Instance): boolean
+		return instance:IsA("GuiObject") and instance:GetAttribute(COUNTER_ATTR) ~= nil
 	end
 
 	-- A collapse toggle = a GuiButton with a `HudToggle` attribute (or tagged "HudToggle").
@@ -286,6 +349,8 @@ function Hud.start(_options: { [string]: any }?)
 	for _, instance in playerGui:GetDescendants() do
 		if isBar(instance) then
 			tryBind(instance)
+		elseif isCounter(instance) then
+			tryBindCounter(instance)
 		elseif isToggle(instance) then
 			wireToggle(instance)
 		end
@@ -293,6 +358,8 @@ function Hud.start(_options: { [string]: any }?)
 	playerGui.DescendantAdded:Connect(function(instance)
 		if isBar(instance) then
 			tryBind(instance)
+		elseif isCounter(instance) then
+			tryBindCounter(instance)
 		elseif isToggle(instance) then
 			wireToggle(instance)
 		end

@@ -9,6 +9,7 @@
         "Max": 100,
         "Start": 100,
         "WarnAt": 25,
+        "DangerHigh": false,
         "Invert": false,
         "Display": true,
         "Icon": "",
@@ -23,6 +24,7 @@
         "Max": 100,
         "Start": 100,
         "WarnAt": 25,
+        "DangerHigh": false,
         "Invert": false,
         "Display": true,
         "Icon": "",
@@ -37,7 +39,8 @@
         "Max": 100,
         "Start": 0,
         "WarnAt": 25,
-        "Invert": true,
+        "DangerHigh": true,
+        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"
@@ -51,7 +54,8 @@
         "Max": 100,
         "Start": 0,
         "WarnAt": 25,
-        "Invert": true,
+        "DangerHigh": true,
+        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"
@@ -65,20 +69,7 @@
         "Max": 100,
         "Start": 0,
         "WarnAt": 25,
-        "Invert": true,
-        "Display": true,
-        "Icon": "",
-        "ValueFormat": "fraction"
-      }
-    },
-    {
-      "className": "Configuration",
-      "name": "Blood",
-      "attributes": {
-        "RatePerSecond": 0.0,
-        "Max": 100,
-        "Start": 100,
-        "WarnAt": 25,
+        "DangerHigh": true,
         "Invert": false,
         "Display": true,
         "Icon": "",
@@ -93,7 +84,23 @@
         "Max": 100,
         "Start": 0,
         "WarnAt": 25,
-        "Invert": true,
+        "DangerHigh": true,
+        "Invert": false,
+        "Display": true,
+        "Icon": "",
+        "ValueFormat": "fraction"
+      }
+    },
+    {
+      "className": "Configuration",
+      "name": "Blood",
+      "attributes": {
+        "RatePerSecond": 0.0,
+        "Max": 100,
+        "Start": 100,
+        "WarnAt": 25,
+        "DangerHigh": false,
+        "Invert": false,
         "Display": true,
         "Icon": "",
         "ValueFormat": "fraction"

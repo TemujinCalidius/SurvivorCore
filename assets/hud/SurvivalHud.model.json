@@ -126,7 +126,7 @@
                 ],
                 [
                   0,
-                  18
+                  20
                 ]
               ]
             },
@@ -136,14 +136,14 @@
           },
           "children": [
             {
-              "className": "TextLabel",
-              "name": "Title",
+              "className": "Frame",
+              "name": "Credits",
               "properties": {
                 "Size": {
                   "UDim2": [
                     [
                       1,
-                      -22
+                      -24
                     ],
                     [
                       1,
@@ -164,19 +164,83 @@
                   ]
                 },
                 "BackgroundTransparency": 1,
-                "Text": "Status",
-                "TextColor3": {
-                  "Color3": [
-                    0.8235,
-                    0.8627,
-                    0.9608
-                  ]
+                "BorderSizePixel": 0
+              },
+              "attributes": {
+                "Counter": "Credits"
+              },
+              "children": [
+                {
+                  "className": "UIListLayout",
+                  "properties": {
+                    "FillDirection": "Horizontal",
+                    "VerticalAlignment": "Center",
+                    "Padding": {
+                      "UDim": [
+                        0,
+                        4
+                      ]
+                    },
+                    "SortOrder": "LayoutOrder"
+                  }
                 },
-                "TextSize": 12,
-                "Font": "GothamMedium",
-                "TextXAlignment": "Left",
-                "TextYAlignment": "Center"
-              }
+                {
+                  "className": "ImageLabel",
+                  "name": "Icon",
+                  "properties": {
+                    "Size": {
+                      "UDim2": [
+                        [
+                          0,
+                          16
+                        ],
+                        [
+                          0,
+                          16
+                        ]
+                      ]
+                    },
+                    "BackgroundTransparency": 1,
+                    "Image": "",
+                    "ScaleType": "Fit",
+                    "Visible": false,
+                    "LayoutOrder": 1
+                  }
+                },
+                {
+                  "className": "TextLabel",
+                  "name": "Value",
+                  "properties": {
+                    "Size": {
+                      "UDim2": [
+                        [
+                          0,
+                          0
+                        ],
+                        [
+                          1,
+                          0
+                        ]
+                      ]
+                    },
+                    "AutomaticSize": "X",
+                    "BackgroundTransparency": 1,
+                    "Text": "0",
+                    "TextColor3": {
+                      "Color3": [
+                        0.96,
+                        0.96,
+                        0.96
+                      ]
+                    },
+                    "TextSize": 13,
+                    "Font": "GothamMedium",
+                    "TextXAlignment": "Left",
+                    "TextYAlignment": "Center",
+                    "LayoutOrder": 2
+                  }
+                }
+              ]
             },
             {
               "className": "TextButton",

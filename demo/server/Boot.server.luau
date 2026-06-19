@@ -26,5 +26,16 @@ SurvivorCore.Hooks.on("gather:depleted", function(ctx)
 	print(("[demo] %s fully gathered %s"):format(ctx.player.Name, tostring(ctx.values.ItemId)))
 end)
 
+-- 3. The HUD shows a "Credits" counter; the game owns that value. Seed a sample so it
+--    renders in the demo (a real game sets player:SetAttribute("Credits", n) itself).
+local Players = game:GetService("Players")
+local function seedCredits(player: Player)
+	player:SetAttribute("Credits", 250)
+end
+for _, player in Players:GetPlayers() do
+	seedCredits(player)
+end
+Players.PlayerAdded:Connect(seedCredits)
+
 SurvivorCore.start()
 print("SurvivorCore demo booted — v" .. SurvivorCore.VERSION)
