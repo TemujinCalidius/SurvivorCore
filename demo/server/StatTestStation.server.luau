@@ -20,6 +20,12 @@ local SurvivorCore = require(ReplicatedStorage:WaitForChild("SurvivorCore"))
 local POISON_SOURCE = "TestStation:poison"
 local BLEED_SOURCE = "TestStation:bleed"
 
+-- Exaggerated rates so effects are visible in seconds — the realistic ~1h defaults live in the
+-- Consequences config for real gameplay. STARVE/DEHYDRATE jump the need to max so you can test
+-- the starving/dehydrated consequences without waiting the real 8 hours.
+local TEST_POISON_RATE = 25 -- Poison/s → ~100% in ~4s
+local TEST_BLEED_RATE = 10 -- Blood/s → bled out in ~10s
+
 local function stats()
 	return SurvivorCore.Stats
 end
@@ -42,6 +48,13 @@ local STATIONS = {
 		end,
 	},
 	{
+		label = "STARVE  (Hunger -> max)",
+		color = Color3.fromRGB(150, 90, 40),
+		action = function(player)
+			stats().adjust(player, "Hunger", 100) -- clamps to max → starving
+		end,
+	},
+	{
 		label = "DRINK  (Thirst -40)",
 		color = Color3.fromRGB(70, 140, 220),
 		action = function(player)
@@ -49,11 +62,17 @@ local STATIONS = {
 		end,
 	},
 	{
-		label = "POISON  (start)",
+		label = "DEHYDRATE  (Thirst -> max)",
+		color = Color3.fromRGB(40, 80, 140),
+		action = function(player)
+			stats().adjust(player, "Thirst", 100) -- clamps to max → dehydrated
+		end,
+	},
+	{
+		label = "POISON  (fast)",
 		color = Color3.fromRGB(120, 190, 70),
 		action = function(player)
-			stats().adjust(player, "Poison", 5)
-			stats().addModifier(player, "Poison", { ratePerSecond = 8, source = POISON_SOURCE })
+			stats().addModifier(player, "Poison", { ratePerSecond = TEST_POISON_RATE, source = POISON_SOURCE })
 		end,
 	},
 	{
@@ -64,10 +83,10 @@ local STATIONS = {
 		end,
 	},
 	{
-		label = "BLEED  (start)",
+		label = "BLEED  (fast)",
 		color = Color3.fromRGB(130, 20, 20),
 		action = function(player)
-			stats().addModifier(player, "Blood", { ratePerSecond = -6, source = BLEED_SOURCE })
+			stats().addModifier(player, "Blood", { ratePerSecond = -TEST_BLEED_RATE, source = BLEED_SOURCE })
 		end,
 	},
 	{

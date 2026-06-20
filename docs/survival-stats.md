@@ -22,10 +22,10 @@ is tunable, and the HUD is a real ScreenGui you restyle in Studio with **zero co
 |---|---|---|---|
 | Health | 100 | no (0 = bad) | real character health (death + respawn); HUD-synced |
 | Energy | 100 | no (0 = bad) | sprint/jump drain, regen at rest ([Sprint](#sprint-jump--energy)) |
-| Hunger | 0 | **yes** (100 = starving) | rises over ~30 min; maxed → drains health |
-| Thirst | 0 | **yes** (100 = dehydrated) | rises over ~20 min; maxed → drains health |
-| Fatigue | 0 | **yes** (100 = exhausted) | rises over ~60 min; maxed → blocks energy regen |
-| Poison | 0 | **yes** (100 = bad) | drains health while poisoned (scaled) |
+| Hunger | 0 | **yes** (100 = starving) | rises over ~8 h; maxed → drains health |
+| Thirst | 0 | **yes** (100 = dehydrated) | rises over ~8 h; maxed → drains health |
+| Fatigue | 0 | **yes** (100 = exhausted) | rises over ~24 h; maxed → blocks energy regen |
+| Poison | 0 | **yes** (100 = bad) | drains health **at 100%** |
 | Blood | 100 | no (0 = death) | bleeds while wounded; 0 → bleed out → death |
 
 > Starving/dehydrated/fatigued also **stop energy regenerating**. See
@@ -145,10 +145,10 @@ so death + Roblox respawn happen naturally:
 
 | Condition | Effect |
 |---|---|
-| **Starving** — Hunger at max | drains health (`0.5`/s) **+ stops energy regen** |
-| **Dehydrated** — Thirst at max | drains health (`1.0`/s) **+ stops energy regen** |
+| **Starving** — Hunger at max | drains health (~8 h to die) **+ stops energy regen** |
+| **Dehydrated** — Thirst at max | drains health (~8 h to die; both at once → ~4 h) **+ stops energy regen** |
 | **Fatigued** — Fatigue at max | **stops energy regen** |
-| **Poisoned** — Poison > 0 | drains health, scaled by level (`2.0`/s at 100%) |
+| **Poisoned** — Poison at 100% | drains health (`1.0`/s) — only once fully poisoned |
 | **Bled out** — Blood at 0 | drains health fast (`3.0`/s) — you bleed out and die |
 
 Energy refusing to regen while starving/dehydrated/fatigued holds **even after the post-sprint
@@ -156,7 +156,8 @@ delay** — a depleted player stays depleted until they address the cause.
 
 ```lua
 SurvivorCore.Config.override("Consequences", {
-    HealthDrainPerSecond = { Starving = 0.5, Dehydrated = 1.0, BledOut = 3.0, PoisonAtMax = 2.0 },
+    HealthDrainPerSecond = { Starving = 100 / (8 * 3600), Dehydrated = 100 / (8 * 3600), PoisonAtMax = 1.0, BledOut = 3.0 },
+    Affliction = { BleedRatePerSecond = 100 / 3600, PoisonRatePerSecond = 100 / 3600 }, -- ~1h each
 })
 ```
 

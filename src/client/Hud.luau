@@ -35,6 +35,7 @@ local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 
 assert(RunService:IsClient(), "SurvivorCore HUD is client-only — boot it via SurvivorCore.startClient()")
 
@@ -125,6 +126,21 @@ function Hud.start(_options: { [string]: any }?)
 		return
 	end
 	started = true
+
+	-- The engine ships its own Health bar, so hide Roblox's built-in top-right health GUI
+	-- (it pops in whenever the character takes damage). Retry briefly — CoreGui can refuse
+	-- the call in the first frames of a session.
+	task.spawn(function()
+		for _ = 1, 10 do
+			local ok = pcall(function()
+				StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
+			end)
+			if ok then
+				break
+			end
+			task.wait(0.2)
+		end
+	end)
 
 	local localPlayer = Players.LocalPlayer
 	local playerGui = localPlayer:WaitForChild("PlayerGui")

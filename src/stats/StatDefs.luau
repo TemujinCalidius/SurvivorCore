@@ -31,15 +31,16 @@ export type StatDef = {
 
 local StatDefs = {}
 
--- Reach `max` (from 0) in N minutes — readable way to express drift rates.
-local function perMinutes(minutes: number): number
-	return 100 / (minutes * 60)
+-- Reach `max` (from 0) in N hours — the survival needs drift slowly over a play session.
+local function perHours(hours: number): number
+	return 100 / (hours * 3600)
 end
 
 -- The shipped defaults. Numbers + default icons ported from The Counter Earth.
 -- Hunger/Thirst/Fatigue/Poison start at 0 and rise toward 100 = bad (`dangerHigh = true`,
 -- so their bars fill up as they worsen). Health/Energy/Blood are resources (`dangerHigh =
--- false`: 0 = bad). Health/Energy are display-only here (drain/regen + consequences = #5/#6).
+-- false`: 0 = bad). Energy is driven by the Movement system (sprint/jump/regen); Health by
+-- the SurvivalConsequences system (synced to the character + drained by starve/poison/bleed).
 StatDefs.DEFAULTS = {
 	{
 		name = "Health",
@@ -67,7 +68,7 @@ StatDefs.DEFAULTS = {
 		name = "Hunger",
 		start = 0,
 		max = 100,
-		ratePerSecond = perMinutes(30),
+		ratePerSecond = perHours(8), -- ~8h of play to fully starve
 		dangerHigh = true,
 		invert = false,
 		warnAt = 25,
@@ -78,7 +79,7 @@ StatDefs.DEFAULTS = {
 		name = "Thirst",
 		start = 0,
 		max = 100,
-		ratePerSecond = perMinutes(20),
+		ratePerSecond = perHours(8), -- ~8h of play to fully dehydrate
 		dangerHigh = true,
 		invert = false,
 		warnAt = 25,
@@ -89,7 +90,7 @@ StatDefs.DEFAULTS = {
 		name = "Fatigue",
 		start = 0,
 		max = 100,
-		ratePerSecond = perMinutes(60),
+		ratePerSecond = perHours(24), -- ~24h of play to fully fatigue
 		dangerHigh = true,
 		invert = false,
 		warnAt = 25,

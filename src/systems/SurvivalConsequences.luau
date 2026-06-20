@@ -131,11 +131,9 @@ function SurvivalConsequences.start(_options: { [string]: any }?)
 				perSecond += drains.Dehydrated
 			end
 
-			-- Poison drains proportionally to how poisoned you are (full rate at 100%).
-			local poison = SurvivalStats.getValue(player, "Poison")
-			local poisonDef = SurvivalStats.getDefinition("Poison")
-			if poison and poisonDef and poisonDef.max > 0 and poison > 0 then
-				perSecond += (poison / poisonDef.max) * drains.PoisonAtMax
+			-- Poison only drains health once it's maxed out (no partial-poison chip damage).
+			if isAtMax(player, "Poison") then
+				perSecond += drains.PoisonAtMax
 			end
 
 			-- Blood is a resource (0 = empty) — at 0 you're bleeding out.
