@@ -26,7 +26,7 @@ jobs:
         uses: CompeyDev/setup-rokit@v0.1.2
 
       - name: StyLua (format check)
-        run: stylua --check src demo
+        run: stylua --check src demo assets plugin
 
       - name: Selene (lint)
         run: selene .
@@ -49,11 +49,22 @@ jobs:
             --ignore "Packages/**" \
             --ignore "DevPackages/**" \
             --ignore "ServerPackages/**" \
-            src demo
+            src demo assets/client
 
-      # Prove both Rojo targets build: the drop-in engine model and the runnable demo place.
+      # The Studio admin plugin is a separate Rojo tree (its requires resolve against its own
+      # sourcemap, not the demo's), so analyze it with the plugin sourcemap.
+      - name: Generate plugin sourcemap
+        run: rojo sourcemap plugin.project.json --output plugin-sourcemap.json
+
+      - name: luau-lsp (plugin)
+        run: luau-lsp analyze --sourcemap plugin-sourcemap.json --defs globalTypes.d.luau --no-strict-dm-types plugin
+
+      # Prove every Rojo target builds: the drop-in engine model, the demo place, the plugin.
       - name: Build engine model (default.project.json)
         run: rojo build default.project.json --output SurvivorCore.rbxm
 
       - name: Build demo place (demo.project.json)
         run: rojo build demo.project.json --output demo.rbxl
+
+      - name: Build admin plugin (plugin.project.json)
+        run: rojo build plugin.project.json --output SurvivorCoreStatAdmin.rbxm

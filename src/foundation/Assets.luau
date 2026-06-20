@@ -31,4 +31,16 @@ function Assets.get(category: string, key: string): string
 	return id
 end
 
+-- Like `get` but SILENT: returns "" for a missing/empty asset without warning.
+-- Use it on hot paths (e.g. the HUD resolving an optional per-stat icon every render)
+-- where a missing id is an expected, non-error case.
+function Assets.tryGet(category: string, key: string): string
+	local cat = store[category]
+	local id = cat and cat[key]
+	if typeof(id) == "string" then
+		return id
+	end
+	return ""
+end
+
 return Assets

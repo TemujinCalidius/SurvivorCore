@@ -2,8 +2,8 @@
 # Uses the Roblox standard library (globals like `game`, `task`, `typeof`, `warn`).
 std = "roblox"
 
-# Generated Wally/Rojo artifacts are not ours to lint.
-exclude = ["Packages", "ServerPackages", "DevPackages"]
+# Generated Wally/Rojo artifacts (and the CI-fetched Roblox type defs) are not ours to lint.
+exclude = ["Packages", "ServerPackages", "DevPackages", "globalTypes.d.luau"]
 
 [lints]
 # Roblox code legitimately leaves some values unused (e.g. connection handles);
