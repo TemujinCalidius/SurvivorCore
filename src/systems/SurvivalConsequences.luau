@@ -36,6 +36,19 @@ local TICK_INTERVAL = 0.1 -- 10 Hz, matching the rest of the survival sim
 local started = false
 
 local humanoids: { [Player]: Humanoid } = {}
+local connections: { [Player]: { RBXScriptConnection } } = {}
+
+-- Release a player's previous-character connections (mirrors Movement; defensive even though
+-- Roblox auto-disconnects on character destroy).
+local function dropConnections(player: Player)
+	local conns = connections[player]
+	if conns then
+		for _, conn in conns do
+			conn:Disconnect()
+		end
+	end
+	connections[player] = nil
+end
 
 local function isAtMax(player: Player, name: string): boolean
 	local def = SurvivalStats.getDefinition(name)
@@ -53,19 +66,23 @@ local function setupCharacter(player: Player, character: Model)
 		return
 	end
 
+	dropConnections(player)
+
 	-- Fresh body: clear injuries/afflictions + modifiers so nothing carries across death.
 	SurvivalStats.resetPlayer(player)
 
 	humanoids[player] = humanoid
 	syncHealth(player, humanoid)
-	humanoid.HealthChanged:Connect(function()
-		syncHealth(player, humanoid)
-	end)
-	humanoid.Died:Connect(function()
-		if humanoids[player] == humanoid then
-			humanoids[player] = nil
-		end
-	end)
+	connections[player] = {
+		humanoid.HealthChanged:Connect(function()
+			syncHealth(player, humanoid)
+		end),
+		humanoid.Died:Connect(function()
+			if humanoids[player] == humanoid then
+				humanoids[player] = nil
+			end
+		end),
+	}
 end
 
 local function addPlayer(player: Player)
@@ -87,6 +104,7 @@ function SurvivalConsequences.start(_options: { [string]: any }?)
 	Players.PlayerAdded:Connect(addPlayer)
 	Players.PlayerRemoving:Connect(function(player)
 		humanoids[player] = nil
+		dropConnections(player)
 	end)
 
 	local accumulator = 0
