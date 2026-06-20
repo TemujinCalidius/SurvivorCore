@@ -8,6 +8,13 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
 ## Unreleased
 
 ### Added
+- **Survival consequences** — stats now bite back (server-authoritative, all tunable via the
+  `Consequences` Config section): **starving** (Hunger maxed) and **dehydrated** (Thirst maxed)
+  drain health; **poison** drains health scaled by its level; **Blood at 0 → bleed out → death**.
+  Health drains stack and reduce real character health, so death + respawn happen naturally.
+  **Energy stops regenerating** while starving, dehydrated, or fully fatigued (even after the
+  post-sprint delay). The engine now syncs the **Health** stat to the character Humanoid (the HUD
+  bar reflects real damage) and **resets all stats + clears modifiers on respawn** (no death-loop).
 - **Sprinting, jumping & energy** — hold **Shift** to sprint (server-authoritative): it drains
   the Energy stat, speeds you up, and forces an exhausted crawl at 0 energy; energy regenerates
   after a short idle delay. Jumps cost energy and are blocked below a threshold. Ships a low-stat

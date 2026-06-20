@@ -12,7 +12,6 @@
 	This is demo scaffolding, not engine code — it shows how a game would drive the API.
 ]]
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
@@ -128,34 +127,11 @@ local function buildStation(def: any, position: Vector3)
 	end)
 end
 
--- Mirror the live Humanoid's health into the "Health" stat attribute so the HUD Health bar
--- tracks damage and resets on respawn. Demo scaffolding — an engine-level Health↔Humanoid
--- sync is part of the consequence-system follow-on (see the respawn/loot issue).
-local function bindHealth(player: Player)
-	local function onCharacter(character: Model)
-		local humanoid = character:WaitForChild("Humanoid", 10)
-		if not humanoid or not humanoid:IsA("Humanoid") then
-			return
-		end
-		local function sync()
-			player:SetAttribute("Health", math.max(0, math.round(humanoid.Health)))
-		end
-		sync()
-		humanoid.HealthChanged:Connect(sync)
-	end
-	player.CharacterAdded:Connect(onCharacter)
-	if player.Character then
-		onCharacter(player.Character)
-	end
-end
+-- (The engine syncs the "Health" stat to the Humanoid + resets stats on respawn now, so the
+-- DAMAGE part's real damage shows on the HUD and death/respawn comes out clean on its own.)
 
 local BASE = Vector3.new(0, 4, -16)
 for i, def in STATIONS do
 	local x = (i - (#STATIONS + 1) / 2) * 4
 	buildStation(def, BASE + Vector3.new(x, 0, 0))
 end
-
-for _, player in Players:GetPlayers() do
-	bindHealth(player)
-end
-Players.PlayerAdded:Connect(bindHealth)

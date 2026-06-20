@@ -18,19 +18,18 @@ is tunable, and the HUD is a real ScreenGui you restyle in Studio with **zero co
 
 ## The default stats
 
-| Stat | Start | Rises to bad? | Behaviour in this version |
+| Stat | Start | Rises to bad? | Behaviour |
 |---|---|---|---|
-| Health | 100 | no (0 = bad) | display-only |
-| Energy | 100 | no (0 = bad) | display-only |
-| Hunger | 0 | **yes** (100 = starving) | rises over ~30 min |
-| Thirst | 0 | **yes** (100 = dehydrated) | rises over ~20 min |
-| Fatigue | 0 | **yes** (100 = exhausted) | rises over ~60 min |
-| Poison | 0 | **yes** (100 = bad) | inert until a poison source |
-| Blood | 100 | no (0 = death) | inert until a bleed source |
+| Health | 100 | no (0 = bad) | real character health (death + respawn); HUD-synced |
+| Energy | 100 | no (0 = bad) | sprint/jump drain, regen at rest ([Sprint](#sprint-jump--energy)) |
+| Hunger | 0 | **yes** (100 = starving) | rises over ~30 min; maxed → drains health |
+| Thirst | 0 | **yes** (100 = dehydrated) | rises over ~20 min; maxed → drains health |
+| Fatigue | 0 | **yes** (100 = exhausted) | rises over ~60 min; maxed → blocks energy regen |
+| Poison | 0 | **yes** (100 = bad) | drains health while poisoned (scaled) |
+| Blood | 100 | no (0 = death) | bleeds while wounded; 0 → bleed out → death |
 
-> Consequences (hunger/thirst draining energy, energy draining health, blood = 0 → death, …)
-> and the energy/movement coupling arrive in later versions. This version is the stat
-> simulation + HUD + tuning.
+> Starving/dehydrated/fatigued also **stop energy regenerating**. See
+> [Consequences](#consequences--when-stats-bite-back) for the full rules + tuning.
 
 Bar **fill direction is engine-owned**: a stat that's *dangerous when high* (Hunger, Thirst,
 Poison…) fills **up** as it worsens and sits empty when you're safe, while a resource (Health,
@@ -137,6 +136,35 @@ SurvivorCore.Config.override("Movement", {
 drops, and a **heartbeat** loop fades in below `Health.HeartbeatStartRatio` (40%) of health. The
 engine ships default art for these (overridable under `Movement.Assets` / the audio + ratio knobs
 in the same section). It boots automatically from `SurvivorCore.startClient()`.
+
+## Consequences — when stats bite back
+
+Letting a stat reach its dangerous extreme now has teeth (server-authoritative, all rates in the
+`Consequences` Config section). Health drains **stack** and reduce the character's **real** health,
+so death + Roblox respawn happen naturally:
+
+| Condition | Effect |
+|---|---|
+| **Starving** — Hunger at max | drains health (`0.5`/s) **+ stops energy regen** |
+| **Dehydrated** — Thirst at max | drains health (`1.0`/s) **+ stops energy regen** |
+| **Fatigued** — Fatigue at max | **stops energy regen** |
+| **Poisoned** — Poison > 0 | drains health, scaled by level (`2.0`/s at 100%) |
+| **Bled out** — Blood at 0 | drains health fast (`3.0`/s) — you bleed out and die |
+
+Energy refusing to regen while starving/dehydrated/fatigued holds **even after the post-sprint
+delay** — a depleted player stays depleted until they address the cause.
+
+```lua
+SurvivorCore.Config.override("Consequences", {
+    HealthDrainPerSecond = { Starving = 0.5, Dehydrated = 1.0, BledOut = 3.0, PoisonAtMax = 2.0 },
+})
+```
+
+The engine keeps the **Health** stat in sync with the character's Humanoid (so the HUD Health bar
+reflects real damage), and on every (re)spawn **resets all stats and clears modifiers** — a fresh
+body, so injuries never carry across death. Drive poison/bleeding from gameplay with the
+[dynamic effects](#dynamic-effects--poison-bleeding-sprint-drain-server) API; persistence + a
+loot-on-death flow are tracked in [issue #19](https://github.com/TemujinCalidius/SurvivorCore/issues/19).
 
 ## The HUD — restyle it freely
 

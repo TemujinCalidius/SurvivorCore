@@ -51,6 +51,18 @@ local function energyOf(player: Player): number
 	return SurvivalStats.getValue(player, "Energy") or 0
 end
 
+-- Energy refuses to regenerate while a survival need is at its dangerous extreme: starving
+-- (Hunger maxed), dehydrated (Thirst maxed) or fully fatigued (Fatigue maxed) — this overrides
+-- the normal post-exertion regen, so a depleted player stays depleted until they recover.
+local function regenBlocked(player: Player): boolean
+	local function atMax(name: string): boolean
+		local def = SurvivalStats.getDefinition(name)
+		local value = SurvivalStats.getValue(player, name)
+		return def ~= nil and value ~= nil and value >= def.max
+	end
+	return atMax("Hunger") or atMax("Thirst") or atMax("Fatigue")
+end
+
 local function setWalkSpeed(state: State, speed: number)
 	local humanoid = state.humanoid
 	if not humanoid then
@@ -228,6 +240,7 @@ function Movement.start(_options: { [string]: any }?)
 			elseif
 				not moving
 				and not swimming
+				and not regenBlocked(player)
 				and os.clock() - state.lastEnergyUseTime >= c.Energy.RegenDelaySeconds
 			then
 				SurvivalStats.adjust(player, "Energy", c.Energy.RegenPerSecond * step)

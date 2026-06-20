@@ -29,6 +29,10 @@ require(script.stats.StatDefs)
 -- sides, so Config.override("Movement", …) works any time before start()/startClient().
 require(script.shared.MovementConfig)
 
+-- Define the "Consequences" Config section (stat → health-drain tuning), so
+-- Config.override("Consequences", …) works any time before start().
+require(script.shared.ConsequenceConfig)
+
 local SurvivorCore = {}
 
 SurvivorCore.VERSION = "0.1.0"
@@ -83,6 +87,10 @@ function SurvivorCore.start(_options: { [string]: any }?)
 
 	-- Movement: server-authoritative sprint/jump/energy (creates the SprintIntent RemoteEvent).
 	require(script.systems.Movement).start(_options)
+
+	-- Consequences: stats bite back (starve/dehydrate/poison/bleed → health → death) + the
+	-- Health↔Humanoid sync and fresh-body reset on respawn.
+	require(script.systems.SurvivalConsequences).start(_options)
 
 	return SurvivorCore
 end

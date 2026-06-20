@@ -150,6 +150,12 @@ function SurvivalStats.getValue(player: Player, name: string): number?
 	return if typeof(value) == "number" then value else nil
 end
 
+-- The merged stat definition (max / start / dangerHigh / …) for a stat, or nil if unknown.
+-- Lets other systems read a stat's range without re-resolving the config.
+function SurvivalStats.getDefinition(name: string): any
+	return statByName(name)
+end
+
 -- Apply a one-time signed delta to a stat (clamped to 0..max), returning the new value.
 -- Use for hits, costs and consumption — a poison dart `adjust(plr, "Poison", 1)`, a jump's
 -- energy cost `adjust(plr, "Energy", -4)`, eating `adjust(plr, "Hunger", -30)`.
@@ -205,6 +211,18 @@ function SurvivalStats.removeModifier(player: Player, name: string, source: stri
 	if perStat then
 		perStat[source] = nil
 	end
+end
+
+-- Reset every stat to its start value and drop all active modifiers — a fresh body on
+-- (re)spawn, so injuries/afflictions don't carry across death (and can't death-loop).
+function SurvivalStats.resetPlayer(player: Player)
+	if not resolved then
+		return
+	end
+	for _, stat in resolved.stats do
+		player:SetAttribute(stat.attribute, stat.start)
+	end
+	modifiers[player] = nil
 end
 
 -- Sum the active modifiers for (player, stat), decrementing timed ones and dropping any
