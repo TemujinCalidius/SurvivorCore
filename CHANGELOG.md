@@ -8,6 +8,12 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
 ## Unreleased
 
 ### Added
+- **Dynamic stat effects** — a per-player, server-side modifier layer over the base rates, so
+  stats can be driven by events instead of only a constant drift. `SurvivorCore.Stats.adjust`
+  (one-time clamped delta), `addModifier` / `removeModifier` (named, optionally-timed rate
+  modifiers; effective rate = base + Σ active), and `getValue`. This is the foundation for poison
+  ticking until cured, bleeding until clotted, and sprint draining energy. Modifiers are dropped
+  when a player leaves. See [docs/survival-stats.md](docs/survival-stats.md).
 - **Survival-stats engine + built-in HUD** (#8, #2) — a server tick simulates per-stat
   drain/regen, stored as auto-replicating Player Attributes, and a reactive **top-left HUD**
   renders them (no RemoteEvents). The HUD is a real, designer-editable `SurvivalHud` ScreenGui

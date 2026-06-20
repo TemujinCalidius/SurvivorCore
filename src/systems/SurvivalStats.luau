@@ -30,6 +30,21 @@ local SurvivalStats = {}
 local started = false
 local resolved: any = nil -- cached StatConfig.resolve() result
 
+-- Per-player, per-stat runtime modifiers: a named rate delta (optionally timed) layered on
+-- top of a stat's base ratePerSecond. This is how DYNAMIC effects work — poison ticking up
+-- until cured, bleeding until clotted, sprint draining energy until you stop, furniture
+-- regen while seated. The effective tick rate = base + sum(active modifiers) per player.
+export type ModifierSpec = {
+	ratePerSecond: number, -- signed delta added to the stat's effective rate while active
+	source: string, -- stable key used to remove it later (e.g. "venom", "sprint", "cut#3")
+	duration: number?, -- optional seconds; nil = lasts until explicitly removed
+}
+
+type Modifier = { ratePerSecond: number, remaining: number? }
+
+-- modifiers[player][statName][source] = Modifier
+local modifiers: { [Player]: { [string]: { [string]: Modifier } } } = {}
+
 local function refresh()
 	resolved = StatConfig.resolve()
 end
@@ -114,6 +129,105 @@ function SurvivalStats.installHud()
 	end
 end
 
+-- ---------------------------------------------------------------------------
+-- Runtime stat operations (SERVER). The dynamic layer over the base rates:
+-- instant deltas + named, optionally-timed rate modifiers. Surfaced on
+-- SurvivorCore.Stats once start() has run (they act on live players).
+-- ---------------------------------------------------------------------------
+
+-- The merged (defaults → overrides) model for a stat, or nil if unknown / pre-start.
+local function statByName(name: string): any
+	return resolved and resolved.byName[name] or nil
+end
+
+-- Current value of a stat for a player (reads the backing Player Attribute), or nil.
+function SurvivalStats.getValue(player: Player, name: string): number?
+	local stat = statByName(name)
+	if not stat then
+		return nil
+	end
+	local value = player:GetAttribute(stat.attribute)
+	return if typeof(value) == "number" then value else nil
+end
+
+-- Apply a one-time signed delta to a stat (clamped to 0..max), returning the new value.
+-- Use for hits, costs and consumption — a poison dart `adjust(plr, "Poison", 1)`, a jump's
+-- energy cost `adjust(plr, "Energy", -4)`, eating `adjust(plr, "Hunger", -30)`.
+function SurvivalStats.adjust(player: Player, name: string, delta: number): number?
+	assert(typeof(player) == "Instance" and player:IsA("Player"), "Stats.adjust: player must be a Player")
+	local stat = statByName(name)
+	if not stat then
+		warn(`[SurvivorCore] Stats.adjust: unknown stat '{name}'`)
+		return nil
+	end
+	local current = player:GetAttribute(stat.attribute)
+	current = if typeof(current) == "number" then current else stat.start
+	local nextValue = math.clamp(current + delta, 0, stat.max)
+	player:SetAttribute(stat.attribute, nextValue)
+	return nextValue
+end
+
+-- Add (or replace) a named rate modifier on a stat for a player. While active it adds
+-- `ratePerSecond` to the stat's effective drift; remove it with removeModifier(source) or
+-- let `duration` lapse. Re-adding the same source replaces it (no implicit stacking).
+function SurvivalStats.addModifier(player: Player, name: string, spec: ModifierSpec)
+	assert(typeof(player) == "Instance" and player:IsA("Player"), "Stats.addModifier: player must be a Player")
+	assert(
+		typeof(spec) == "table" and typeof(spec.ratePerSecond) == "number",
+		"Stats.addModifier: spec.ratePerSecond (a number) is required"
+	)
+	assert(
+		typeof(spec.source) == "string" and spec.source ~= "",
+		"Stats.addModifier: spec.source (a stable key) is required"
+	)
+	if not statByName(name) then
+		warn(`[SurvivorCore] Stats.addModifier: unknown stat '{name}'`)
+		return
+	end
+	local perPlayer = modifiers[player]
+	if not perPlayer then
+		perPlayer = {}
+		modifiers[player] = perPlayer
+	end
+	local perStat = perPlayer[name]
+	if not perStat then
+		perStat = {}
+		perPlayer[name] = perStat
+	end
+	perStat[spec.source] = { ratePerSecond = spec.ratePerSecond, remaining = spec.duration }
+end
+
+-- Remove a modifier by its source key (no-op if absent) — an antidote
+-- `removeModifier(plr, "Poison", "venom")`, a bandage, or releasing the sprint key.
+function SurvivalStats.removeModifier(player: Player, name: string, source: string)
+	local perPlayer = modifiers[player]
+	local perStat = perPlayer and perPlayer[name]
+	if perStat then
+		perStat[source] = nil
+	end
+end
+
+-- Sum the active modifiers for (player, stat), decrementing timed ones and dropping any
+-- that have expired. Returns 0 when the player has none (the common case).
+local function sumModifiers(player: Player, name: string, step: number): number
+	local perPlayer = modifiers[player]
+	local perStat = perPlayer and perPlayer[name]
+	if not perStat then
+		return 0
+	end
+	local sum = 0
+	for source, mod in perStat do
+		sum += mod.ratePerSecond
+		if mod.remaining then
+			mod.remaining -= step
+			if mod.remaining <= 0 then
+				perStat[source] = nil
+			end
+		end
+	end
+	return sum
+end
+
 function SurvivalStats.start(_options: { [string]: any }?)
 	assert(not started, "SurvivalStats.start() called twice")
 	started = true
@@ -126,6 +240,9 @@ function SurvivalStats.start(_options: { [string]: any }?)
 		initPlayer(player)
 	end
 	Players.PlayerAdded:Connect(initPlayer)
+	Players.PlayerRemoving:Connect(function(player)
+		modifiers[player] = nil -- drop a leaver's modifiers so the table can't leak
+	end)
 
 	local accumulator = 0
 	RunService.Heartbeat:Connect(function(dt)
@@ -141,10 +258,13 @@ function SurvivalStats.start(_options: { [string]: any }?)
 
 		for _, player in Players:GetPlayers() do
 			for _, stat in resolved.stats do
-				if stat.ratePerSecond ~= 0 then
+				-- Effective rate = the stat's base drift + any active runtime modifiers
+				-- (poison/bleed/sprint/…). sumModifiers also expires timed ones.
+				local rate = stat.ratePerSecond + sumModifiers(player, stat.name, step)
+				if rate ~= 0 then
 					local current = player:GetAttribute(stat.attribute)
 					if typeof(current) == "number" then
-						local nextValue = math.clamp(current + stat.ratePerSecond * step, 0, stat.max)
+						local nextValue = math.clamp(current + rate * step, 0, stat.max)
 						if nextValue ~= current then
 							player:SetAttribute(stat.attribute, nextValue)
 						end

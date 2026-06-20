@@ -79,6 +79,40 @@ SurvivorCore.Stats.defineStat({
 **Precedence (last wins):** engine defaults → `Config.override` → the Studio `SurvivalStatsConfig`
 instance.
 
+## Dynamic effects — poison, bleeding, sprint drain (server)
+
+The config rates above are the stat's **constant baseline drift** (e.g. hunger always creeps up).
+But most survival behaviour is *event-driven and per-player*: a poison that ticks until you take an
+antidote, a cut that bleeds until you bandage it, sprinting that drains energy until you stop. Those
+aren't a static number — so the engine layers two **server-side** runtime operations on top of the
+baseline (available on `SurvivorCore.Stats` once `start()` has run):
+
+```lua
+-- one-time signed delta, clamped to 0..max (a hit, a cost, eating)
+SurvivorCore.Stats.adjust(player, "Poison", 1)          -- "you got 1 poison" → now 1/100
+SurvivorCore.Stats.adjust(player, "Hunger", -30)        -- ate food
+
+-- a named, optionally-timed rate modifier; effective tick rate = base + Σ(active modifiers)
+SurvivorCore.Stats.addModifier(player, "Poison", { ratePerSecond = 2, source = "venom" })
+SurvivorCore.Stats.removeModifier(player, "Poison", "venom")   -- antidote → ticking stops
+SurvivorCore.Stats.getValue(player, "Energy")           -- read the current value
+```
+
+So the patterns you'd expect fall out directly:
+
+| Scenario | Calls |
+|---|---|
+| Poisoned, ticks up to 100 | `adjust(+1)` then `addModifier("Poison", {ratePerSecond = 2, source = "venom"})` |
+| Antidote / it wears off | `removeModifier("Poison", "venom")`, or pass a `duration` so it auto-expires |
+| Cut bleeds out | `addModifier("Blood", {ratePerSecond = -1.5, source = "cut"})` |
+| Bandage / clot | `removeModifier("Blood", "cut")` |
+| Sprinting drains energy | `addModifier("Energy", {ratePerSecond = -drain, source = "sprint"})` while held |
+| Resting / furniture regen | a positive `Energy` modifier (per-furniture strength) |
+
+A modifier with the same `source` replaces the old one (no implicit stacking); a `duration` (seconds)
+makes it expire on its own; a player's modifiers are dropped when they leave. These are **server-only**
+(authoritative) — drive them from your gameplay code, never trust the client.
+
 ## The HUD — restyle it freely
 
 The HUD is the `SurvivalHud` ScreenGui in **StarterGui**. Restyle anything — colors, gradients,

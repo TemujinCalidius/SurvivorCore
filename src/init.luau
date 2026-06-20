@@ -63,7 +63,19 @@ function SurvivorCore.start(_options: { [string]: any }?)
 
 	-- Survival-stats simulation (server-only): ticks stats as Player Attributes and
 	-- installs the built-in HUD for drop-in consumers that haven't supplied their own.
-	require(script.systems.SurvivalStats).start(_options)
+	local survival = require(script.systems.SurvivalStats)
+	survival.start(_options)
+
+	-- Runtime stat operations become available once the sim is running. They act on live
+	-- players, so they're server-only (exposed here after start, not at require time):
+	--   SurvivorCore.Stats.adjust(player, "Poison", 1)              -- one-time delta
+	--   SurvivorCore.Stats.addModifier(player, "Poison", {ratePerSecond = 2, source = "venom"})
+	--   SurvivorCore.Stats.removeModifier(player, "Poison", "venom")
+	--   SurvivorCore.Stats.getValue(player, "Energy")
+	SurvivorCore.Stats.adjust = survival.adjust
+	SurvivorCore.Stats.addModifier = survival.addModifier
+	SurvivorCore.Stats.removeModifier = survival.removeModifier
+	SurvivorCore.Stats.getValue = survival.getValue
 
 	return SurvivorCore
 end
