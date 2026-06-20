@@ -35,7 +35,7 @@ require(script.shared.ConsequenceConfig)
 
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.1.0"
+SurvivorCore.VERSION = "0.2.0"
 
 -- Foundation
 SurvivorCore.Config = Config
