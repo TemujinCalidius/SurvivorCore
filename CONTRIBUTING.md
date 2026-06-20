@@ -56,6 +56,12 @@ components, hooks, and the foundation. See [Architecture Overview](#architecture
 > Working on the engine alone (not the demo)? `rojo serve default.project.json` mounts just
 > `src` as the `SurvivorCore` model.
 
+> **Studio + Rojo gotcha — restart before trusting a Play test.** When you change scripts during a
+> `rojo serve` session, Studio updates each script's `Source` in the Edit datamodel, but **Play
+> Solo can run cached old bytecode** — so your change silently doesn't take effect on Play. If a
+> fix isn't showing up, **restart Studio** (clears the script cache) and reconnect, or test from a
+> fresh build: `rojo build demo.project.json -o /tmp/demo.rbxlx` and open that file.
+
 ## Code Style
 
 - **Luau, typed where practical.** Use `--!strict` on new modules when the types are clean;
@@ -63,11 +69,14 @@ components, hooks, and the foundation. See [Architecture Overview](#architecture
 - **Formatting & linting are enforced by CI.** Before you push, run the same checks CI does
   (see [Making a Pull Request](#making-a-pull-request)). `stylua` owns formatting — don't
   hand-format around it.
-- **Never hardcode asset IDs in `.luau`.** Asset IDs are content. Register them through
-  `Assets` (`Assets.register("Sounds", "Harvest", "rbxassetid://…")`) and read them back, with
-  the empty-string fallback convention. The engine must contain **zero** concrete asset IDs.
-- **Keep the core content-free.** No concrete items, recipes, lore, world strings, or
-  instance-name string matches (`name == "campfire"`) in the engine. Content enters two ways:
+- **Default art is fine; keep it swappable.** Assets in this repo are free to use, so the engine
+  may ship free *default* art IDs (e.g. the HUD stat icons in `StatDefs`) — provided they stay
+  overridable (config / admin plugin / `Assets`) and never get buried in logic. For dynamic or
+  owner-supplied art, still route through the `Assets` registry
+  (`Assets.register("Sounds", "Harvest", "rbxassetid://…")`) with the empty-string fallback.
+- **Keep the core free of game-specific *design*.** No concrete items, recipes, lore, world
+  strings, or instance-name string matches (`name == "campfire"`) in the engine — free default
+  *art* is the one exception (above). Content enters two ways:
   - **Registries** — developers call `register()` from code (`Items`, `Recipes`, `Stats`,
     `Mobs`, …).
   - **Components** — creators tag their own objects and set Attributes (`Gatherable`, and the
@@ -110,17 +119,21 @@ published (which auto-posts to Discussions → Announcements).
    # git checkout -b docs/my-fix main        # documentation only
    ```
 3. **Implement your change.** Write clear, typed Luau. Add comments where the "why" isn't
-   obvious. Keep the engine content-free.
+   obvious. Keep the engine free of game-specific design (free default art is fine).
 4. **Test locally.** Play-test in Studio, then run the same checks CI does:
    ```bash
-   stylua --check src demo
+   stylua --check src demo assets plugin
    selene .
    rojo sourcemap demo.project.json --output sourcemap.json
    curl -fsSL -o globalTypes.d.luau https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.luau
    luau-lsp analyze --sourcemap sourcemap.json --defs globalTypes.d.luau --no-strict-dm-types \
-     --ignore "Packages/**" --ignore "DevPackages/**" --ignore "ServerPackages/**" src demo
+     --ignore "Packages/**" --ignore "DevPackages/**" --ignore "ServerPackages/**" src demo assets/client
+   # the admin plugin is a separate Rojo tree — analyze it with its own sourcemap
+   rojo sourcemap plugin.project.json --output plugin-sourcemap.json
+   luau-lsp analyze --sourcemap plugin-sourcemap.json --defs globalTypes.d.luau --no-strict-dm-types plugin
    rojo build default.project.json --output SurvivorCore.rbxm
    rojo build demo.project.json --output demo.rbxl
+   rojo build plugin.project.json --output SurvivorCoreStatAdmin.rbxm
    ```
    (`stylua src demo` auto-formats; `sourcemap.json`, `globalTypes.d.luau`, and the build
    outputs are git-ignored.)

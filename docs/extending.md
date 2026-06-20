@@ -219,5 +219,6 @@ end)
 SurvivorCore.start()
 ```
 
-See [Getting Started](getting-started.md) to wire the engine into your place, and
+See [Getting Started](getting-started.md) to wire the engine into your place,
+[Survival Stats + HUD](survival-stats.md) for the built-in stats and HUD, and
 [Architecture](architecture.md) for how the layers fit together.

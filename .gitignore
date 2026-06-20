@@ -1,14 +1,16 @@
 # Rojo / Roblox
 sourcemap.json
+plugin-sourcemap.json
 globalTypes.d.luau
 *.rbxl
 *.rbxlx
 *.rbxl.lock
 *.rbxlx.lock
 
-# Build output (the .rbxm is built in CI and attached to releases)
+# Build output (the .rbxm is built in CI and attached to releases).
+# NOTE: *.rbxmx (XML models — e.g. the HUD/config templates under assets/) are
+# version-controlled source, NOT build output, so they are intentionally tracked.
 *.rbxm
-*.rbxmx
 /build/
 
 # Toolchain managers
