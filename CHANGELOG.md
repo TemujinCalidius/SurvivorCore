@@ -8,6 +8,13 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
 ## Unreleased
 
 ### Added
+- **Sprinting, jumping & energy** — hold **Shift** to sprint (server-authoritative): it drains
+  the Energy stat, speeds you up, and forces an exhausted crawl at 0 energy; energy regenerates
+  after a short idle delay. Jumps cost energy and are blocked below a threshold. Ships a low-stat
+  **feedback** layer too — a screen vignette + breathing loop that intensify as energy drops, and
+  a heartbeat loop below 40% health. Adds the engine's first RemoteEvent (`SprintIntent`) and a
+  `Movement` Config section (`Config.override("Movement", …)`). Logic + tuning + free default art
+  ported from The Counter Earth. See [docs/survival-stats.md](docs/survival-stats.md).
 - **Dynamic stat effects** — a per-player, server-side modifier layer over the base rates, so
   stats can be driven by events instead of only a constant drift. `SurvivorCore.Stats.adjust`
   (one-time clamped delta), `addModifier` / `removeModifier` (named, optionally-timed rate

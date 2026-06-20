@@ -25,6 +25,10 @@ local Components = require(script.components)
 -- works any time before start(). Runs on both server and client (idempotent per side).
 require(script.stats.StatDefs)
 
+-- Define the "Movement" Config section (sprint/jump/energy + feedback tuning) on both
+-- sides, so Config.override("Movement", …) works any time before start()/startClient().
+require(script.shared.MovementConfig)
+
 local SurvivorCore = {}
 
 SurvivorCore.VERSION = "0.1.0"
@@ -77,6 +81,9 @@ function SurvivorCore.start(_options: { [string]: any }?)
 	SurvivorCore.Stats.removeModifier = survival.removeModifier
 	SurvivorCore.Stats.getValue = survival.getValue
 
+	-- Movement: server-authoritative sprint/jump/energy (creates the SprintIntent RemoteEvent).
+	require(script.systems.Movement).start(_options)
+
 	return SurvivorCore
 end
 
@@ -90,6 +97,9 @@ function SurvivorCore.startClient(_options: { [string]: any }?)
 	clientStarted = true
 
 	require(script.client.Hud).start(_options)
+
+	-- Sprint input + low-stat vignette/breathing/heartbeat feedback.
+	require(script.client.MovementFeedback).start(_options)
 
 	return SurvivorCore
 end

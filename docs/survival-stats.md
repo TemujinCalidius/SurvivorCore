@@ -113,6 +113,31 @@ A modifier with the same `source` replaces the old one (no implicit stacking); a
 makes it expire on its own; a player's modifiers are dropped when they leave. These are **server-only**
 (authoritative) — drive them from your gameplay code, never trust the client.
 
+## Sprint, jump & energy
+
+The engine ships a server-authoritative movement system that spends the **Energy** stat (ported
+from The Counter Earth's proven tuning):
+
+- **Hold Shift** to sprint — the client sends intent over the `SprintIntent` RemoteEvent; the
+  server speeds the character up (`SprintSpeed`) and drains energy while you're actually moving.
+- At **0 energy** you're forced to a slow `ExhaustedSpeed` until it recovers.
+- **Energy regenerates** after `RegenDelaySeconds` of not exerting (and not moving).
+- **Jumps cost energy** (`JumpCost`) and are **blocked below `MinToJump`** (JumpPower drops to 0).
+
+It's all tunable via the **`Movement`** Config section — no engine edits:
+
+```lua
+SurvivorCore.Config.override("Movement", {
+    Energy = { SprintDrainPerSecond = 20, RegenPerSecond = 10, JumpCost = 8 },
+    Movement = { SprintSpeed = 28, WalkSpeed = 16, ExhaustedSpeed = 6, JumpPower = 80 },
+})
+```
+
+**Low-stat feedback (client).** A full-screen **vignette** + a **breathing** loop fade in as energy
+drops, and a **heartbeat** loop fades in below `Health.HeartbeatStartRatio` (40%) of health. The
+engine ships default art for these (overridable under `Movement.Assets` / the audio + ratio knobs
+in the same section). It boots automatically from `SurvivorCore.startClient()`.
+
 ## The HUD — restyle it freely
 
 The HUD is the `SurvivalHud` ScreenGui in **StarterGui**. Restyle anything — colors, gradients,
