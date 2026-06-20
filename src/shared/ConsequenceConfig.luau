@@ -17,12 +17,12 @@ ConsequenceConfig.SECTION = "Consequences"
 
 ConsequenceConfig.DEFAULTS = {
 	-- Health (HP) drained per second while each condition holds. They add together, so being
-	-- both starving AND dehydrated kills in half the time.
+	-- both starving AND dehydrated kills in half the time. (Bleeding out at 0 Blood is INSTANT
+	-- death, handled directly in SurvivalConsequences — not a drain rate.)
 	HealthDrainPerSecond = {
 		Starving = 100 / (8 * 3600), -- Hunger at max → ~8h to die
 		Dehydrated = 100 / (8 * 3600), -- Thirst at max → ~8h to die (both together → ~4h)
 		PoisonAtMax = 1.0, -- ONLY at 100% poison (~1.7 min to die); no partial-poison chip damage
-		BledOut = 3.0, -- Blood empty (0) — quick death once you've bled out
 	},
 	-- Default rate a bleed / poison SOURCE applies. Gameplay can pass a stronger/weaker rate per
 	-- source (a deep cut vs a graze); these are the engine's sensible defaults.

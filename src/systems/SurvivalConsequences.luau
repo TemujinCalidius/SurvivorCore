@@ -5,10 +5,10 @@
 	Each tick, for every living character:
 	  • STARVING   (Hunger at max)  → drain Health
 	  • DEHYDRATED (Thirst at max)  → drain Health
-	  • POISONED   (Poison > 0)     → drain Health, scaled by the poison level
-	  • BLED OUT   (Blood == 0)     → drain Health fast — you bleed out and die
-	Drains stack, and they reduce the character's real Humanoid health, so death + Roblox
-	respawn happen naturally.
+	  • POISONED   (Poison at max)  → drain Health
+	  • BLED OUT   (Blood == 0)     → INSTANT death
+	Health drains stack and reduce the character's real Humanoid health (so death + Roblox
+	respawn happen naturally); bleeding out at 0 Blood kills outright.
 
 	It also keeps the "Health" stat attribute in lockstep with the Humanoid (so the HUD Health
 	bar reflects real damage), and on every (re)spawn resets all stats to their start values +
@@ -122,24 +122,24 @@ function SurvivalConsequences.start(_options: { [string]: any }?)
 				continue
 			end
 
-			local perSecond = 0
+			-- Bled out: Blood empty (resource at 0) is INSTANT death — not a drain.
+			local blood = SurvivalStats.getValue(player, "Blood")
+			if blood ~= nil and blood <= 0 then
+				humanoid.Health = 0
+				continue
+			end
 
+			-- Otherwise, stacking per-second health drains from the survival needs.
+			local perSecond = 0
 			if isAtMax(player, "Hunger") then
 				perSecond += drains.Starving
 			end
 			if isAtMax(player, "Thirst") then
 				perSecond += drains.Dehydrated
 			end
-
 			-- Poison only drains health once it's maxed out (no partial-poison chip damage).
 			if isAtMax(player, "Poison") then
 				perSecond += drains.PoisonAtMax
-			end
-
-			-- Blood is a resource (0 = empty) — at 0 you're bleeding out.
-			local blood = SurvivalStats.getValue(player, "Blood")
-			if blood ~= nil and blood <= 0 then
-				perSecond += drains.BledOut
 			end
 
 			if perSecond > 0 then

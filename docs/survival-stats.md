@@ -4,6 +4,8 @@ SurvivorCore ships a survival-stat simulation and a reactive **top-left HUD**. I
 included — register nothing and you already get seven stats and a working HUD — but every rate
 is tunable, and the HUD is a real ScreenGui you restyle in Studio with **zero code**.
 
+> 📹 **See it in action:** [HUD, survival stats & the admin plugin](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P)
+
 ## How it works
 
 - Each stat value lives as a **Roblox Player Attribute** on the player (e.g. `Hunger`). Roblox
@@ -149,17 +151,19 @@ so death + Roblox respawn happen naturally:
 | **Dehydrated** — Thirst at max | drains health (~8 h to die; both at once → ~4 h) **+ stops energy regen** |
 | **Fatigued** — Fatigue at max | **stops energy regen** |
 | **Poisoned** — Poison at 100% | drains health (`1.0`/s) — only once fully poisoned |
-| **Bled out** — Blood at 0 | drains health fast (`3.0`/s) — you bleed out and die |
+| **Bled out** — Blood at 0 | **instant death** |
 
 Energy refusing to regen while starving/dehydrated/fatigued holds **even after the post-sprint
 delay** — a depleted player stays depleted until they address the cause.
 
 ```lua
 SurvivorCore.Config.override("Consequences", {
-    HealthDrainPerSecond = { Starving = 100 / (8 * 3600), Dehydrated = 100 / (8 * 3600), PoisonAtMax = 1.0, BledOut = 3.0 },
+    HealthDrainPerSecond = { Starving = 100 / (8 * 3600), Dehydrated = 100 / (8 * 3600), PoisonAtMax = 1.0 },
     Affliction = { BleedRatePerSecond = 100 / 3600, PoisonRatePerSecond = 100 / 3600 }, -- ~1h each
 })
 ```
+
+Bleeding out (Blood = 0) is **instant death**, not a drain — so it has no rate to tune.
 
 The engine keeps the **Health** stat in sync with the character's Humanoid (so the HUD Health bar
 reflects real damage), and on every (re)spawn **resets all stats and clears modifiers** — a fresh

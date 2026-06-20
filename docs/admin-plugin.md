@@ -4,6 +4,8 @@ A small **Studio plugin** that gives the experience owner a friendly form to tun
 stats — instead of hand-editing Attributes on the `SurvivalStatsConfig` instance in the Explorer.
 It's the first slice of the [Builder / Admin plugin](https://github.com/TemujinCalidius/SurvivorCore/issues/11).
 
+> 📹 **Demo:** [HUD, survival stats & the admin plugin in action](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P)
+
 ## Install
 
 > **This is a Studio editor tool, not game content — so syncing the engine does _not_ install it.**

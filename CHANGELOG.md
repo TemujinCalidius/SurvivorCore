@@ -10,7 +10,7 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
 ### Added
 - **Survival consequences** — stats now bite back (server-authoritative, all tunable via the
   `Consequences` Config section): **starving** (Hunger maxed) and **dehydrated** (Thirst maxed)
-  drain health; **poison drains health at 100%**; **Blood at 0 → bleed out → death**.
+  drain health; **poison drains health at 100%**; **Blood at 0 → bleed out (instant death)**.
   Health drains stack and reduce real character health, so death + respawn happen naturally.
   **Energy stops regenerating** while starving, dehydrated, or fully fatigued (even after the
   post-sprint delay). The engine now syncs the **Health** stat to the character Humanoid (the HUD
