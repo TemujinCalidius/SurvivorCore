@@ -149,6 +149,10 @@ closes), so it's easy to see at a glance which problems are fixed and just waiti
 The label needs no cleanup: on merge the PR closes and any linked issue auto-closes via a
 `Closes #N` reference.
 
+**Closing multiple issues from one PR.** Give each issue its own keyword —
+`Closes #1, Closes #2` — not `Closes #1, #2`. GitHub only auto-links the number that directly
+follows a closing keyword, so the bare `#2` in the second form won't auto-close.
+
 ## Issue Templates
 
 File issues with the forms in `.github/ISSUE_TEMPLATE/`:
@@ -162,6 +166,13 @@ File issues with the forms in `.github/ISSUE_TEMPLATE/`:
 
 Open-ended questions and "how do I…?" go to
 [Discussions](https://github.com/TemujinCalidius/SurvivorCore/discussions), not Issues.
+
+## Reporting a security issue
+
+Found a vulnerability in the engine? **Don't open a public issue, PR, or discussion** — that
+discloses it to every game built on SurvivorCore before a fix exists. Report it privately via
+[**Security → Report a vulnerability**](https://github.com/TemujinCalidius/SurvivorCore/security/advisories/new).
+See [`SECURITY.md`](SECURITY.md) for the full coordinated-disclosure policy, supported versions, and scope.
 
 ## Architecture Overview
 
