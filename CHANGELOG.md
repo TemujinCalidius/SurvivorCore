@@ -7,6 +7,8 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
 ## Unreleased
 
+## 0.2.0 — 2026-06-20
+
 ### Added
 - **Survival consequences** — stats now bite back (server-authoritative, all tunable via the
   `Consequences` Config section): **starving** (Hunger maxed) and **dehydrated** (Thirst maxed)
