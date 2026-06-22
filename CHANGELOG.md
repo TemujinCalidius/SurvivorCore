@@ -5,7 +5,15 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
-## Unreleased
+## 0.2.1 — 2026-06-22
+
+### Fixed
+- **Custom stat `attribute` overrides now work end to end** (#20) — the HUD bound stat bars by the
+  stat *name*, but the engine stores each value under the stat's backing `attribute` (overridable
+  via `Config.override("SurvivalStats", { Stat = { attribute = "…" } })`), so an override silently
+  froze the bar. The binder now reads + listens on the resolved `attribute`; the same hardcoded-name
+  slip in the Health↔Humanoid sync and the energy (vignette/breathing) feedback is fixed too.
+  Default behaviour (attribute defaults to the name) is unchanged.
 
 ## 0.2.0 — 2026-06-20
 

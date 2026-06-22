@@ -57,7 +57,11 @@ local function isAtMax(player: Player, name: string): boolean
 end
 
 local function syncHealth(player: Player, humanoid: Humanoid)
-	player:SetAttribute("Health", math.max(0, math.round(humanoid.Health)))
+	-- Write to the Health stat's backing attribute (defaults to "Health"), so a custom
+	-- `attribute` override still lands where the HUD reads it.
+	local def = SurvivalStats.getDefinition("Health")
+	local attr = (def and def.attribute) or "Health"
+	player:SetAttribute(attr, math.max(0, math.round(humanoid.Health)))
 end
 
 local function setupCharacter(player: Player, character: Model)

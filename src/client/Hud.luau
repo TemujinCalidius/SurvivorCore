@@ -156,6 +156,11 @@ function Hud.start(_options: { [string]: any }?)
 			warn(`[SurvivorCore HUD] bar '{bar:GetFullName()}' is missing a 'Stat' attribute`)
 			return
 		end
+		-- The bar's `Stat` attribute names the stat; the value lives on the player under the stat's
+		-- backing attribute (`def.attribute`, which defaults to the name). Read + listen on THAT,
+		-- so a custom `attribute` override (set in config before start, never changes at runtime)
+		-- stays in sync with the HUD instead of silently reading a name nobody writes to.
+		local attrName = (byName[statName] and byName[statName].attribute) or statName
 		local fill = bar:FindFirstChild("Fill")
 		if not fill or not fill:IsA("GuiObject") then
 			warn(`[SurvivorCore HUD] bar '{bar:GetFullName()}' is missing a 'Fill' GuiObject child`)
@@ -191,7 +196,7 @@ function Hud.start(_options: { [string]: any }?)
 			local normalColor = bar:GetAttribute("FillColor") or authoredColor
 			local warnColor = bar:GetAttribute("WarnColor") or DEFAULT_WARN_COLOR
 
-			local value = localPlayer:GetAttribute(statName)
+			local value = localPlayer:GetAttribute(attrName)
 			local ratio = 0
 			if typeof(value) == "number" and max > 0 then
 				ratio = math.clamp(value / max, 0, 1)
@@ -234,7 +239,7 @@ function Hud.start(_options: { [string]: any }?)
 			end
 		end
 
-		local connection = localPlayer:GetAttributeChangedSignal(statName):Connect(render)
+		local connection = localPlayer:GetAttributeChangedSignal(attrName):Connect(render)
 		-- also re-render when the bar's own Icon is set at runtime (lets the game assign art live)
 		local iconConn = bar:GetAttributeChangedSignal("Icon"):Connect(render)
 		renderers[bar] = render
