@@ -22,6 +22,7 @@ assert(RunService:IsClient(), "SurvivorCore.MovementFeedback is client-only — 
 
 local MovementConfig = require(script.Parent.Parent.shared.MovementConfig)
 local Remotes = require(script.Parent.Parent.shared.Remotes)
+local StatConfig = require(script.Parent.Parent.stats.StatConfig)
 
 local MovementFeedback = {}
 
@@ -54,6 +55,10 @@ function MovementFeedback.start(_options: { [string]: any }?)
 
 	local player = Players.LocalPlayer
 	local cfg = MovementConfig.get()
+
+	-- Read Energy from its backing attribute (defaults to "Energy"), respecting a custom override.
+	local energyDef = StatConfig.resolve().byName.Energy
+	local energyAttr = (energyDef and energyDef.attribute) or "Energy"
 
 	-- --- Sprint input → server -------------------------------------------------
 	local sprintRemote = Remotes.event("SprintIntent")
@@ -109,7 +114,7 @@ function MovementFeedback.start(_options: { [string]: any }?)
 	local heartbeat = makeLoopedSound("SurvivorCoreHeartbeat", cfg.Assets.Heartbeat)
 
 	RunService.RenderStepped:Connect(function(dt)
-		local energy = player:GetAttribute("Energy")
+		local energy = player:GetAttribute(energyAttr)
 		if typeof(energy) ~= "number" then
 			energy = 0
 		end
