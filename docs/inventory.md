@@ -7,6 +7,8 @@ Character Sheet, with Codex / Achievements / Quests scaffolded). Like the surviv
 (icons, counts, fills) — never layout or colors. The engine ships **zero items**; your game registers
 them, and their display data replicates to clients automatically.
 
+> 📹 **See it in action:** [Inventory & hotbar system](https://makertube.net/w/wXRkuJo323AHMpZKVwWxt3)
+
 - **Data layer (server):** [src/systems/Inventory.luau](../src/systems/Inventory.luau)
 - **UI (client):** `PanelManager`, `InventoryUi`, `Hotbar`, `CharacterSheet`, `DragDrop`, `SlotGrid`,
   `UiFallback` under [src/client/](../src/client)
