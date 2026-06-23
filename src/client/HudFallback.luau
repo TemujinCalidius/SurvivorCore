@@ -28,9 +28,14 @@ local FALLBACK_COLORS = {
 
 local HudFallback = {}
 
+-- Marks a HUD as the built-in fallback (vs an authored template), so the binder's dedupe can
+-- always drop the fallback in favour of an authored HUD when both end up present.
+HudFallback.FALLBACK_ATTRIBUTE = "SurvivorCoreHudFallback"
+
 function HudFallback.build(playerGui: Instance, stats: { any })
 	local screen = Instance.new("ScreenGui")
 	screen.Name = HUD_NAME
+	screen:SetAttribute(HudFallback.FALLBACK_ATTRIBUTE, true)
 	screen.ResetOnSpawn = false
 	-- Respect the ~36px Roblox topbar inset so bars never render under the CoreGui menu.
 	screen.IgnoreGuiInset = false

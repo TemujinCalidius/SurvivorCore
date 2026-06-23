@@ -198,6 +198,30 @@ SurvivorCore.Assets.registerCategory("Animations", {
 SurvivorCore.Assets.get("Sounds", "Harvest") -- "rbxassetid://123456789"
 ```
 
+Two engine-reserved categories resolve automatically in the built-in UI: **`StatIcons`** (per stat,
+for the HUD) and **`ItemIcons`** (per item id, for the inventory). An item icon can also live inline on
+the def's `icon` field — either works.
+
+```lua
+SurvivorCore.Assets.register("ItemIcons", "reed", "rbxassetid://…")
+```
+
+---
+
+## Inventory & UI
+
+The engine ships a full inventory (slots + carry-weight), a hotbar, equipment slots, and a tabbed
+menu — all driven by the same template + binder model as the HUD, and extensible from code:
+
+```lua
+SurvivorCore.Inventory.add(player, "reed", 5)        -- server: grant items
+SurvivorCore.UI.registerPanel({ id = "map", title = "Map", build = fn }) -- client: add a tab
+```
+
+See **[Inventory, Hotbar & Menu UI](inventory.md)** for the item-def schema, the full API, the
+RemoteEvent contract, the `item:use` / `inventory:changed` hooks, and the template attribute
+conventions.
+
 ---
 
 ## Putting it together

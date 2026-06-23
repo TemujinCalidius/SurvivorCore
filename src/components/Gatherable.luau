@@ -40,8 +40,10 @@ return Components.define({
 			local hp = (instance:GetAttribute("_HP") or 1) - 1
 			instance:SetAttribute("_HP", hp)
 
-			-- TODO (extraction): grant `values.Yield` of `values.ItemId` via the
-			-- inventory service once persistence/inventory are extracted.
+			-- The Inventory system grants `values.Yield` of `values.ItemId` by subscribing to
+			-- the "gather:depleted" hook below (kept here as a hook, not a direct call, to avoid
+			-- a require cycle and to let any system observe gathers). "gather:hit" fires per
+			-- interaction for games that want per-hit yield or swing feedback.
 			Hooks.run("gather:hit", { instance = instance, player = player, values = values, hpLeft = hp })
 
 			if hp <= 0 then

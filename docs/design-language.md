@@ -41,7 +41,9 @@ re-skin freely; these are the engine's clean defaults and the rules any shipped 
 
 ## Icon style
 
-Flat, minimal, **two-tone** glyphs — modern and crisp, legible at ~20 px in a HUD.
+Flat, minimal, **two-tone** glyphs — modern and crisp, legible at ~20 px in a HUD. The same style
+covers **item icons** (the inventory/hotbar render at ~48–64 px) — keep the family consistent so
+stat icons and item icons read as one set.
 
 - **Form:** a single clear glyph, centered, **filling ~70–80% of the frame** (minimal margin so
   it stays large when downscaled). Consistent visual weight across the set.
@@ -65,7 +67,9 @@ Flat, minimal, **two-tone** glyphs — modern and crisp, legible at ~20 px in a 
 3. **Post-process:** key out the white background → transparent (RGBA), trim to the glyph's
    bounding box, then pad to a uniform square so the set is visually consistent.
 4. **Upload to Roblox** → asset id, and register: `Assets.register("StatIcons", "<Stat>", id)`
-   (the HUD's `Icon` slots resolve from category `StatIcons`, key = stat / counter name).
+   (the HUD's `Icon` slots resolve from category `StatIcons`, key = stat / counter name). Item
+   icons follow the same flow under `Assets.register("ItemIcons", "<itemId>", id)` (or the item
+   def's inline `icon` field) — see [inventory.md](inventory.md).
 
 The API key lives **outside the repo** at `~/.config/survivorcore/3daistudio.key` (read at call
 time, never printed or committed).
