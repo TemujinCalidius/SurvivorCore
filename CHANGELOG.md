@@ -5,7 +5,7 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
-## Unreleased
+## 0.3.0 — 2026-06-23
 
 ### Added
 - **Inventory, hotbar & tabbed menu UI** (#7, #9, #3) — a server-authoritative inventory with a
