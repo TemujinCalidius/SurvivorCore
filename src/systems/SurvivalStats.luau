@@ -119,6 +119,15 @@ function SurvivalStats.installHud()
 		hudTemplate:Clone().Parent = StarterGui
 	end
 
+	-- The inventory UI rides the same install path: the tabbed menu + the bottom hotbar
+	-- ScreenGui templates, cloned into StarterGui if the consumer hasn't supplied their own.
+	for _, uiName in { "SurvivalMenu", "SurvivalHotbar" } do
+		local uiTemplate = templates:FindFirstChild(uiName)
+		if uiTemplate and not StarterGui:FindFirstChild(uiName) then
+			uiTemplate:Clone().Parent = StarterGui
+		end
+	end
+
 	-- The client boot loader rides StarterPlayerScripts (copied to each joiner).
 	local loaderTemplate = templates:FindFirstChild(LOADER_NAME)
 	if loaderTemplate then
