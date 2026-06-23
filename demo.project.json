@@ -11,7 +11,9 @@
     },
     "StarterGui": {
       "$className": "StarterGui",
-      "SurvivalHud": { "$path": "assets/hud/SurvivalHud.model.json" }
+      "SurvivalHud": { "$path": "assets/hud/SurvivalHud.model.json" },
+      "SurvivalMenu": { "$path": "assets/ui/SurvivalMenu.model.json" },
+      "SurvivalHotbar": { "$path": "assets/ui/SurvivalHotbar.model.json" }
     },
     "StarterPlayer": {
       "$className": "StarterPlayer",

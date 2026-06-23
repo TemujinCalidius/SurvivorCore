@@ -1,0 +1,2228 @@
+{
+  "className": "ScreenGui",
+  "properties": {
+    "ResetOnSpawn": false,
+    "IgnoreGuiInset": false,
+    "ZIndexBehavior": "Sibling",
+    "DisplayOrder": 3
+  },
+  "children": [
+    {
+      "className": "Frame",
+      "name": "Root",
+      "properties": {
+        "AnchorPoint": {
+          "Vector2": [
+            0.5,
+            1
+          ]
+        },
+        "Position": {
+          "UDim2": [
+            [
+              0.5,
+              0
+            ],
+            [
+              1,
+              -12
+            ]
+          ]
+        },
+        "Size": {
+          "UDim2": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              70
+            ]
+          ]
+        },
+        "AutomaticSize": "X",
+        "BackgroundTransparency": 1,
+        "BorderSizePixel": 0,
+        "Active": true
+      },
+      "children": [
+        {
+          "className": "UIListLayout",
+          "properties": {
+            "FillDirection": "Horizontal",
+            "Padding": {
+              "UDim": [
+                0,
+                6
+              ]
+            },
+            "SortOrder": "LayoutOrder",
+            "HorizontalAlignment": "Center",
+            "VerticalAlignment": "Center"
+          }
+        },
+        {
+          "className": "ImageButton",
+          "name": "Slot1",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  58
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BackgroundTransparency": 0.25,
+            "BorderSizePixel": 0,
+            "LayoutOrder": 1,
+            "AutoButtonColor": false,
+            "Image": ""
+          },
+          "attributes": {
+            "HotbarSlot": 1
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Transparency": 0.8,
+                "Thickness": 1
+              }
+            },
+            {
+              "className": "ImageLabel",
+              "name": "Icon",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.78,
+                      0
+                    ],
+                    [
+                      0.78,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0.11,
+                      0
+                    ],
+                    [
+                      0.11,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "ScaleType": "Fit",
+                "Image": "",
+                "Visible": false,
+                "ZIndex": 2
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Key",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "1",
+                "TextColor3": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "BorderSizePixel": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      3
+                    ],
+                    [
+                      0,
+                      2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Top",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Count",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamBold",
+                "TextSize": 12,
+                "BorderSizePixel": 0,
+                "AnchorPoint": {
+                  "Vector2": [
+                    1,
+                    1
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      1,
+                      -3
+                    ],
+                    [
+                      1,
+                      -2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      28
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Right",
+                "TextYAlignment": "Bottom",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Active",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "BorderSizePixel": 0,
+                "Visible": false,
+                "ZIndex": 2
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                },
+                {
+                  "className": "UIStroke",
+                  "properties": {
+                    "Color": {
+                      "Color3": [
+                        0.8,
+                        0.651,
+                        0.4
+                      ]
+                    },
+                    "Transparency": 0.0,
+                    "Thickness": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "className": "ImageButton",
+          "name": "Slot2",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  58
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BackgroundTransparency": 0.25,
+            "BorderSizePixel": 0,
+            "LayoutOrder": 2,
+            "AutoButtonColor": false,
+            "Image": ""
+          },
+          "attributes": {
+            "HotbarSlot": 2
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Transparency": 0.8,
+                "Thickness": 1
+              }
+            },
+            {
+              "className": "ImageLabel",
+              "name": "Icon",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.78,
+                      0
+                    ],
+                    [
+                      0.78,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0.11,
+                      0
+                    ],
+                    [
+                      0.11,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "ScaleType": "Fit",
+                "Image": "",
+                "Visible": false,
+                "ZIndex": 2
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Key",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "2",
+                "TextColor3": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "BorderSizePixel": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      3
+                    ],
+                    [
+                      0,
+                      2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Top",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Count",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamBold",
+                "TextSize": 12,
+                "BorderSizePixel": 0,
+                "AnchorPoint": {
+                  "Vector2": [
+                    1,
+                    1
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      1,
+                      -3
+                    ],
+                    [
+                      1,
+                      -2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      28
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Right",
+                "TextYAlignment": "Bottom",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Active",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "BorderSizePixel": 0,
+                "Visible": false,
+                "ZIndex": 2
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                },
+                {
+                  "className": "UIStroke",
+                  "properties": {
+                    "Color": {
+                      "Color3": [
+                        0.8,
+                        0.651,
+                        0.4
+                      ]
+                    },
+                    "Transparency": 0.0,
+                    "Thickness": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "className": "ImageButton",
+          "name": "Slot3",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  58
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BackgroundTransparency": 0.25,
+            "BorderSizePixel": 0,
+            "LayoutOrder": 3,
+            "AutoButtonColor": false,
+            "Image": ""
+          },
+          "attributes": {
+            "HotbarSlot": 3
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Transparency": 0.8,
+                "Thickness": 1
+              }
+            },
+            {
+              "className": "ImageLabel",
+              "name": "Icon",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.78,
+                      0
+                    ],
+                    [
+                      0.78,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0.11,
+                      0
+                    ],
+                    [
+                      0.11,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "ScaleType": "Fit",
+                "Image": "",
+                "Visible": false,
+                "ZIndex": 2
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Key",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "3",
+                "TextColor3": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "BorderSizePixel": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      3
+                    ],
+                    [
+                      0,
+                      2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Top",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Count",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamBold",
+                "TextSize": 12,
+                "BorderSizePixel": 0,
+                "AnchorPoint": {
+                  "Vector2": [
+                    1,
+                    1
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      1,
+                      -3
+                    ],
+                    [
+                      1,
+                      -2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      28
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Right",
+                "TextYAlignment": "Bottom",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Active",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "BorderSizePixel": 0,
+                "Visible": false,
+                "ZIndex": 2
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                },
+                {
+                  "className": "UIStroke",
+                  "properties": {
+                    "Color": {
+                      "Color3": [
+                        0.8,
+                        0.651,
+                        0.4
+                      ]
+                    },
+                    "Transparency": 0.0,
+                    "Thickness": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "className": "ImageButton",
+          "name": "Slot4",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  58
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BackgroundTransparency": 0.25,
+            "BorderSizePixel": 0,
+            "LayoutOrder": 4,
+            "AutoButtonColor": false,
+            "Image": ""
+          },
+          "attributes": {
+            "HotbarSlot": 4
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Transparency": 0.8,
+                "Thickness": 1
+              }
+            },
+            {
+              "className": "ImageLabel",
+              "name": "Icon",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.78,
+                      0
+                    ],
+                    [
+                      0.78,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0.11,
+                      0
+                    ],
+                    [
+                      0.11,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "ScaleType": "Fit",
+                "Image": "",
+                "Visible": false,
+                "ZIndex": 2
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Key",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "4",
+                "TextColor3": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "BorderSizePixel": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      3
+                    ],
+                    [
+                      0,
+                      2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Top",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Count",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamBold",
+                "TextSize": 12,
+                "BorderSizePixel": 0,
+                "AnchorPoint": {
+                  "Vector2": [
+                    1,
+                    1
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      1,
+                      -3
+                    ],
+                    [
+                      1,
+                      -2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      28
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Right",
+                "TextYAlignment": "Bottom",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Active",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "BorderSizePixel": 0,
+                "Visible": false,
+                "ZIndex": 2
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                },
+                {
+                  "className": "UIStroke",
+                  "properties": {
+                    "Color": {
+                      "Color3": [
+                        0.8,
+                        0.651,
+                        0.4
+                      ]
+                    },
+                    "Transparency": 0.0,
+                    "Thickness": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "className": "ImageButton",
+          "name": "Slot5",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  58
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BackgroundTransparency": 0.25,
+            "BorderSizePixel": 0,
+            "LayoutOrder": 5,
+            "AutoButtonColor": false,
+            "Image": ""
+          },
+          "attributes": {
+            "HotbarSlot": 5
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Transparency": 0.8,
+                "Thickness": 1
+              }
+            },
+            {
+              "className": "ImageLabel",
+              "name": "Icon",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.78,
+                      0
+                    ],
+                    [
+                      0.78,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0.11,
+                      0
+                    ],
+                    [
+                      0.11,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "ScaleType": "Fit",
+                "Image": "",
+                "Visible": false,
+                "ZIndex": 2
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Key",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "5",
+                "TextColor3": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "BorderSizePixel": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      3
+                    ],
+                    [
+                      0,
+                      2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Top",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Count",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamBold",
+                "TextSize": 12,
+                "BorderSizePixel": 0,
+                "AnchorPoint": {
+                  "Vector2": [
+                    1,
+                    1
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      1,
+                      -3
+                    ],
+                    [
+                      1,
+                      -2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      28
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Right",
+                "TextYAlignment": "Bottom",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Active",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "BorderSizePixel": 0,
+                "Visible": false,
+                "ZIndex": 2
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                },
+                {
+                  "className": "UIStroke",
+                  "properties": {
+                    "Color": {
+                      "Color3": [
+                        0.8,
+                        0.651,
+                        0.4
+                      ]
+                    },
+                    "Transparency": 0.0,
+                    "Thickness": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "className": "ImageButton",
+          "name": "Slot6",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  58
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BackgroundTransparency": 0.25,
+            "BorderSizePixel": 0,
+            "LayoutOrder": 6,
+            "AutoButtonColor": false,
+            "Image": ""
+          },
+          "attributes": {
+            "HotbarSlot": 6
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Transparency": 0.8,
+                "Thickness": 1
+              }
+            },
+            {
+              "className": "ImageLabel",
+              "name": "Icon",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.78,
+                      0
+                    ],
+                    [
+                      0.78,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0.11,
+                      0
+                    ],
+                    [
+                      0.11,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "ScaleType": "Fit",
+                "Image": "",
+                "Visible": false,
+                "ZIndex": 2
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Key",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "6",
+                "TextColor3": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "BorderSizePixel": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      3
+                    ],
+                    [
+                      0,
+                      2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Top",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Count",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamBold",
+                "TextSize": 12,
+                "BorderSizePixel": 0,
+                "AnchorPoint": {
+                  "Vector2": [
+                    1,
+                    1
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      1,
+                      -3
+                    ],
+                    [
+                      1,
+                      -2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      28
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Right",
+                "TextYAlignment": "Bottom",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Active",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "BorderSizePixel": 0,
+                "Visible": false,
+                "ZIndex": 2
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                },
+                {
+                  "className": "UIStroke",
+                  "properties": {
+                    "Color": {
+                      "Color3": [
+                        0.8,
+                        0.651,
+                        0.4
+                      ]
+                    },
+                    "Transparency": 0.0,
+                    "Thickness": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "className": "ImageButton",
+          "name": "Slot7",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  58
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BackgroundTransparency": 0.25,
+            "BorderSizePixel": 0,
+            "LayoutOrder": 7,
+            "AutoButtonColor": false,
+            "Image": ""
+          },
+          "attributes": {
+            "HotbarSlot": 7
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Transparency": 0.8,
+                "Thickness": 1
+              }
+            },
+            {
+              "className": "ImageLabel",
+              "name": "Icon",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.78,
+                      0
+                    ],
+                    [
+                      0.78,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0.11,
+                      0
+                    ],
+                    [
+                      0.11,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "ScaleType": "Fit",
+                "Image": "",
+                "Visible": false,
+                "ZIndex": 2
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Key",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "7",
+                "TextColor3": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "BorderSizePixel": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      3
+                    ],
+                    [
+                      0,
+                      2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Top",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Count",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamBold",
+                "TextSize": 12,
+                "BorderSizePixel": 0,
+                "AnchorPoint": {
+                  "Vector2": [
+                    1,
+                    1
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      1,
+                      -3
+                    ],
+                    [
+                      1,
+                      -2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      28
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Right",
+                "TextYAlignment": "Bottom",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Active",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "BorderSizePixel": 0,
+                "Visible": false,
+                "ZIndex": 2
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                },
+                {
+                  "className": "UIStroke",
+                  "properties": {
+                    "Color": {
+                      "Color3": [
+                        0.8,
+                        0.651,
+                        0.4
+                      ]
+                    },
+                    "Transparency": 0.0,
+                    "Thickness": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "className": "ImageButton",
+          "name": "Slot8",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  58
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BackgroundTransparency": 0.25,
+            "BorderSizePixel": 0,
+            "LayoutOrder": 8,
+            "AutoButtonColor": false,
+            "Image": ""
+          },
+          "attributes": {
+            "HotbarSlot": 8
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Transparency": 0.8,
+                "Thickness": 1
+              }
+            },
+            {
+              "className": "ImageLabel",
+              "name": "Icon",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.78,
+                      0
+                    ],
+                    [
+                      0.78,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0.11,
+                      0
+                    ],
+                    [
+                      0.11,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "ScaleType": "Fit",
+                "Image": "",
+                "Visible": false,
+                "ZIndex": 2
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Key",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "8",
+                "TextColor3": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "BorderSizePixel": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      3
+                    ],
+                    [
+                      0,
+                      2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Top",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Count",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamBold",
+                "TextSize": 12,
+                "BorderSizePixel": 0,
+                "AnchorPoint": {
+                  "Vector2": [
+                    1,
+                    1
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      1,
+                      -3
+                    ],
+                    [
+                      1,
+                      -2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      28
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Right",
+                "TextYAlignment": "Bottom",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Active",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "BorderSizePixel": 0,
+                "Visible": false,
+                "ZIndex": 2
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                },
+                {
+                  "className": "UIStroke",
+                  "properties": {
+                    "Color": {
+                      "Color3": [
+                        0.8,
+                        0.651,
+                        0.4
+                      ]
+                    },
+                    "Transparency": 0.0,
+                    "Thickness": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "className": "ImageButton",
+          "name": "Slot9",
+          "properties": {
+            "Size": {
+              "UDim2": [
+                [
+                  0,
+                  58
+                ],
+                [
+                  0,
+                  58
+                ]
+              ]
+            },
+            "BackgroundColor3": {
+              "Color3": [
+                0.1098,
+                0.1255,
+                0.1647
+              ]
+            },
+            "BackgroundTransparency": 0.25,
+            "BorderSizePixel": 0,
+            "LayoutOrder": 9,
+            "AutoButtonColor": false,
+            "Image": ""
+          },
+          "attributes": {
+            "HotbarSlot": 9
+          },
+          "children": [
+            {
+              "className": "UICorner",
+              "properties": {
+                "CornerRadius": {
+                  "UDim": [
+                    0,
+                    6
+                  ]
+                }
+              }
+            },
+            {
+              "className": "UIStroke",
+              "properties": {
+                "Color": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Transparency": 0.8,
+                "Thickness": 1
+              }
+            },
+            {
+              "className": "ImageLabel",
+              "name": "Icon",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.78,
+                      0
+                    ],
+                    [
+                      0.78,
+                      0
+                    ]
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      0.11,
+                      0
+                    ],
+                    [
+                      0.11,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "ScaleType": "Fit",
+                "Image": "",
+                "Visible": false,
+                "ZIndex": 2
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Key",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "9",
+                "TextColor3": {
+                  "Color3": [
+                    0.8235,
+                    0.8627,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamMedium",
+                "TextSize": 11,
+                "BorderSizePixel": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      3
+                    ],
+                    [
+                      0,
+                      2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      14
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Left",
+                "TextYAlignment": "Top",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "TextLabel",
+              "name": "Count",
+              "properties": {
+                "BackgroundTransparency": 1,
+                "Text": "",
+                "TextColor3": {
+                  "Color3": [
+                    0.9608,
+                    0.9608,
+                    0.9608
+                  ]
+                },
+                "Font": "GothamBold",
+                "TextSize": 12,
+                "BorderSizePixel": 0,
+                "AnchorPoint": {
+                  "Vector2": [
+                    1,
+                    1
+                  ]
+                },
+                "Position": {
+                  "UDim2": [
+                    [
+                      1,
+                      -3
+                    ],
+                    [
+                      1,
+                      -2
+                    ]
+                  ]
+                },
+                "Size": {
+                  "UDim2": [
+                    [
+                      0,
+                      28
+                    ],
+                    [
+                      0,
+                      14
+                    ]
+                  ]
+                },
+                "TextXAlignment": "Right",
+                "TextYAlignment": "Bottom",
+                "ZIndex": 3
+              }
+            },
+            {
+              "className": "Frame",
+              "name": "Active",
+              "properties": {
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "BackgroundTransparency": 1,
+                "BorderSizePixel": 0,
+                "Visible": false,
+                "ZIndex": 2
+              },
+              "children": [
+                {
+                  "className": "UICorner",
+                  "properties": {
+                    "CornerRadius": {
+                      "UDim": [
+                        0,
+                        6
+                      ]
+                    }
+                  }
+                },
+                {
+                  "className": "UIStroke",
+                  "properties": {
+                    "Color": {
+                      "Color3": [
+                        0.8,
+                        0.651,
+                        0.4
+                      ]
+                    },
+                    "Transparency": 0.0,
+                    "Thickness": 2
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -33,9 +33,17 @@ require(script.shared.MovementConfig)
 -- Config.override("Consequences", …) works any time before start().
 require(script.shared.ConsequenceConfig)
 
+-- Define the "Inventory" Config section (slots + carry-weight + hotbar + equip-slot tuning),
+-- so Config.override("Inventory", …) works any time before start().
+require(script.shared.InventoryConfig)
+
+-- Define the "UI" Config section (menu/hotbar theme + keybinds), so
+-- Config.override("UI", …) works any time before startClient().
+require(script.shared.UiConfig)
+
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.2.1"
+SurvivorCore.VERSION = "0.3.0"
 
 -- Foundation
 SurvivorCore.Config = Config
@@ -92,6 +100,14 @@ function SurvivorCore.start(_options: { [string]: any }?)
 	-- Health↔Humanoid sync and fresh-body reset on respawn.
 	require(script.systems.SurvivalConsequences).start(_options)
 
+	-- Inventory: server-authoritative slots + carry-weight, hotbar, equipment, consumables.
+	-- Booted after SurvivalStats so consumables apply their effects via Stats.adjust. The
+	-- module table IS the public API — SurvivorCore.Inventory.add/remove/move/split/equip/
+	-- unequip/setHotbar/swapHotbar/useSlot/getQty/has/getSlots (all act on live players).
+	local inventory = require(script.systems.Inventory)
+	inventory.start(_options)
+	SurvivorCore.Inventory = inventory
+
 	return SurvivorCore
 end
 
@@ -108,6 +124,35 @@ function SurvivorCore.startClient(_options: { [string]: any }?)
 
 	-- Sprint input + low-stat vignette/breathing/heartbeat feedback.
 	require(script.client.MovementFeedback).start(_options)
+
+	-- UI layer: the tabbed menu (Inventory / Character / scaffolded Codex·Achievements·Quests)
+	-- and the bottom hotbar — authored ScreenGui templates driven by attribute binders, exactly
+	-- like the HUD. PanelManager owns the menu + keybind; SurvivorCore.UI exposes its registrable
+	-- panel API (registerPanel / open / close / toggle).
+	require(script.client.DragDrop).start(_options)
+	local panelManager = require(script.client.PanelManager)
+	panelManager.start(_options)
+	SurvivorCore.UI = panelManager
+	require(script.client.Hotbar).start(_options)
+	require(script.client.InventoryUi).start(_options)
+	require(script.client.CharacterSheet).start(_options)
+
+	-- Zero-setup net: if no authored menu/hotbar template reached the player, build the minimal
+	-- fallback (the binders pick it up via DescendantAdded, like HudFallback).
+	task.delay(2, function()
+		local localPlayer = game:GetService("Players").LocalPlayer
+		local playerGui = localPlayer and localPlayer:FindFirstChild("PlayerGui")
+		if not playerGui then
+			return
+		end
+		local UiFallback = require(script.client.UiFallback)
+		if not playerGui:FindFirstChild("SurvivalMenu") then
+			UiFallback.buildMenu(playerGui)
+		end
+		if not playerGui:FindFirstChild("SurvivalHotbar") then
+			UiFallback.buildHotbar(playerGui)
+		end
+	end)
 
 	return SurvivorCore
 end

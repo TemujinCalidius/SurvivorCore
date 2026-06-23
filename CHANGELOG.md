@@ -5,6 +5,32 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.3.0 — 2026-06-23
+
+### Added
+- **Inventory, hotbar & tabbed menu UI** (#7, #9, #3) — a server-authoritative inventory with a
+  **slots + carry-weight** model, a 9-slot quick-use **hotbar** (keys 1-9), **equipment** slots
+  (head/top/pants/shoes/back/quiver), and a restyleable **tabbed menu** (functional Inventory +
+  Character Sheet; Codex/Achievements/Quests scaffolded). Built the engine's way — authored
+  ScreenGui **templates** (`SurvivalMenu`, `SurvivalHotbar`) driven by attribute-discovering
+  **binders**, so world creators restyle everything in Studio with zero code (and a zero-setup
+  fallback guarantees the UI always appears). Items **stack** and have **weight**; equipping a
+  **backpack** raises both slot count and weight limit. **Consumables** apply their `onConsume`
+  effects through the stat-effects layer (e.g. food lowers Hunger) and fire an `item:use` hook;
+  every change fires `inventory:changed`. Full **drag-and-drop** (move/merge/swap, pin to hotbar),
+  pickups **auto-assign** to the smallest free hotbar slot, and gathering a node now grants its
+  yield straight into the inventory. New public API: `SurvivorCore.Inventory.*`
+  (add/remove/move/split/equip/unequip/setHotbar/swapHotbar/useSlot/…) and
+  `SurvivorCore.UI.registerPanel/open/close/toggle` for code-added tabs. Item **display data**
+  (name/icon/stack/…) replicates to clients automatically, so games register items once
+  (server-side) and the UI just works; item icons resolve via the `ItemIcons` Assets category or an
+  inline `icon` field. Tunable via the new `Inventory` and `UI` Config sections. The engine still
+  ships **zero items** — the demo registers a sample set and seeds a starter inventory. Opening the
+  menu defaults to **Tab** — the engine frees it by disabling Roblox's player roster (which otherwise
+  swallows the key), and moves the chat window to the bottom-left so it clears the top-left HUD; both
+  are opt-out via the `UI` Config section (`ReclaimCoreKeys`, `Chat`). See
+  [docs/inventory.md](docs/inventory.md).
+
 ## 0.2.1 — 2026-06-22
 
 ### Fixed

@@ -105,15 +105,31 @@ end
 local Hud = {}
 local started = false
 
--- installHud() + the StarterGui->PlayerGui copy can briefly produce two HUDs; keep one.
+-- Several paths can land more than one HUD in PlayerGui — installHud()'s clone + the
+-- StarterGui->PlayerGui copy, or a late fallback racing the authored template. Keep exactly one,
+-- always preferring an AUTHORED HUD over the built-in fallback (and dropping extra copies).
 local function dedupeHuds(playerGui: Instance)
-	local kept: Instance? = nil
+	local authored: Instance? = nil
+	local fallbacks: { Instance } = {}
 	for _, gui in playerGui:GetChildren() do
 		if gui:IsA("ScreenGui") and gui.Name == HUD_NAME then
-			if kept then
-				gui:Destroy()
+			if gui:GetAttribute(HudFallback.FALLBACK_ATTRIBUTE) then
+				table.insert(fallbacks, gui)
+			elseif authored then
+				gui:Destroy() -- a second authored copy
 			else
-				kept = gui
+				authored = gui
+			end
+		end
+	end
+	if authored then
+		for _, fb in fallbacks do
+			fb:Destroy() -- authored wins; the fallback is only a no-template safety net
+		end
+	else
+		for index, fb in fallbacks do
+			if index > 1 then
+				fb:Destroy()
 			end
 		end
 	end
@@ -296,6 +312,13 @@ function Hud.start(_options: { [string]: any }?)
 	end
 
 	dedupeHuds(playerGui)
+	-- Run it again whenever another HUD shows up (a fallback racing the template, a late
+	-- StarterGui copy, installHud's clone) so we never end up with two on screen.
+	playerGui.ChildAdded:Connect(function(child)
+		if child:IsA("ScreenGui") and child.Name == HUD_NAME then
+			dedupeHuds(playerGui)
+		end
+	end)
 
 	-- A stat bar is any GuiObject carrying a `Stat` attribute (how the authored
 	-- template marks them) OR tagged `SurvivorStatBar` (for the Builder UI / fallback).
@@ -442,11 +465,14 @@ function Hud.start(_options: { [string]: any }?)
 		end
 	end)
 
-	-- Zero-setup safety net: if nothing showed up, build the minimal fallback.
+	-- Zero-setup safety net: if no HUD showed up at all, build the minimal fallback. Guard on the
+	-- ScreenGui's presence (not just whether bars bound yet) so a slow authored HUD never gets a
+	-- fallback built alongside it; if it still arrives late, the ChildAdded dedupe drops the extra.
 	task.delay(FALLBACK_WAIT, function()
-		if next(bound) == nil then
-			HudFallback.build(playerGui, StatConfig.resolve().stats)
+		if next(bound) ~= nil or playerGui:FindFirstChild(HUD_NAME) then
+			return
 		end
+		HudFallback.build(playerGui, StatConfig.resolve().stats)
 	end)
 end
 

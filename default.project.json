@@ -5,6 +5,8 @@
     "Templates": {
       "$className": "Folder",
       "SurvivalHud": { "$path": "assets/hud/SurvivalHud.model.json" },
+      "SurvivalMenu": { "$path": "assets/ui/SurvivalMenu.model.json" },
+      "SurvivalHotbar": { "$path": "assets/ui/SurvivalHotbar.model.json" },
       "SurvivalStatsConfig": { "$path": "assets/config/SurvivalStatsConfig.model.json" },
       "HudLoader": { "$path": "assets/client/HudLoader.client.luau" }
     }
