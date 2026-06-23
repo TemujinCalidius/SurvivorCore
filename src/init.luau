@@ -43,7 +43,7 @@ require(script.shared.UiConfig)
 
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.2.1"
+SurvivorCore.VERSION = "0.3.0"
 
 -- Foundation
 SurvivorCore.Config = Config
