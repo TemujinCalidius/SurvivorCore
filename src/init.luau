@@ -13,10 +13,13 @@
 	  • Creator components (tag your own object "Gatherable", set attributes) + lifecycle Hooks.
 ]]
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local Config = require(script.foundation.Config)
 local Assets = require(script.foundation.Assets)
 local EventBridge = require(script.foundation.EventBridge)
 local Hooks = require(script.foundation.Hooks)
+local Reactions = require(script.foundation.Reactions)
 local Registries = require(script.registries)
 local Components = require(script.components)
 
@@ -41,6 +44,11 @@ require(script.shared.InventoryConfig)
 -- Config.override("UI", …) works any time before startClient().
 require(script.shared.UiConfig)
 
+-- Define the "Harvesting" (tool-swing range/cooldown/LoS) and "Crafting" (craft time) Config
+-- sections, so Config.override(...) works any time before start()/startClient().
+require(script.shared.HarvestingConfig)
+require(script.shared.CraftingConfig)
+
 local SurvivorCore = {}
 
 SurvivorCore.VERSION = "0.3.0"
@@ -51,9 +59,14 @@ SurvivorCore.Assets = Assets
 SurvivorCore.Events = EventBridge
 SurvivorCore.Hooks = Hooks
 
+-- Gathering juice: per-resource-type reaction hooks (shake / fell / etc.). Registration is safe
+-- any time; the harvesting path dispatches them. SurvivorCore.Gather.onReaction(id, event, fn).
+SurvivorCore.Gather = { onReaction = Reactions.on }
+
 -- Content registries
 SurvivorCore.Items = Registries.Items
 SurvivorCore.Recipes = Registries.Recipes
+SurvivorCore.Resources = Registries.Resources
 SurvivorCore.Stats = Registries.Stats
 SurvivorCore.Achievements = Registries.Achievements
 SurvivorCore.Codex = Registries.Codex
@@ -70,6 +83,16 @@ local clientStarted = false
 function SurvivorCore.start(_options: { [string]: any }?)
 	assert(not started, "SurvivorCore.start() called twice")
 	started = true
+
+	-- No-code content: register item/resource defs authored as instances (the admin plugin writes
+	-- these under ReplicatedStorage.SurvivorCoreContent), complementing code register(). Done first,
+	-- so Gatherable nodes can resolve their Resource def and systems see the full roster. Recipes
+	-- carry ingredient lists (not flat attributes), so they stay code-registered for now.
+	local content = ReplicatedStorage:FindFirstChild("SurvivorCoreContent")
+	if content then
+		Registries.Items.loadFromFolder(content:FindFirstChild("Items"))
+		Registries.Resources.loadFromFolder(content:FindFirstChild("Resources"))
+	end
 
 	-- Load built-in components so their tags are recognised.
 	require(script.components.Gatherable)
@@ -108,6 +131,21 @@ function SurvivorCore.start(_options: { [string]: any }?)
 	inventory.start(_options)
 	SurvivorCore.Inventory = inventory
 
+	-- ToolEquip: hotbar → physical Tool bridge (an active tool item becomes a held Roblox Tool).
+	require(script.systems.ToolEquip).start(_options)
+
+	-- Harvesting: the authoritative hit resolver for gatherable nodes (prompt + tool-swing). Booted
+	-- after Inventory so per-hit yield can be granted (and a full inventory blocks the hit). The
+	-- module table exposes tryHarvest, which the Gatherable component's prompt path calls in.
+	local harvesting = require(script.systems.Harvesting)
+	harvesting.start(_options)
+	SurvivorCore.Harvesting = harvesting
+
+	-- Crafting: server-authoritative hand crafting (consume recipe ingredients → produce output).
+	local crafting = require(script.systems.Crafting)
+	crafting.start(_options)
+	SurvivorCore.Crafting = crafting
+
 	return SurvivorCore
 end
 
@@ -136,6 +174,10 @@ function SurvivorCore.startClient(_options: { [string]: any }?)
 	require(script.client.Hotbar).start(_options)
 	require(script.client.InventoryUi).start(_options)
 	require(script.client.CharacterSheet).start(_options)
+	require(script.client.CraftingUi).start(_options)
+
+	-- Tool-swing harvesting input (click an equipped tool at a gatherable node).
+	require(script.client.ToolHarvest).start(_options)
 
 	-- Zero-setup net: if no authored menu/hotbar template reached the player, build the minimal
 	-- fallback (the binders pick it up via DescendantAdded, like HudFallback).

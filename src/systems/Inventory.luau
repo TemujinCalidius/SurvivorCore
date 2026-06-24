@@ -667,21 +667,6 @@ local function initPlayer(player: Player)
 	end)
 end
 
--- Gather grant: when a Gatherable node is fully harvested, grant its Yield of ItemId. Using
--- the hook (not editing Gatherable) avoids a require cycle and lets any system observe gathers.
--- Granting on depletion matches the documented attribute semantics ("Yield = per full harvest");
--- a game wanting per-hit yield can subscribe to "gather:hit" itself.
-local function onGatherDepleted(ctx: any)
-	if not ctx or not ctx.player or not ctx.values then
-		return
-	end
-	local itemId = sanitizeItemId(ctx.values.ItemId)
-	if itemId == "" or not readDef(itemId) then
-		return -- engine ships no items; an unregistered/placeholder ItemId is silently skipped
-	end
-	Inventory.add(ctx.player, itemId, math.max(1, math.floor(tonumber(ctx.values.Yield) or 1)))
-end
-
 -- ── Remote handlers (validated client → server requests) ────────────────────
 
 local function wireRemotes()
@@ -746,7 +731,6 @@ function Inventory.start(_options: { [string]: any }?)
 		lastUse[player] = nil
 	end)
 
-	Hooks.on("gather:depleted", onGatherDepleted)
 	wireRemotes()
 end
 
