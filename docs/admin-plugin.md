@@ -1,8 +1,17 @@
-# Survival Stats admin plugin
+# SurvivorCore admin plugin
 
-A small **Studio plugin** that gives the experience owner a friendly form to tune the survival
-stats — instead of hand-editing Attributes on the `SurvivalStatsConfig` instance in the Explorer.
-It's the first slice of the [Builder / Admin plugin](https://github.com/TemujinCalidius/SurvivorCore/issues/11).
+A small **Studio plugin** that gives the experience owner friendly forms instead of hand-editing
+Attributes in the Explorer. It adds two toolbar buttons under **SurvivorCore**:
+
+- **Survival Stats** — tune the survival-stat rates/thresholds/HUD on the `SurvivalStatsConfig`
+  instance (the deltas-only, locked model below).
+- **Content** — create/edit/delete **items** and **gatherable resources** with no code (the Builder
+  first slice). It writes `SurvivorCoreContent` instances the engine loads at `start()` — see
+  [content-authoring.md](content-authoring.md). Unlike the stats editor, content is full
+  owner-authored defs (not deltas). Every edit is one Studio undo step.
+
+The rest of this page covers the Survival Stats editor; both install the same way. It's the
+[Builder / Admin plugin](https://github.com/TemujinCalidius/SurvivorCore/issues/11).
 
 > 📹 **Demo:** [HUD, survival stats & the admin plugin in action](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P)
 
