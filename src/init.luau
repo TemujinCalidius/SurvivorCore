@@ -51,7 +51,7 @@ require(script.shared.CraftingConfig)
 
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.3.0"
+SurvivorCore.VERSION = "0.4.0"
 
 -- Foundation
 SurvivorCore.Config = Config
