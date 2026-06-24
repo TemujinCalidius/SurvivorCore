@@ -13,7 +13,7 @@ it validates, rolls a **per-hit yield** (`yieldMin..yieldMax`), tries to add it 
 (**blocking the hit if you're full** — nothing wasted), then spends one HP and fires the hooks. On
 depletion the node is destroyed (unless it opts out — see reactions).
 
-> 📹 Demo video: _coming soon_
+> 📹 **Demo:** [chopping a tree, gathering reeds & hand crafting](https://makertube.net/w/b6RWPeiW6vLz4iVXuuiRtP)
 
 ## Defining a node
 

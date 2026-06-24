@@ -13,7 +13,7 @@ Attributes in the Explorer. It adds two toolbar buttons under **SurvivorCore**:
 The rest of this page covers the Survival Stats editor; both install the same way. It's the
 [Builder / Admin plugin](https://github.com/TemujinCalidius/SurvivorCore/issues/11).
 
-> 📹 **Demo:** [HUD, survival stats & the admin plugin in action](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P)
+> 📹 **Demos:** [HUD, survival stats & the admin plugin](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P) · [no-code item & gatherable creation](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE)
 
 ## Install
 

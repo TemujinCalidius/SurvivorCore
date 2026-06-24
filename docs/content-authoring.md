@@ -1,5 +1,7 @@
 # No-code content authoring
 
+> 📹 **Demo:** [creating an item + gatherable in the admin panel](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE)
+
 The engine ships **zero** items, resources, or recipes — your game supplies them. You can do this
 two ways, and they coexist:
 
