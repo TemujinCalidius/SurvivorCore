@@ -45,6 +45,30 @@ function Registry.new(name: string, options: Options?)
 		end
 	end
 
+	-- No-code authoring path: populate from a Folder of children where each child's Name is the
+	-- key and its Attributes become the def's fields. This is what the admin plugin writes (under
+	-- ReplicatedStorage.SurvivorCoreContent); it complements code register(). Already-registered
+	-- keys are skipped, and a def that fails validation is warned-and-skipped (never throws), so a
+	-- bad authored entry can't take down boot.
+	function self.loadFromFolder(folder: Instance?)
+		if folder == nil then
+			return
+		end
+		for _, child in folder:GetChildren() do
+			local key = child.Name
+			if byId[key] == nil then
+				local def: { [string]: any } = { [keyField] = key }
+				for attrName, value in child:GetAttributes() do
+					def[attrName] = value
+				end
+				local ok, err = pcall(self.register, def)
+				if not ok then
+					warn(`[{name}] loadFromFolder skipped '{tostring(key)}': {tostring(err)}`)
+				end
+			end
+		end
+	end
+
 	function self.get(key: any): any
 		return byId[key]
 	end

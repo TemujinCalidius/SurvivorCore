@@ -12,6 +12,9 @@ local Registries = {}
 
 Registries.Items = Registry.new("Items", { keyField = "id" })
 Registries.Recipes = Registry.new("Recipes", { keyField = "id" })
+-- A gatherable-resource def: what a tagged Gatherable node *is*. Separate from the inventory
+-- item it yields. Fields: { id, item, hp, requireTool, yieldMin, yieldMax }.
+Registries.Resources = Registry.new("Resources", { keyField = "id" })
 Registries.Stats = Registry.new("Stats", { keyField = "name" })
 Registries.Achievements = Registry.new("Achievements", { keyField = "key" })
 Registries.Codex = Registry.new("Codex", { keyField = "id" })

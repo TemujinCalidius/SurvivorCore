@@ -1,7 +1,7 @@
 [package]
 name = "temujincalidius/survivorcore"
 description = "Batteries-included, creator-extensible survival game framework for Roblox."
-version = "0.3.0"
+version = "0.4.0"
 license = "MIT"
 authors = ["Samuel Lison"]
 registry = "https://github.com/UpliftGames/wally-index"

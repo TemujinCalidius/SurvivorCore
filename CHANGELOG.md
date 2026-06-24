@@ -5,6 +5,33 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.4.0 — 2026-06-24
+
+### Added
+- **Tool-swing harvesting & the gather → craft loop** (#1, #4) — equip a tool from the hotbar,
+  **click a node to swing**, and the server validates the hit (range, line-of-sight, equipped tool,
+  cooldown) before granting a per-hit **random yield** straight into your inventory; a full
+  inventory **blocks** the hit so nothing is wasted. Bare-hand nodes keep the hold-`E` prompt. This
+  is the engine's first **client-input → RemoteEvent → server-validation pipeline**, shaped for
+  combat to reuse. Selecting a tool in the hotbar now equips a **real `Tool`** (the new
+  hotbar→Tool bridge), with a content-free Tool template path. **Hand crafting** closes the loop:
+  a server-authoritative runtime consumes a recipe's ingredients and produces its output
+  (refunding on no room), surfaced as a **Crafting tab** that lists `Recipes.forStation("hand")`
+  and gates each recipe on what you're carrying. New APIs: `SurvivorCore.Harvesting`,
+  `SurvivorCore.Crafting`, plus `Harvesting`/`Crafting` Config sections. See
+  [docs/harvesting.md](docs/harvesting.md) and [docs/crafting.md](docs/crafting.md).
+- **No-code content layer** (#11, Builder first slice) — items and gatherable **resources** can now
+  be authored **without code**. A new `Resources` registry defines what a node *is*
+  (item it yields, HP/gathers, required tool, yield min/max); a `Gatherable` node binds to one via a
+  `Resource` attribute (tag a mesh, set `Resource = "oak_tree"` — no per-node attributes). Content
+  can be defined as instances (`Registry.loadFromFolder` reads a `SurvivorCoreContent` folder at
+  start), and the **admin plugin gains a "Content" widget** to create/edit/delete items + gatherable
+  resources from a form — what it writes, the engine registers, no code. Per-resource-type
+  **reaction hooks** (`SurvivorCore.Gather.onReaction`) drive the juice (a reed sways, a tree fells
+  and leaves a stump), with `DestroyOnDeplete` so a creator can transform the node on depletion.
+  New hooks: `gather:blocked`, `craft:start` / `craft:end` / `craft:blocked`. See
+  [docs/content-authoring.md](docs/content-authoring.md).
+
 ## 0.3.0 — 2026-06-23
 
 ### Added

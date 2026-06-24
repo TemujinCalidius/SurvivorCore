@@ -219,12 +219,30 @@ end
 
 -- ── Tab discovery + wiring ───────────────────────────────────────────────────
 
+-- Resize tab buttons so they always fit the TabBar, however many there are (authored +
+-- code-registered like Crafting). Each takes an equal share; the 6px offset leaves room for the
+-- UIListLayout's padding so the row never overflows the bar.
+local function fitTabs()
+	local n = 0
+	for _ in tabs do
+		n += 1
+	end
+	if n == 0 then
+		return
+	end
+	for _, button in tabs do
+		button.Size = UDim2.new(1 / n, -6, 1, 0)
+		button.AutomaticSize = Enum.AutomaticSize.None
+	end
+end
+
 local function wireTabButton(id: string, button: GuiButton)
 	tabs[id] = button
 	registered[id] = true
 	button.Activated:Connect(function()
 		PanelManager.showTab(id)
 	end)
+	fitTabs()
 end
 
 local function bindContent(id: string, frame: GuiObject)
