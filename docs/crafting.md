@@ -4,7 +4,7 @@ Hand crafting closes the **gather → craft → use** loop: from your inventory,
 are consumed and its output produced — server-authoritative, via
 [`src/systems/Crafting.luau`](../src/systems/Crafting.luau).
 
-> 📹 Demo video: _coming soon_
+> 📹 **Demo:** [gathering & hand crafting in action](https://makertube.net/w/b6RWPeiW6vLz4iVXuuiRtP)
 
 ## Recipes
 
