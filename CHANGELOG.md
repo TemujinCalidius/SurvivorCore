@@ -5,7 +5,7 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
-## Unreleased
+## 0.5.0 — 2026-06-25
 
 ### Added
 - **Mob & AI engine** (#17) — the shared creature substrate combat, animals and monsters all build
