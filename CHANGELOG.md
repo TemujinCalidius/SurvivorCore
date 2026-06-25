@@ -5,6 +5,51 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.5.0 — 2026-06-25
+
+### Added
+- **Mob & AI engine** (#17) — the shared creature substrate combat, animals and monsters all build
+  on. A **mob is a Model tagged `Mob`** with a Humanoid + PrimaryPart, so it's damaged, healed and
+  killed *exactly* like a player. A reusable **FSM** (idle / wander / chase / attack / flee /
+  return-on-leash / death) drives behavior, with the profile picked by **data** — a `Mobs` def's
+  `faction`: `"hostile"` chases + attacks, `"passive"` flees, `"neutral"` wanders. Line-of-sight,
+  leash distance and target selection are built in; movement is `Humanoid:MoveTo`. New
+  `SurvivorCore.Mobs` runtime — `spawn` / `adopt` / `damage` / `getActive` / `isMob` (the registry's
+  `register` / `loadFromFolder` still author defs in code or no-code) — plus per-mob-type
+  **reactions** `SurvivorCore.Mobs.onReaction(mobType, "spawned"|"hit"|"attack"|"died", …)` for death
+  fades, spawn cries, etc. A `Mobs` Config section tunes tick rate, default aggro/leash/attack and
+  respawn. New hooks: `mob:spawned` / `mob:hit` / `mob:attack` / `mob:died`. See
+  [docs/mobs.md](docs/mobs.md).
+- **Combat — melee + ranged** (#12, #14) — server-authoritative combat reusing the v0.4.0
+  client-input → server-validated-hit pipeline. A **weapon is just an item** (`category = "weapon"` +
+  a `toolType` so the hotbar equips it) with flat `weapon*` stats. **Melee:** equip + click; the
+  server picks the nearest valid target (a mob, or another player when `FriendlyFire` is on) within
+  range + line-of-sight and applies damage. **Ranged (bow):** a TCE-style **aiming** flow — hold
+  right-click to aim (over-the-shoulder camera + FOV zoom + a crosshair and a charge ring), hold
+  left-click to **draw**, release to **fire** along the crosshair. The server recomputes the shot from
+  the bow's muzzle, times the draw (anti-cheat), consumes one arrow from the inventory, and simulates
+  the **gravity arc** authoritatively, sending the arc path back so the client flies a cosmetic arrow
+  along the real curve. **Arrows are their own configurable ammo item** (`category = "ammo"`): per
+  type a **weight**, **damage ×**, **drop/curve ×**, **max range** and **speed ×**, so different
+  arrows fly and hit differently — a shot combines the bow's pullback with the arrow's ballistics. The
+  **kill-event schema is designed once** here — `combat:hit` / `combat:kill` `{ attacker, victim,
+  weapon, source }` — fired through both `Hooks` and `EventBridge`. New `SurvivorCore.Combat` + a
+  `Combat` Config section (ranges, cooldowns, friendly fire, bow physics). Because mob/player damage
+  flows through `Humanoid:TakeDamage`, it's lethal and **drives the survival Health HUD with no extra
+  wiring**. See [docs/combat.md](docs/combat.md).
+- **No-code mobs & weapons** (#11, Builder slice) — the admin plugin's **Content** widget gains
+  **Mobs**, **Weapons** and **Arrows / Ammo** editors (schema-driven, like Items/Gatherables): create
+  a mob type (faction/health/speed/ranges) — **+ Add to World** drops a tagged placeholder rig; create
+  a weapon (kind/damage/range/cooldown + bow draw/speed/ammo) — **+ Tool model** drops a starter `Tool`
+  to build the held look on; create an arrow type (damage/curve/range/speed/weight). The engine loads
+  all of them from `SurvivorCoreContent` at start — what the plugin writes, the runtime registers, no
+  code. A creator also authors a mob by tagging any rigged Model **`Mob`** and setting `MobType`.
+
+### Fixed
+- Removing or consuming one item no longer clears **unrelated** hotbar pins — the orphaned-pin sweep
+  is now scoped to the affected item. (Previously, e.g., firing a bow that consumed an arrow could
+  unpin and unequip a hotbar-pinned weapon that had no inventory stack.)
+
 ## 0.4.0 — 2026-06-24
 
 ### Added

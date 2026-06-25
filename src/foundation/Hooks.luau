@@ -9,6 +9,18 @@
 
 	This is how game-specific flourish (tree-felling physics, station VFX, custom drops)
 	stays OUT of the engine while remaining first-class.
+
+	Engine-fired hooks (ctx is a single table unless noted):
+	  gather:hit / gather:depleted / gather:blocked  { instance, player, resource, item?, … }
+	  craft:start / craft:end / craft:blocked        { station?, recipe, player, reason? }
+	  item:use                                       { player, itemId, … }
+	  mob:spawned / mob:hit / mob:died               { instance, mobType, player?, killer?, position? }
+	  mob:attack                                     { instance, mobType, player, damage, position }
+	  combat:hit                                     { attacker, victim, weapon, source, damage, victimHpLeft }
+	  combat:kill                                    { attacker, victim, weapon, source }   -- source "melee"|"bow"
+
+	Per-resource / per-mob-type variants of these dispatch through Reactions (see Reactions.luau):
+	SurvivorCore.Gather.onReaction(resourceId, …) and SurvivorCore.Mobs.onReaction(mobType, …).
 ]]
 
 local Hooks = {}

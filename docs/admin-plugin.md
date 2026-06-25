@@ -5,15 +5,16 @@ Attributes in the Explorer. It adds two toolbar buttons under **SurvivorCore**:
 
 - **Survival Stats** — tune the survival-stat rates/thresholds/HUD on the `SurvivalStatsConfig`
   instance (the deltas-only, locked model below).
-- **Content** — create/edit/delete **items** and **gatherable resources** with no code (the Builder
-  first slice). It writes `SurvivorCoreContent` instances the engine loads at `start()` — see
-  [content-authoring.md](content-authoring.md). Unlike the stats editor, content is full
-  owner-authored defs (not deltas). Every edit is one Studio undo step.
+- **Content** — create/edit/delete **items**, **weapons**, **gatherable resources** and **mobs** with
+  no code (the Builder slice). It writes `SurvivorCoreContent` instances the engine loads at `start()`
+  — see [content-authoring.md](content-authoring.md). Gatherables and mobs each get a **+ Add to
+  World** button that drops the tagged instance in front of the camera. Unlike the stats editor,
+  content is full owner-authored defs (not deltas). Every edit is one Studio undo step.
 
 The rest of this page covers the Survival Stats editor; both install the same way. It's the
 [Builder / Admin plugin](https://github.com/TemujinCalidius/SurvivorCore/issues/11).
 
-> 📹 **Demos:** [HUD, survival stats & the admin plugin](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P) · [no-code item & gatherable creation](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE)
+> 📹 **Demos:** [HUD, survival stats & the admin plugin](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P) · [no-code item & gatherable creation](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE) · [no-code weapon, ammo & mob creation](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU)
 
 ## Install
 

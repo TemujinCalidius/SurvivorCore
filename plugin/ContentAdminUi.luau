@@ -110,16 +110,17 @@ local function buildEntry(catKey: string, id: string, ContentAdmin: any, applySe
 		applyDelete(catKey, id)
 	end)
 
-	-- Gatherables get a one-click "Add to World" that drops a tagged, Resource-set Part in front of
-	-- the camera (the no-code way to place a node) — the bridge between the editor and the world.
+	-- Gatherables + Mobs drop a tagged, def-linked instance; Weapons drop a starter Tool (Handle +
+	-- the weapon's ToolType/WeaponKind) you can model the look on — all in front of the camera, the
+	-- bridge between the editor and the world.
 	local labelRight = 64
-	if catKey == "Resources" and applySpawn then
+	if (catKey == "Resources" or catKey == "Mobs" or catKey == "Weapons") and applySpawn then
 		local add = make("TextButton", {
 			Size = UDim2.fromOffset(104, 20),
 			Position = UDim2.new(1, -168, 0.5, -10),
 			BackgroundColor3 = COL_FIELD,
 			AutoButtonColor = true,
-			Text = "+ Add to World",
+			Text = if catKey == "Weapons" then "+ Tool model" else "+ Add to World",
 			TextColor3 = COL_ACCENT,
 			TextSize = 11,
 			Font = FONT,
@@ -127,7 +128,7 @@ local function buildEntry(catKey: string, id: string, ContentAdmin: any, applySe
 		}, { corner(4) })
 		add.Parent = title
 		add.MouseButton1Click:Connect(function()
-			applySpawn(id)
+			applySpawn(catKey, id)
 		end)
 		labelRight = 176
 	end

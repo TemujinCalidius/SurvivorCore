@@ -93,6 +93,83 @@ SurvivorCore.Items.register({
 	icon = "rbxassetid://137051934393677",
 })
 
+-- Weapons are just items: a `toolType` (so the hotbar equips them) + flat `weapon*` stats the Combat
+-- system reads. Equip from the hotbar, then click (melee) or hold-to-draw + release (bow).
+SurvivorCore.Items.register({
+	id = "wood_club",
+	name = "Wooden Club",
+	description = "A heavy length of timber. Equip it, then click a creature to swing.",
+	stack = 1,
+	weight = 1.8,
+	category = "weapon",
+	toolType = "club",
+	weaponKind = "melee",
+	weaponDamage = 20,
+	weaponRange = 8,
+	weaponCooldown = 0.6,
+	icon = "rbxassetid://102789813187589",
+})
+SurvivorCore.Items.register({
+	id = "short_bow",
+	name = "Short Bow",
+	description = "Hold right-click to aim, hold left-click to draw (longer = stronger), release to fire.",
+	stack = 1,
+	weight = 1.2,
+	category = "weapon",
+	toolType = "bow",
+	weaponKind = "bow",
+	weaponDamage = 30,
+	weaponDrawTime = 1,
+	weaponProjectileSpeed = 210,
+	weaponMaxRange = 260,
+	weaponAmmo = "arrow", -- a balanced, flat-ish arrow (consumed from the inventory per shot)
+	icon = "rbxassetid://124374881225649",
+})
+SurvivorCore.Items.register({
+	id = "war_bow",
+	name = "War Bow",
+	description = "A heavier bow — slower pull, harder hit. Loads heavy arrows that arc steeply.",
+	stack = 1,
+	weight = 1.8,
+	category = "weapon",
+	toolType = "bow",
+	weaponKind = "bow",
+	weaponDamage = 42,
+	weaponDrawTime = 1.4, -- slower to full draw
+	weaponProjectileSpeed = 180,
+	weaponMaxRange = 300,
+	weaponAmmo = "heavy_arrow",
+	icon = "rbxassetid://124374881225649",
+})
+
+-- Two arrow TYPES with different ballistics — exactly what the admin "Arrows / Ammo" editor authors.
+SurvivorCore.Items.register({
+	id = "arrow",
+	name = "Arrow",
+	description = "A balanced arrow. Flies fairly flat.",
+	category = "ammo",
+	weight = 0.05,
+	stack = 32,
+	ammoDamage = 1, -- the bow's base damage
+	ammoDrop = 1, -- normal gravity / curve
+	ammoSpeed = 0, -- 0 = use the bow's speed
+	ammoRange = 0, -- 0 = use the bow's max range
+	icon = "rbxassetid://86406240258610",
+})
+SurvivorCore.Items.register({
+	id = "heavy_arrow",
+	name = "Heavy Arrow",
+	description = "Heavier head: hits harder and drops fast (a steep arc), but won't reach far.",
+	category = "ammo",
+	weight = 0.12,
+	stack = 16,
+	ammoDamage = 1.4, -- +40% damage
+	ammoDrop = 2, -- doubles gravity → a pronounced arc
+	ammoSpeed = 0.85, -- a touch slower
+	ammoRange = 140, -- short effective range
+	icon = "rbxassetid://86406240258610",
+})
+
 -- Gatherable RESOURCE defs: what a tagged node *is*. A creator tags a mesh "Gatherable" and sets
 -- Resource = "<id>" to inherit these (no per-node attributes). HP>0 + a tool = click-to-swing;
 -- no tool = bare-hand hold-E. (These can also be authored no-code via the admin plugin.)
@@ -111,6 +188,29 @@ SurvivorCore.Resources.register({
 	requireTool = "", -- bare-hand
 	yieldMin = 1,
 	yieldMax = 2,
+})
+
+-- Mob defs: what a "Mob"-tagged model *is*. `faction` picks the AI profile (hostile chases + attacks;
+-- passive flees). The engine ships zero creatures — these are demo content (also no-code-authorable).
+SurvivorCore.Mobs.register({
+	id = "husk",
+	faction = "hostile",
+	health = 60,
+	walkSpeed = 5,
+	runSpeed = 15,
+	aggroRange = 40,
+	leashRange = 70,
+	attackRange = 6,
+	attackDamage = 8,
+	attackCooldown = 1.5,
+})
+SurvivorCore.Mobs.register({
+	id = "boar",
+	faction = "passive",
+	health = 40,
+	walkSpeed = 6,
+	runSpeed = 24,
+	aggroRange = 28, -- bolts when you get within ~28 studs
 })
 SurvivorCore.Items.register({
 	id = "straw_hat",
@@ -162,20 +262,35 @@ end)
 local function seedPlayer(player: Player)
 	player:SetAttribute("Credits", 250)
 
-	-- A starter inventory (slots 1-4 of the base 5; slot 5 left free to demo equip/unequip).
+	-- A starter inventory. The satchel is equipped (EquipSlot_Back) for the extra slots its backpack
+	-- bonus grants, leaving room for the gather tool, weapons and arrows.
 	player:SetAttribute("InvSlot_1", "berry")
 	player:SetAttribute("InvQty_1", 12)
 	player:SetAttribute("InvSlot_2", "mushroom")
 	player:SetAttribute("InvQty_2", 3)
 	player:SetAttribute("InvSlot_3", "water_skin")
 	player:SetAttribute("InvQty_3", 1)
-	player:SetAttribute("InvSlot_4", "reed_satchel")
-	player:SetAttribute("InvQty_4", 1)
+	player:SetAttribute("InvSlot_4", "arrow")
+	player:SetAttribute("InvQty_4", 24)
 	player:SetAttribute("InvSlot_5", "stone_axe")
 	player:SetAttribute("InvQty_5", 1)
+	-- Weapons live in real inventory slots (so a hotbar pin always has a backing stack); the satchel's
+	-- +6 slots make room.
+	player:SetAttribute("InvSlot_6", "wood_club")
+	player:SetAttribute("InvQty_6", 1)
+	player:SetAttribute("InvSlot_7", "short_bow")
+	player:SetAttribute("InvQty_7", 1)
+	player:SetAttribute("InvSlot_8", "war_bow")
+	player:SetAttribute("InvQty_8", 1)
+	player:SetAttribute("InvSlot_9", "heavy_arrow")
+	player:SetAttribute("InvQty_9", 12)
 	player:SetAttribute("HotbarSlot1", "berry") -- a pre-pinned quick slot
 	player:SetAttribute("HotbarSlot2", "stone_axe") -- press 2 to equip the axe, then click a tree
+	player:SetAttribute("HotbarSlot3", "wood_club") -- press 3 to equip the club, then click a mob
+	player:SetAttribute("HotbarSlot4", "short_bow") -- press 4: aim (RMB) + draw (LMB) — balanced arrows
+	player:SetAttribute("HotbarSlot5", "war_bow") -- press 5: the war bow — heavy arrows that arc steeply
 	player:SetAttribute("EquipSlot_Head", "straw_hat") -- a pre-filled equipment slot
+	player:SetAttribute("EquipSlot_Back", "reed_satchel") -- equipped for +slots / +carry weight
 end
 for _, player in Players:GetPlayers() do
 	seedPlayer(player)
@@ -305,6 +420,61 @@ SurvivorCore.Gather.onReaction("oak_tree", "depleted", function(ctx)
 			trunk:Destroy()
 		end
 	end)
+end)
+
+-- 5. The demo "combat field": weapon Tool looks the hotbar equips, a hostile husk that chases +
+--    attacks, and a passive boar that bolts when you near it. All demo content — the engine ships no
+--    creatures or weapons. (Mobs.spawn is available after start(); the AI runs server-side.)
+local function buildWeaponTemplates()
+	local content = ReplicatedStorage:FindFirstChild("SurvivorCoreContent")
+	local tools = content and content:FindFirstChild("Tools")
+	if not tools then
+		return
+	end
+	local function template(id: string, size: Vector3, color: Color3)
+		if tools:FindFirstChild(id) then
+			return
+		end
+		local tool = Instance.new("Tool")
+		tool.Name = id
+		tool.RequiresHandle = true
+		tool.CanBeDropped = false
+		local handle = Instance.new("Part")
+		handle.Name = "Handle"
+		handle.Size = size
+		handle.Color = color
+		handle.Material = Enum.Material.Wood
+		handle.CanCollide = false
+		handle.Massless = true
+		handle.Parent = tool
+		tool.Parent = tools
+	end
+	template("wood_club", Vector3.new(0.5, 3.5, 0.5), Color3.fromRGB(120, 85, 55))
+	template("short_bow", Vector3.new(0.3, 4, 0.3), Color3.fromRGB(150, 110, 70))
+	template("war_bow", Vector3.new(0.35, 5, 0.35), Color3.fromRGB(110, 80, 60))
+end
+buildWeaponTemplates()
+
+SurvivorCore.Mobs.spawn("husk", CFrame.new(40, 5, 20), { respawn = true })
+SurvivorCore.Mobs.spawn("husk", CFrame.new(48, 5, 32), { respawn = true })
+SurvivorCore.Mobs.spawn("boar", CFrame.new(-30, 5, 18))
+
+-- Death juice (per mob type): fade the husk's body out over its corpse time. Pure creator content
+-- via the reaction API — the engine just fires "died"; the game decides what a corpse looks like.
+local FADE = TweenInfo.new(4, Enum.EasingStyle.Linear)
+SurvivorCore.Mobs.onReaction("husk", "died", function(ctx)
+	local model = ctx.instance
+	if not model then
+		return
+	end
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") then
+			TweenService:Create(part, FADE, { Transparency = 1 }):Play()
+		end
+	end
+end)
+SurvivorCore.Hooks.on("mob:died", function(ctx)
+	print(("[demo] %s was slain"):format(tostring(ctx.mobType)))
 end)
 
 print("SurvivorCore demo booted — v" .. SurvivorCore.VERSION)
