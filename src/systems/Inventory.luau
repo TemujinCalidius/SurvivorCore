@@ -289,11 +289,14 @@ local function tryAutoHotbar(player: Player, itemId: string)
 	end
 end
 
--- Clear hotbar pins whose item no longer exists anywhere in inventory. Call after any removal.
-local function cleanOrphanedHotbarPins(player: Player)
+-- Clear hotbar pins whose item no longer exists anywhere in inventory. Pass `onlyItemId` to scope
+-- the sweep to pins for that ONE item — so removing/consuming item X never clears an unrelated pin Y
+-- (e.g. a hotbar-pinned weapon with no inventory stack). nil sweeps every pin.
+local function cleanOrphanedHotbarPins(player: Player, onlyItemId: string?)
 	for slot = 1, HOTBAR_SIZE do
 		local pinned = tostring(player:GetAttribute(InventoryTypes.hotbarSlotAttr(slot)) or "")
-		if pinned ~= "" and getTotalQty(player, pinned) == 0 then
+		local consider = pinned ~= "" and (onlyItemId == nil or pinned == onlyItemId)
+		if consider and getTotalQty(player, pinned) == 0 then
 			player:SetAttribute(InventoryTypes.hotbarSlotAttr(slot), nil)
 			if math.floor(tonumber(player:GetAttribute(InventoryTypes.HOTBAR_EQUIPPED_ATTR)) or 0) == slot then
 				player:SetAttribute(InventoryTypes.HOTBAR_EQUIPPED_ATTR, nil)
@@ -329,7 +332,7 @@ local function consume(player: Player, itemId: string, slot: number?): boolean
 		end
 	end
 
-	cleanOrphanedHotbarPins(player)
+	cleanOrphanedHotbarPins(player, itemId)
 	-- Every successful consume fires item:use — the seam for eat animations, sounds, or
 	-- modifier logic (e.g. Stats.removeModifier to stop an ongoing poison tick).
 	Hooks.run("item:use", { player = player, itemId = itemId, def = def, slot = slot })
@@ -364,7 +367,7 @@ function Inventory.remove(player: Player, itemId: string, amount: number?): bool
 	end
 	local ok = removeQty(player, id, math.max(1, math.floor(tonumber(amount) or 1)))
 	if ok then
-		cleanOrphanedHotbarPins(player)
+		cleanOrphanedHotbarPins(player, id)
 		fireChanged(player, "remove", { itemId = id })
 	end
 	return ok

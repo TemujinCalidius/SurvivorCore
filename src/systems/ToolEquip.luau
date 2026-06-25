@@ -52,10 +52,26 @@ end
 local function makeTool(def: any, itemId: string): Tool
 	local tmpl = findTemplate(itemId)
 	local tool = if tmpl then tmpl:Clone() else buildDefaultTool(def.name or itemId)
+	if tmpl then
+		-- A held Tool's parts must be unanchored to weld to the hand; creator templates authored in
+		-- the world (e.g. the plugin's "+ Tool model") are often left anchored, so normalise here.
+		for _, p in tool:GetDescendants() do
+			if p:IsA("BasePart") then
+				p.Anchored = false
+			end
+		end
+	end
 	tool.Name = def.name or itemId
 	tool:SetAttribute(TOOL_MARKER, true)
 	tool:SetAttribute("_ItemId", itemId)
 	tool:SetAttribute("ToolType", def.toolType)
+	-- If this item is a weapon, stamp the client-readable routing attributes (the client routes melee
+	-- vs bow off WeaponKind, and sizes the bow draw meter off WeaponDrawTime). The SERVER re-reads the
+	-- authoritative weapon stats from the Items registry — these are for client input only.
+	if typeof(def.weaponKind) == "string" and def.weaponKind ~= "" then
+		tool:SetAttribute("WeaponKind", def.weaponKind)
+		tool:SetAttribute("WeaponDrawTime", tonumber(def.weaponDrawTime) or 0)
+	end
 	return tool
 end
 

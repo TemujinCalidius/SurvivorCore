@@ -43,6 +43,94 @@ ContentAdmin.CATEGORIES = {
 			{ attr = "description", kind = "string", label = "Description", default = "" },
 		},
 	},
+	Weapons = {
+		-- Weapons ARE items (category = "weapon"), but live in their own SurvivorCoreContent.Weapons
+		-- folder so this editor never collides with the Items editor; the engine loads it into the
+		-- Items registry at start(). `toolType` lets the hotbar equip it; the `weapon*` fields are the
+		-- flat stats the Combat system reads.
+		folder = "Weapons",
+		title = "Weapons",
+		keyLabel = "New weapon id",
+		fields = {
+			{ attr = "name", kind = "string", label = "Name", default = "" },
+			{ attr = "category", kind = "string", label = "Category", default = "weapon" },
+			{
+				attr = "toolType",
+				kind = "string",
+				label = "Tool type",
+				default = "",
+				placeholder = "sword / bow (required to equip)",
+			},
+			{ attr = "weaponKind", kind = "string", label = "Kind", default = "melee", placeholder = "melee / bow" },
+			{ attr = "weaponDamage", kind = "number", label = "Damage", default = 10 },
+			{ attr = "weaponRange", kind = "number", label = "Range (melee)", default = 8 },
+			{ attr = "weaponCooldown", kind = "number", label = "Cooldown", default = 0.6 },
+			{ attr = "weaponDrawTime", kind = "number", label = "Draw time (bow)", default = 1 },
+			{ attr = "weaponProjectileSpeed", kind = "number", label = "Arrow speed (bow)", default = 180 },
+			{
+				attr = "weaponMaxRange",
+				kind = "number",
+				label = "Max range (bow)",
+				default = 0,
+				placeholder = "0 = engine default",
+			},
+			{
+				attr = "weaponAmmo",
+				kind = "string",
+				label = "Ammo item (bow)",
+				default = "",
+				placeholder = "an arrow id; blank = none",
+			},
+			{ attr = "stack", kind = "number", label = "Max stack", default = 1 },
+			{ attr = "weight", kind = "number", label = "Weight", default = 1 },
+			{ attr = "icon", kind = "string", label = "Icon", default = "", placeholder = "rbxassetid://…" },
+		},
+	},
+	Arrows = {
+		-- Arrows ARE items (category = "ammo"), in their own SurvivorCoreContent.Arrows folder (loaded
+		-- into the Items registry). A bow's `weaponAmmo` points at one of these ids; the shot combines
+		-- the bow's pullback with the arrow's weight/damage/range. Different arrow types = different
+		-- ballistics.
+		folder = "Arrows",
+		title = "Arrows / Ammo",
+		keyLabel = "New arrow id",
+		fields = {
+			{ attr = "name", kind = "string", label = "Name", default = "" },
+			{ attr = "category", kind = "string", label = "Category", default = "ammo" },
+			{
+				attr = "ammoDamage",
+				kind = "number",
+				label = "Damage ×",
+				default = 1,
+				placeholder = "1.0 = bow base; 1.2 = +20%",
+			},
+			{
+				attr = "ammoDrop",
+				kind = "number",
+				label = "Drop / curve ×",
+				default = 1,
+				placeholder = "1.0 = normal; heavier = more arc",
+			},
+			{
+				attr = "ammoRange",
+				kind = "number",
+				label = "Max range",
+				default = 0,
+				placeholder = "studs; 0 = bow default",
+			},
+			{
+				attr = "ammoSpeed",
+				kind = "number",
+				label = "Speed ×",
+				default = 0,
+				placeholder = "0 = bow speed; 1.2 = faster",
+			},
+			{ attr = "weight", kind = "number", label = "Carry weight", default = 0.05 },
+			{ attr = "stack", kind = "number", label = "Max stack", default = 32 },
+			{ attr = "icon", kind = "string", label = "Icon", default = "", placeholder = "rbxassetid://…" },
+			{ attr = "description", kind = "string", label = "Description", default = "" },
+		},
+	},
 	Resources = {
 		folder = "Resources",
 		title = "Gatherables",
@@ -61,10 +149,32 @@ ContentAdmin.CATEGORIES = {
 			{ attr = "yieldMax", kind = "number", label = "Yield max", default = 1 },
 		},
 	},
+	Mobs = {
+		folder = "Mobs",
+		title = "Mobs",
+		keyLabel = "New mob id",
+		fields = {
+			{
+				attr = "faction",
+				kind = "string",
+				label = "Faction",
+				default = "hostile",
+				placeholder = "hostile / passive / neutral",
+			},
+			{ attr = "health", kind = "number", label = "Health", default = 50 },
+			{ attr = "walkSpeed", kind = "number", label = "Walk speed", default = 6 },
+			{ attr = "runSpeed", kind = "number", label = "Run speed", default = 14 },
+			{ attr = "aggroRange", kind = "number", label = "Aggro range", default = 40 },
+			{ attr = "leashRange", kind = "number", label = "Leash range", default = 60 },
+			{ attr = "attackRange", kind = "number", label = "Attack range", default = 6 },
+			{ attr = "attackDamage", kind = "number", label = "Attack damage", default = 8 },
+			{ attr = "attackCooldown", kind = "number", label = "Attack cooldown", default = 1.5 },
+		},
+	},
 } :: { [string]: Category }
 
 -- Render order for the UI.
-ContentAdmin.ORDER = { "Items", "Resources" }
+ContentAdmin.ORDER = { "Items", "Weapons", "Arrows", "Resources", "Mobs" }
 
 -- ids are lowercase alphanumeric + underscore (matches how content is referenced everywhere).
 function ContentAdmin.sanitizeId(raw: any): string
