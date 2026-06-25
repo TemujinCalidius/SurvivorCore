@@ -49,9 +49,14 @@ require(script.shared.UiConfig)
 require(script.shared.HarvestingConfig)
 require(script.shared.CraftingConfig)
 
+-- Define the "Mobs" (AI tick/aggro/leash) and "Combat" (melee range/cooldown + bow) Config sections,
+-- so Config.override(...) works any time before start()/startClient().
+require(script.shared.MobsConfig)
+require(script.shared.CombatConfig)
+
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.4.0"
+SurvivorCore.VERSION = "0.5.0"
 
 -- Foundation
 SurvivorCore.Config = Config
@@ -73,6 +78,12 @@ SurvivorCore.Codex = Registries.Codex
 SurvivorCore.Appearance = Registries.Appearance
 SurvivorCore.Mobs = Registries.Mobs
 
+-- Mob juice: per-mob-type reaction hooks (death fade, spawn cry, hit flinch). Like Gather, safe to
+-- register any time; the Mobs FSM dispatches them. SurvivorCore.Mobs.onReaction(id, event, fn) where
+-- event = "spawned" | "hit" | "attack" | "died". The runtime API (spawn/adopt/damage/getActive/
+-- isMob) is attached after start() (server-only, acts on live mobs).
+SurvivorCore.Mobs.onReaction = Reactions.on
+
 -- Creator-facing component layer
 SurvivorCore.Components = Components
 
@@ -91,11 +102,17 @@ function SurvivorCore.start(_options: { [string]: any }?)
 	local content = ReplicatedStorage:FindFirstChild("SurvivorCoreContent")
 	if content then
 		Registries.Items.loadFromFolder(content:FindFirstChild("Items"))
+		-- Weapons and Arrows ARE items (category = "weapon" / "ammo"); the admin plugin authors them in
+		-- their own folders so its editors don't collide with the Items editor — load both into Items.
+		Registries.Items.loadFromFolder(content:FindFirstChild("Weapons"))
+		Registries.Items.loadFromFolder(content:FindFirstChild("Arrows"))
 		Registries.Resources.loadFromFolder(content:FindFirstChild("Resources"))
+		Registries.Mobs.loadFromFolder(content:FindFirstChild("Mobs"))
 	end
 
 	-- Load built-in components so their tags are recognised.
 	require(script.components.Gatherable)
+	require(script.components.Mob)
 
 	-- TODO (extraction): boot order — Config merge → Assets → persistence → systems.
 	Components.scan()
@@ -133,6 +150,24 @@ function SurvivorCore.start(_options: { [string]: any }?)
 
 	-- ToolEquip: hotbar → physical Tool bridge (an active tool item becomes a held Roblox Tool).
 	require(script.systems.ToolEquip).start(_options)
+
+	-- Mobs: the shared mob & AI engine (FSM substrate). Adopts any "Mob"-tagged model (done during
+	-- Components.scan above) and runs its AI; the runtime API acts on live mobs, so it's attached
+	-- here after start(): SurvivorCore.Mobs.spawn(type, cframe, opts) / adopt / damage / getActive /
+	-- isMob (registry register/get/getAll/query + onReaction were available before start()).
+	local mobs = require(script.systems.Mobs)
+	mobs.start(_options)
+	SurvivorCore.Mobs.spawn = mobs.spawn
+	SurvivorCore.Mobs.adopt = mobs.adopt
+	SurvivorCore.Mobs.damage = mobs.damage
+	SurvivorCore.Mobs.getActive = mobs.getActive
+	SurvivorCore.Mobs.isMob = mobs.isMob
+
+	-- Combat: server-authoritative melee + ranged (bow). Booted after Inventory (bow ammo) and Mobs
+	-- (its targets). Reuses the tool-swing pipeline; fires the combat:hit / combat:kill schema.
+	local combat = require(script.systems.Combat)
+	combat.start(_options)
+	SurvivorCore.Combat = combat
 
 	-- Harvesting: the authoritative hit resolver for gatherable nodes (prompt + tool-swing). Booted
 	-- after Inventory so per-hit yield can be granted (and a full inventory blocks the hit). The
@@ -178,6 +213,10 @@ function SurvivorCore.startClient(_options: { [string]: any }?)
 
 	-- Tool-swing harvesting input (click an equipped tool at a gatherable node).
 	require(script.client.ToolHarvest).start(_options)
+
+	-- Combat input (click an equipped weapon: melee swing, or hold-to-draw a bow). Routes by the
+	-- held Tool's WeaponKind, so it coexists with ToolHarvest without double-firing.
+	require(script.client.CombatInput).start(_options)
 
 	-- Zero-setup net: if no authored menu/hotbar template reached the player, build the minimal
 	-- fallback (the binders pick it up via DescendantAdded, like HudFallback).

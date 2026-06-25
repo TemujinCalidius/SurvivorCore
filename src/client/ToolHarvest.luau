@@ -72,6 +72,11 @@ local function playSwing(tool: Tool)
 end
 
 local function onActivated(tool: Tool)
+	-- A weapon (carries WeaponKind) routes to CombatInput, not here — so the two input paths never
+	-- double-fire on the same click. Harvest tools have no WeaponKind and fall through.
+	if typeof(tool:GetAttribute("WeaponKind")) == "string" then
+		return
+	end
 	local node = findGatherableUnderMouse()
 	if not node or not inRange(node) then
 		return
