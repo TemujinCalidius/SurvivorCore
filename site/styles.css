@@ -61,6 +61,12 @@ h1, h2, h3 { line-height: 1.15; letter-spacing: -0.015em; margin: 0; }
   color: var(--text);
 }
 .btn-ghost:hover { border-color: var(--green); color: var(--text); background: rgba(90, 205, 120, 0.08); }
+.btn-sponsor {
+  background: rgba(233, 105, 150, 0.12);
+  border-color: rgba(233, 105, 150, 0.35);
+  color: #f3a0bd;
+}
+.btn-sponsor:hover { background: rgba(233, 105, 150, 0.2); border-color: rgba(233, 105, 150, 0.6); color: #ffc0d6; }
 
 /* ---- Nav ---- */
 .nav {
@@ -247,6 +253,7 @@ h1 {
 /* ---- Get started ---- */
 .start-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
 .panel {
+  min-width: 0; /* let the panel shrink so its <pre> scrolls instead of overflowing the page */
   padding: 1.6rem;
   background: var(--panel);
   border: 1px solid var(--stroke);
