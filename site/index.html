@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SurvivorCore — the survival game engine for Roblox</title>
+    <meta
+      name="description"
+      content="SurvivorCore is a batteries-included, creator-extensible survival game framework for Roblox. Survival stats, inventory, gathering, crafting, combat, mobs & AI — plus a no-code admin plugin. Free & open source."
+    />
+    <meta name="theme-color" content="#14171e" />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SurvivorCore — the survival game engine for Roblox" />
+    <meta
+      property="og:description"
+      content="Build a survival game in Roblox Studio — survival stats, inventory, gathering, crafting, combat, mobs & AI, and a no-code admin plugin. Free & open source."
+    />
+    <meta property="og:url" content="https://temujincalidius.github.io/SurvivorCore/" />
+    <meta property="og:image" content="https://temujincalidius.github.io/SurvivorCore/assets/img/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="assets/img/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="assets/img/logo-64.png" />
+    <link rel="apple-touch-icon" href="assets/img/logo-180.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <a class="brand" href="#top" aria-label="SurvivorCore home">
+        <img src="assets/img/logo-64.png" alt="" width="34" height="34" />
+        <span>Survivor<span class="accent">Core</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#demos">Demos</a>
+        <a href="#start">Get started</a>
+        <a class="btn btn-ghost" href="https://github.com/TemujinCalidius/SurvivorCore">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <!-- ===== Hero ===== -->
+      <section class="hero">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-inner">
+          <img class="hero-logo" src="assets/img/logo-256.png" alt="SurvivorCore logo" width="112" height="112" />
+          <a class="badge" href="https://github.com/TemujinCalidius/SurvivorCore/releases/latest">
+            v0.5.0 · pre-release
+          </a>
+          <h1>The survival game engine for <span class="accent">Roblox</span></h1>
+          <p class="lede">
+            A batteries-included, creator-extensible framework. Survival stats, inventory, gathering,
+            crafting, combat, mobs &amp; AI — wired together, restyleable, and authorable
+            <strong>without code</strong>. If you know Roblox Studio, you can build a survival game.
+          </p>
+          <div class="cta">
+            <a class="btn btn-primary" href="#start">Get started</a>
+            <a class="btn btn-ghost" href="https://github.com/TemujinCalidius/SurvivorCore">View on GitHub</a>
+          </div>
+          <p class="hero-sub">Free &amp; open source (MIT) · drop-in <code>.rbxm</code> or Wally</p>
+        </div>
+      </section>
+
+      <!-- ===== Value props ===== -->
+      <section class="props">
+        <div class="prop">
+          <h3>Batteries included</h3>
+          <p>The core survival loop ships working — stats, inventory, gather, craft, fight — not a pile of parts to wire.</p>
+        </div>
+        <div class="prop">
+          <h3>No-code friendly</h3>
+          <p>A Studio admin plugin creates items, weapons, ammo and mobs — with full stats — and zero scripting.</p>
+        </div>
+        <div class="prop">
+          <h3>Yours to re-skin</h3>
+          <p>UI is real, restyleable Instances driven by attributes. Override any default; nothing is locked.</p>
+        </div>
+        <div class="prop">
+          <h3>Server-authoritative</h3>
+          <p>Hits, harvests and crafts are validated on the server. Content-free by design — you bring the game.</p>
+        </div>
+      </section>
+
+      <!-- ===== Features ===== -->
+      <section id="features" class="section">
+        <div class="section-head">
+          <h2>Everything the survival loop needs</h2>
+          <p>Each system is configurable, hook-extensible, and authorable as tagged Instances or no-code.</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <span class="ico ico-green" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2 5 4-12 2 7h6"/></svg>
+            </span>
+            <h3>Survival stats &amp; HUD</h3>
+            <p>Health, energy, hunger, thirst, fatigue, blood, poison — ticking, draining, biting back. A clean, restyleable HUD drives only the data.</p>
+          </article>
+          <article class="card">
+            <span class="ico ico-green" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            </span>
+            <h3>Inventory, hotbar &amp; crafting</h3>
+            <p>Slots + carry-weight, a 9-slot hotbar, equipment, and hand crafting in a tabbed menu — server-authoritative, drag-and-drop.</p>
+          </article>
+          <article class="card">
+            <span class="ico ico-green" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3l7 7-3 3-7-7z"/><path d="M11 6 4 13l-1 8 8-1 7-7"/></svg>
+            </span>
+            <h3>Gathering</h3>
+            <p>Tag any mesh <code>Gatherable</code>: hold-E or tool-swing, per-hit yields, reaction hooks (a reed sways, a tree fells and leaves a stump).</p>
+          </article>
+          <article class="card">
+            <span class="ico ico-ember" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c2 3 1 5-1 7s-2 5 1 6c3-1 5-4 5-8 3 2 3 8-2 10s-11-1-11-7c0-4 4-6 4-9 1 .5 2 .8 4 1z"/></svg>
+            </span>
+            <h3>Combat — melee &amp; bow</h3>
+            <p>Click to swing; or aim a bow, draw for power, and loose arrows that <em>arc under real weight</em>. One server-validated kill-event schema.</p>
+          </article>
+          <article class="card">
+            <span class="ico ico-ember" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="6"/><path d="M8 9h.01M16 9h.01M9 20l1-4M15 20l-1-4"/></svg>
+            </span>
+            <h3>Mobs &amp; AI</h3>
+            <p>A shared FSM substrate: hostile mobs chase &amp; attack, passive animals flee. Behavior is data — faction picks the profile.</p>
+          </article>
+          <article class="card">
+            <span class="ico ico-green" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4l-6 6 2 2 6-6a4 4 0 0 0 5.4-5.4l-2.3 2.3-2-2 2.3-2.3z"/></svg>
+            </span>
+            <h3>No-code admin plugin</h3>
+            <p>Create items, weapons, ammo and mobs from a Studio form — damage, range, arrow curve, weight, aggro, leash — and drop them into the world.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===== Showcase ===== -->
+      <section id="demos" class="section">
+        <div class="section-head">
+          <h2>See it in action</h2>
+          <p>The whole UI suite runs out of the box — restyle it, or keep the clean defaults.</p>
+        </div>
+        <figure class="shot">
+          <img
+            src="assets/img/ui-showcase.png"
+            alt="SurvivorCore in Roblox Studio: the survival HUD, a tabbed inventory/crafting menu, and the hotbar"
+            loading="lazy"
+            onerror="this.closest('figure').style.display='none'"
+          />
+          <figcaption>HUD, tabbed menu (inventory · character · crafting · codex · achievements · quests) and hotbar — all default UI.</figcaption>
+        </figure>
+        <div class="videos">
+          <div class="video"><iframe src="https://makertube.net/videos/embed/tyn8JEMG3CaMbTXid8osdU" title="Mobs &amp; combat demo" loading="lazy" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-fullscreen"></iframe><span>Mobs &amp; combat</span></div>
+          <div class="video"><iframe src="https://makertube.net/videos/embed/b6RWPeiW6vLz4iVXuuiRtP" title="Gathering &amp; crafting demo" loading="lazy" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-fullscreen"></iframe><span>Gathering &amp; crafting</span></div>
+          <div class="video"><iframe src="https://makertube.net/videos/embed/mCneurjoY3Av6yi48VsGQE" title="No-code content creation demo" loading="lazy" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-fullscreen"></iframe><span>No-code creation</span></div>
+          <div class="video"><iframe src="https://makertube.net/videos/embed/wXRkuJo323AHMpZKVwWxt3" title="Inventory &amp; hotbar demo" loading="lazy" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-fullscreen"></iframe><span>Inventory &amp; hotbar</span></div>
+        </div>
+      </section>
+
+      <!-- ===== Get started ===== -->
+      <section id="start" class="section">
+        <div class="section-head">
+          <h2>Get started</h2>
+          <p>Drop it into <code>ReplicatedStorage</code>, register your content, and call <code>start()</code>.</p>
+        </div>
+        <div class="start-grid">
+          <div class="panel">
+            <h3>Install</h3>
+            <p>Grab the drop-in model from the latest release, or add it with Wally:</p>
+            <pre><code># wally.toml
+[dependencies]
+SurvivorCore = "temujincalidius/survivorcore@0.5.0"</code></pre>
+            <p class="muted">…or drop <code>SurvivorCore.rbxm</code> into <code>ReplicatedStorage</code>.</p>
+            <p>
+              <a class="btn btn-ghost" href="https://github.com/TemujinCalidius/SurvivorCore/releases/latest">Latest release ↗</a>
+              <a class="btn btn-ghost" href="https://github.com/TemujinCalidius/SurvivorCore/tree/main/docs">Read the docs ↗</a>
+            </p>
+          </div>
+          <div class="panel">
+            <h3>Boot it</h3>
+            <pre><code>local SurvivorCore = require(ReplicatedStorage.SurvivorCore)
+
+-- register content (or author it no-code in the admin plugin)
+SurvivorCore.Items.register({ id = "berry", name = "Wild Berries", stack = 20 })
+SurvivorCore.Mobs.register({ id = "husk", faction = "hostile", health = 60 })
+
+SurvivorCore.start()  -- boots stats, inventory, gathering, crafting, combat, mobs…</code></pre>
+            <p class="muted">The HUD loader calls <code>startClient()</code> for you. That's it.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <img src="assets/img/logo-64.png" alt="" width="30" height="30" />
+          <span>Survivor<span class="accent">Core</span></span>
+        </div>
+        <nav class="footer-links">
+          <a href="https://github.com/TemujinCalidius/SurvivorCore">GitHub</a>
+          <a href="https://github.com/TemujinCalidius/SurvivorCore/tree/main/docs">Docs</a>
+          <a href="https://github.com/TemujinCalidius/SurvivorCore/releases">Releases</a>
+          <a href="https://thecounterearth.com">The Counter Earth</a>
+        </nav>
+      </div>
+      <p class="colophon">
+        Free &amp; open source under the MIT license · the engine behind
+        <a href="https://thecounterearth.com">The Counter Earth</a>. Built with
+        <a href="https://github.com/rojo-rbx/rojo">Rojo</a>.
+      </p>
+    </footer>
+  </body>
+</html>
