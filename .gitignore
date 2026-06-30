@@ -24,3 +24,6 @@ globalTypes.d.luau
 # Editor / OS
 .DS_Store
 .vscode/
+
+# Local Claude Code preview/launch config
+.claude/
