@@ -190,6 +190,22 @@ local function applySpawn(catKey: string, id: string): any
 			Selection:Set({ model })
 			return model
 		end
+		if catKey == "Quests" then
+			-- Drop a quest-giver post: tag + Quest attribute is exactly what the engine reads. The
+			-- creator swaps in their own NPC/notice-board model later (tag it and set Quest).
+			local post = Instance.new("Part")
+			post.Name = id .. "_giver"
+			post.Size = Vector3.new(1, 5, 1)
+			post.Anchored = true
+			post.Color = Color3.fromRGB(120, 170, 255)
+			post.Material = Enum.Material.Wood
+			post.Position = spawnPosition()
+			post:SetAttribute("Quest", id)
+			CollectionService:AddTag(post, "QuestGiver")
+			post.Parent = Workspace
+			Selection:Set({ post })
+			return post
+		end
 		if catKey == "Weapons" then
 			-- Drop a starter Tool you can model the look on. It carries the weapon's ToolType /
 			-- WeaponKind so it's recognisable; move it under ReplicatedStorage.SurvivorCoreContent.Tools

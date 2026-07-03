@@ -46,10 +46,12 @@ SurvivorCore.Recipes.register({
 
 | Registry | Key field | What it holds |
 |---|---|---|
-| `Items` | `id` | Item definitions (name, stack size, …). |
+| `Items` | `id` | Item definitions (name, stack size, …) — incl. weapons + ammo. |
 | `Recipes` | `id` | Crafting **and** cooking recipes — one registry, routed by `station`. |
+| `Resources` | `id` | Gatherable-resource defs (what a tagged node *is*). |
 | `Stats` | `name` | Survival/status stat models. |
-| `Achievements` | `key` | Achievement definitions. |
+| `Achievements` | `key` | Achievement defs (counter + threshold — [docs](achievements.md)). |
+| `Quests` | `id` | Quest defs (objectives + rewards — [docs](quests.md)). |
 | `Codex` | `id` | Discoverable lore / collectible entries. |
 | `Appearance` | `id` | Character appearance options. |
 | `Mobs` | `id` | Creature / hostile-mob definitions. |
@@ -142,15 +144,22 @@ end)
 -- later: disconnect()
 ```
 
-Engine systems fire hooks with `Hooks.run("name", ctx)`. Today the `Gatherable` component
-fires:
+Engine systems fire hooks with `Hooks.run("name", ctx)`. The full catalogue lives in the header of
+[`src/foundation/Hooks.luau`](../src/foundation/Hooks.luau); highlights:
 
-| Hook | Context |
+| Hook family | Fired by |
 |---|---|
-| `gather:hit` | `{ instance, player, values, hpLeft }` — each interaction. |
-| `gather:depleted` | `{ instance, player, values }` — final hit, before the instance is destroyed. |
+| `gather:hit` / `gather:depleted` / `gather:blocked` | harvesting ([docs](harvesting.md)) |
+| `craft:start` / `craft:end` / `craft:blocked` | crafting ([docs](crafting.md)) |
+| `item:use` · `inventory:changed` | inventory ([docs](inventory.md)) |
+| `mob:spawned` / `mob:hit` / `mob:attack` / `mob:died` | mobs & AI ([docs](mobs.md)) |
+| `combat:hit` / `combat:kill` | combat ([docs](combat.md)) |
+| `quest:started` / `quest:progress` / `quest:completed` / `quest:blocked` | quests ([docs](quests.md)) |
+| `achievement:unlocked` | achievements ([docs](achievements.md)) |
 
-More hooks land as systems are extracted (`craft:start`/`craft:end`, mob lifecycle, …).
+These gameplay events ALSO cross the **EventBridge** with the same names — that bus is what quests,
+achievements, and analytics consume (via the `Progression` translation layer,
+[docs](achievements.md#the-progression-stream)).
 
 ### Hooks vs. EventBridge
 

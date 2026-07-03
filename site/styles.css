@@ -210,6 +210,8 @@ h1 {
 .ico svg { width: 24px; height: 24px; }
 .ico-green { color: var(--green); background: rgba(90, 205, 120, 0.12); }
 .ico-ember { color: var(--ember); background: rgba(240, 136, 60, 0.13); }
+/* The capstone card (the no-code admin plugin) spans the full grid row. */
+.card-wide { grid-column: 1 / -1; }
 
 /* ---- Showcase ---- */
 .shot {
@@ -310,7 +312,8 @@ pre code { color: inherit; }
   .start-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 680px) {
-  .nav-links { gap: 0.8rem; }
+  .nav { flex-wrap: wrap; justify-content: center; }
+  .nav-links { gap: 0.8rem; flex-wrap: wrap; justify-content: center; }
   .nav-links > a:not(.btn) { display: none; }
   .props { grid-template-columns: 1fr; }
   .grid { grid-template-columns: 1fr; }

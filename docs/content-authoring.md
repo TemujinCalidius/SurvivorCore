@@ -47,6 +47,20 @@ ReplicatedStorage
    │     • faction = "hostile"        ("hostile" | "passive" | "neutral")
    │     • health = 60
    │     • aggroRange = 40
+   ├─ Quests     (Folder)        ← flat single-objective quests (normalized at load)
+   │  └─ gather_reeds (Configuration)
+   │     • name = "Gather Reeds"
+   │     • objectiveType = "gather"   ("gather" | "craft" | "kill" | "use")
+   │     • objectiveTarget = "reed"
+   │     • objectiveCount = 3
+   │     • rewardItem = "berry"
+   │     • rewardCount = 2
+   │     • autoStart = true
+   ├─ Achievements (Folder)      ← flat counter + threshold defs
+   │  └─ husk_slayer (Configuration)
+   │     • name = "Husk Slayer"
+   │     • counter = "kills_husk"     (see docs/achievements.md for the counter catalogue)
+   │     • threshold = 3
    ├─ Tools      (Folder)        ← Tool templates the hotbar equips (named by item id)
    └─ MobModels  (Folder)        ← rigged mob templates Mobs.spawn clones (named by mob id)
 ```
@@ -57,7 +71,7 @@ same instance-config pattern the survival stats use.
 
 ## The admin plugin Content widget
 
-Open Studio → the **SurvivorCore** toolbar → **Content**. Five builders:
+Open Studio → the **SurvivorCore** toolbar → **Content**. Seven builders:
 
 - **Items** — create an item by id, then set Name / Max stack / Weight / Category / Tool type /
   Icon / Description.
@@ -74,6 +88,13 @@ Open Studio → the **SurvivorCore** toolbar → **Content**. Five builders:
   Yield min / Yield max. **+ Add to World** drops a tagged `Gatherable` node.
 - **Mobs** — create a mob type by id, then set Faction / Health / Speeds / Aggro / Leash / Attack.
   **+ Add to World** drops a tagged `Mob` placeholder rig (swap in your own model later).
+- **Quests** — create a quest by id, then set Name / Description / Objective (type, target, count) /
+  Reward (item, count) / Auto-start / Requires / Turn in. **+ Quest giver** drops a tagged
+  `QuestGiver` post offering it (see [quests.md](quests.md)). Multi-objective chains stay
+  code-authored, like recipes.
+- **Achievements** — create an achievement by key, then set Name / Description / Counter /
+  Threshold / Icon — counters are the engine's auto-derived progression counters
+  (see [achievements.md](achievements.md)).
 
 Each edit is one Studio **undo** step. Behind the scenes it creates/edits the
 `SurvivorCoreContent` instances above, so pressing Play registers your content with no code.
