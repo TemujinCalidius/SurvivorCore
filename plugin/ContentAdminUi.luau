@@ -110,17 +110,20 @@ local function buildEntry(catKey: string, id: string, ContentAdmin: any, applySe
 		applyDelete(catKey, id)
 	end)
 
-	-- Gatherables + Mobs drop a tagged, def-linked instance; Weapons drop a starter Tool (Handle +
-	-- the weapon's ToolType/WeaponKind) you can model the look on — all in front of the camera, the
-	-- bridge between the editor and the world.
+	-- Gatherables + Mobs + Quests drop a tagged, def-linked instance; Weapons drop a starter Tool
+	-- (Handle + the weapon's ToolType/WeaponKind) you can model the look on — all in front of the
+	-- camera, the bridge between the editor and the world.
 	local labelRight = 64
-	if (catKey == "Resources" or catKey == "Mobs" or catKey == "Weapons") and applySpawn then
+	if (catKey == "Resources" or catKey == "Mobs" or catKey == "Weapons" or catKey == "Quests") and applySpawn then
 		local add = make("TextButton", {
 			Size = UDim2.fromOffset(104, 20),
 			Position = UDim2.new(1, -168, 0.5, -10),
 			BackgroundColor3 = COL_FIELD,
 			AutoButtonColor = true,
-			Text = if catKey == "Weapons" then "+ Tool model" else "+ Add to World",
+			Text = if catKey == "Weapons"
+				then "+ Tool model"
+				elseif catKey == "Quests" then "+ Quest giver"
+				else "+ Add to World",
 			TextColor3 = COL_ACCENT,
 			TextSize = 11,
 			Font = FONT,

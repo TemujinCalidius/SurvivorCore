@@ -18,9 +18,16 @@
 	  mob:attack                                     { instance, mobType, player, damage, position }
 	  combat:hit                                     { attacker, victim, weapon, source, damage, victimHpLeft }
 	  combat:kill                                    { attacker, victim, weapon, source }   -- source "melee"|"bow"
+	  quest:started / quest:progress / quest:completed / quest:blocked
+	                                                 { player, questId, def?, index?, count?, reason? }
+	  achievement:unlocked                           { player, key, def }
 
 	Per-resource / per-mob-type variants of these dispatch through Reactions (see Reactions.luau):
 	SurvivorCore.Gather.onReaction(resourceId, …) and SurvivorCore.Mobs.onReaction(mobType, …).
+
+	Gameplay lifecycle events (gather:*, craft:*, item:use, mob:*, combat:*, quest:*,
+	achievement:unlocked) ALSO cross the EventBridge bus with the same names — that is what
+	quests/achievements/analytics subscribe to (see EventBridge.luau and systems/Progression.luau).
 ]]
 
 local Hooks = {}

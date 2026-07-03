@@ -5,11 +5,13 @@ Attributes in the Explorer. It adds two toolbar buttons under **SurvivorCore**:
 
 - **Survival Stats** — tune the survival-stat rates/thresholds/HUD on the `SurvivalStatsConfig`
   instance (the deltas-only, locked model below).
-- **Content** — create/edit/delete **items**, **weapons**, **gatherable resources** and **mobs** with
-  no code (the Builder slice). It writes `SurvivorCoreContent` instances the engine loads at `start()`
-  — see [content-authoring.md](content-authoring.md). Gatherables and mobs each get a **+ Add to
-  World** button that drops the tagged instance in front of the camera. Unlike the stats editor,
-  content is full owner-authored defs (not deltas). Every edit is one Studio undo step.
+- **Content** — create/edit/delete **items**, **weapons**, **arrows**, **gatherable resources**,
+  **mobs**, **quests** and **achievements** with no code (the Builder slice). It writes
+  `SurvivorCoreContent` instances the engine loads at `start()` — see
+  [content-authoring.md](content-authoring.md). Gatherables/mobs get **+ Add to World**, weapons
+  **+ Tool model**, quests **+ Quest giver** — each drops the tagged instance in front of the
+  camera. Unlike the stats editor, content is full owner-authored defs (not deltas). Every edit is
+  one Studio undo step.
 
 The rest of this page covers the Survival Stats editor; both install the same way. It's the
 [Builder / Admin plugin](https://github.com/TemujinCalidius/SurvivorCore/issues/11).

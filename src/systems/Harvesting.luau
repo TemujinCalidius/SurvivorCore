@@ -22,6 +22,7 @@ assert(RunService:IsServer(), "SurvivorCore.Harvesting is server-only — requir
 local Inventory = require(script.Parent.Inventory)
 local Reactions = require(script.Parent.Parent.foundation.Reactions)
 local Hooks = require(script.Parent.Parent.foundation.Hooks)
+local EventBridge = require(script.Parent.Parent.foundation.EventBridge)
 local Remotes = require(script.Parent.Parent.shared.Remotes)
 local HarvestingConfig = require(script.Parent.Parent.shared.HarvestingConfig)
 
@@ -94,6 +95,7 @@ local function fireBlocked(player: Player, node: Instance, resource: any, reason
 	local ctx = { instance = node, player = player, resource = resource, reason = reason }
 	Hooks.run("gather:blocked", ctx)
 	Reactions.run(resource, "blocked", ctx)
+	EventBridge.fire("gather:blocked", player, ctx)
 	fireResult(player, { ok = false, reason = reason, resource = resource })
 end
 
@@ -263,6 +265,7 @@ function Harvesting.tryHarvest(node: Instance, player: Player, mode: string): bo
 	}
 	Hooks.run("gather:hit", ctx)
 	Reactions.run(info.resource, "hit", ctx)
+	EventBridge.fire("gather:hit", player, ctx) -- quests/achievements/analytics consume the bus
 	fireResult(player, { ok = true, resource = info.resource, granted = amount, hpLeft = hp })
 
 	if hp <= 0 then
@@ -275,6 +278,7 @@ function Harvesting.tryHarvest(node: Instance, player: Player, mode: string): bo
 		}
 		Hooks.run("gather:depleted", dctx)
 		Reactions.run(info.resource, "depleted", dctx)
+		EventBridge.fire("gather:depleted", player, dctx)
 		removeHealthBar(node)
 		if info.destroyOnDeplete then
 			node:Destroy()

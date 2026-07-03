@@ -149,6 +149,62 @@ ContentAdmin.CATEGORIES = {
 			{ attr = "yieldMax", kind = "number", label = "Yield max", default = 1 },
 		},
 	},
+	Quests = {
+		-- Flat single-objective quests (multi-objective chains stay code-authored, like recipes).
+		-- The engine's QuestData.normalize turns these attributes into the canonical def at load.
+		folder = "Quests",
+		title = "Quests",
+		keyLabel = "New quest id",
+		fields = {
+			{ attr = "name", kind = "string", label = "Quest name", default = "" },
+			{ attr = "description", kind = "string", label = "Description", default = "" },
+			{
+				attr = "objectiveType",
+				kind = "string",
+				label = "Objective",
+				default = "gather",
+				placeholder = "gather / craft / kill / use",
+			},
+			{
+				attr = "objectiveTarget",
+				kind = "string",
+				label = "Target id",
+				default = "",
+				placeholder = "item / mob id; blank = any",
+			},
+			{ attr = "objectiveCount", kind = "number", label = "Count needed", default = 1 },
+			{ attr = "rewardItem", kind = "string", label = "Reward item", default = "", placeholder = "an item id" },
+			{ attr = "rewardCount", kind = "number", label = "Reward count", default = 1 },
+			{ attr = "autoStart", kind = "boolean", label = "Auto-start", default = false },
+			{
+				attr = "requires",
+				kind = "string",
+				label = "Requires quest",
+				default = "",
+				placeholder = "prerequisite quest id",
+			},
+			{ attr = "turnIn", kind = "boolean", label = "Turn in at giver", default = false },
+		},
+	},
+	Achievements = {
+		-- Flat counter + threshold defs against the engine's auto-derived progression counters.
+		folder = "Achievements",
+		title = "Achievements",
+		keyLabel = "New achievement key",
+		fields = {
+			{ attr = "name", kind = "string", label = "Name", default = "" },
+			{ attr = "description", kind = "string", label = "Description", default = "" },
+			{
+				attr = "counter",
+				kind = "string",
+				label = "Counter",
+				default = "",
+				placeholder = "gathers_reed / kills_husk / crafts_total",
+			},
+			{ attr = "threshold", kind = "number", label = "Threshold", default = 1 },
+			{ attr = "icon", kind = "string", label = "Icon", default = "", placeholder = "rbxassetid://…" },
+		},
+	},
 	Mobs = {
 		folder = "Mobs",
 		title = "Mobs",
@@ -174,7 +230,7 @@ ContentAdmin.CATEGORIES = {
 } :: { [string]: Category }
 
 -- Render order for the UI.
-ContentAdmin.ORDER = { "Items", "Weapons", "Arrows", "Resources", "Mobs" }
+ContentAdmin.ORDER = { "Items", "Weapons", "Arrows", "Resources", "Mobs", "Quests", "Achievements" }
 
 -- ids are lowercase alphanumeric + underscore (matches how content is referenced everywhere).
 function ContentAdmin.sanitizeId(raw: any): string

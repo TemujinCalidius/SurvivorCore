@@ -212,6 +212,65 @@ SurvivorCore.Mobs.register({
 	runSpeed = 24,
 	aggroRange = 28, -- bolts when you get within ~28 studs
 })
+
+-- Quests: a small chain through the demo loop — gather → craft → fight. `gather_reeds` starts
+-- automatically; finishing it auto-starts `weave_basket` (requires + autoStart); `slay_husk` is
+-- offered at the quest-giver post near spawn and must be turned in there (turnIn).
+SurvivorCore.Quests.register({
+	id = "gather_reeds",
+	name = "Gather Reeds",
+	description = "Pull 3 reeds from the bushes by the river.",
+	objectives = { { type = "gather", target = "reed", count = 3 } },
+	rewards = { { item = "berry", count = 2 } },
+	autoStart = true,
+})
+SurvivorCore.Quests.register({
+	id = "weave_basket",
+	name = "Weave a Basket",
+	description = "Craft a reed basket from your gathered reeds.",
+	objectives = { { type = "craft", target = "reed_basket", count = 1 } },
+	rewards = { { item = "arrow", count = 5 } },
+	autoStart = true,
+	requires = "gather_reeds",
+})
+SurvivorCore.Quests.register({
+	id = "slay_husk",
+	name = "Slay a Husk",
+	description = "A husk stalks the field. Put it down, then report back.",
+	objectives = { { type = "kill", target = "husk", count = 1 } },
+	rewards = { { item = "heavy_arrow", count = 4 } },
+	turnIn = true, -- return to the giver post to claim
+})
+
+-- Achievements: flat counter + threshold against the engine's auto-derived counters.
+SurvivorCore.Achievements.register({
+	key = "first_reed",
+	name = "First Harvest",
+	description = "Gather your first reed.",
+	counter = "gathers_reed",
+	threshold = 1,
+})
+SurvivorCore.Achievements.register({
+	key = "reed_hoarder",
+	name = "Reed Hoarder",
+	description = "Gather 25 reeds.",
+	counter = "gathers_reed",
+	threshold = 25,
+})
+SurvivorCore.Achievements.register({
+	key = "handy",
+	name = "Handy",
+	description = "Craft your first item.",
+	counter = "crafts_total",
+	threshold = 1,
+})
+SurvivorCore.Achievements.register({
+	key = "husk_slayer",
+	name = "Husk Slayer",
+	description = "Slay 3 husks.",
+	counter = "kills_husk",
+	threshold = 3,
+})
 SurvivorCore.Items.register({
 	id = "straw_hat",
 	name = "Straw Hat",
@@ -458,6 +517,38 @@ buildWeaponTemplates()
 SurvivorCore.Mobs.spawn("husk", CFrame.new(40, 5, 20), { respawn = true })
 SurvivorCore.Mobs.spawn("husk", CFrame.new(48, 5, 32), { respawn = true })
 SurvivorCore.Mobs.spawn("boar", CFrame.new(-30, 5, 18))
+
+-- The quest-giver post: offers `slay_husk` (hold E to accept; return to turn in). Any mesh works —
+-- tag it "QuestGiver" + set Quest — this demo just uses a marked wooden post.
+local function buildQuestPost(position: Vector3)
+	local post = Instance.new("Part")
+	post.Name = "QuestPost"
+	post.Size = Vector3.new(1, 5, 1)
+	post.Anchored = true
+	post.Color = Color3.fromRGB(150, 110, 70)
+	post.Material = Enum.Material.Wood
+	post.Position = position + Vector3.new(0, 2.5, 0)
+	local sign = Instance.new("Part")
+	sign.Name = "Sign"
+	sign.Size = Vector3.new(2.4, 1.4, 0.3)
+	sign.Color = Color3.fromRGB(120, 170, 255)
+	sign.Material = Enum.Material.SmoothPlastic
+	sign.Anchored = true
+	sign.CFrame = post.CFrame * CFrame.new(0, 1.6, 0)
+	sign.Parent = post
+	post:SetAttribute("Quest", "slay_husk")
+	CollectionService:AddTag(post, "QuestGiver")
+	post.Parent = Workspace
+end
+buildQuestPost(Vector3.new(8, 0, 8))
+
+-- Flourish hooks: print quest + achievement milestones to the output.
+SurvivorCore.Hooks.on("quest:completed", function(ctx)
+	print(("[demo] %s completed quest '%s'"):format(ctx.player.Name, tostring(ctx.questId)))
+end)
+SurvivorCore.Hooks.on("achievement:unlocked", function(ctx)
+	print(("[demo] %s unlocked achievement '%s'"):format(ctx.player.Name, tostring(ctx.key)))
+end)
 
 -- Death juice (per mob type): fade the husk's body out over its corpse time. Pure creator content
 -- via the reaction API — the engine just fires "died"; the game decides what a corpse looks like.
