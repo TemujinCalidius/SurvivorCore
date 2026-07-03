@@ -250,10 +250,37 @@ local function bindContent(id: string, frame: GuiObject)
 	frame.Visible = false
 end
 
+-- Panels whose build function has already run (an id builds at most once per menu bind).
+local built: { [string]: boolean } = {}
+
+-- A code-registered panel for a tab the TEMPLATE already scaffolds ("quests"/"achievements"
+-- placeholders): adopt the authored content frame — hide its placeholder children and run the
+-- panel's build into it — instead of silently doing nothing (registered[id] is already true).
+local function adoptAuthoredPanel(spec: any): boolean
+	local content = contents[spec.id]
+	if not content or built[spec.id] then
+		return content ~= nil -- already built (or nothing to adopt)
+	end
+	built[spec.id] = true
+	for _, child in content:GetChildren() do
+		if child:IsA("GuiObject") then
+			child.Visible = false -- the authored "coming soon" placeholder steps aside
+		end
+	end
+	if typeof(spec.build) == "function" then
+		task.spawn(spec.build, content)
+	end
+	return true
+end
+
 -- Create a tab from code: clone an authored tab button for styling (or build a plain one),
 -- add an empty content frame, and let the caller fill it once.
 local function realizePanel(spec: any)
-	if not menuGui or registered[spec.id] then
+	if not menuGui then
+		return
+	end
+	if registered[spec.id] then
+		adoptAuthoredPanel(spec)
 		return
 	end
 	local host = menuGui:FindFirstChild("TabContentHost", true)
@@ -272,6 +299,7 @@ local function realizePanel(spec: any)
 	content:SetAttribute("TabContent", spec.id)
 	content.Parent = host
 	bindContent(spec.id, content)
+	built[spec.id] = true
 	if typeof(spec.build) == "function" then
 		task.spawn(spec.build, content)
 	end

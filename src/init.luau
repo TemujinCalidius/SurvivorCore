@@ -54,9 +54,14 @@ require(script.shared.CraftingConfig)
 require(script.shared.MobsConfig)
 require(script.shared.CombatConfig)
 
+-- Define the "Quests" (max active/toasts) and "Achievements" (toasts) Config sections, so
+-- Config.override(...) works any time before start()/startClient().
+require(script.shared.QuestsConfig)
+require(script.shared.AchievementsConfig)
+
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.5.0"
+SurvivorCore.VERSION = "0.6.0"
 
 -- Foundation
 SurvivorCore.Config = Config
@@ -74,6 +79,7 @@ SurvivorCore.Recipes = Registries.Recipes
 SurvivorCore.Resources = Registries.Resources
 SurvivorCore.Stats = Registries.Stats
 SurvivorCore.Achievements = Registries.Achievements
+SurvivorCore.Quests = Registries.Quests
 SurvivorCore.Codex = Registries.Codex
 SurvivorCore.Appearance = Registries.Appearance
 SurvivorCore.Mobs = Registries.Mobs
@@ -108,11 +114,16 @@ function SurvivorCore.start(_options: { [string]: any }?)
 		Registries.Items.loadFromFolder(content:FindFirstChild("Arrows"))
 		Registries.Resources.loadFromFolder(content:FindFirstChild("Resources"))
 		Registries.Mobs.loadFromFolder(content:FindFirstChild("Mobs"))
+		-- Quests are flat single-objective defs no-code (QuestData.normalize reads them);
+		-- achievement defs are flat by design, so they load verbatim.
+		Registries.Quests.loadFromFolder(content:FindFirstChild("Quests"))
+		Registries.Achievements.loadFromFolder(content:FindFirstChild("Achievements"))
 	end
 
 	-- Load built-in components so their tags are recognised.
 	require(script.components.Gatherable)
 	require(script.components.Mob)
+	require(script.components.QuestGiver)
 
 	-- TODO (extraction): boot order — Config merge → Assets → persistence → systems.
 	Components.scan()
@@ -181,6 +192,34 @@ function SurvivorCore.start(_options: { [string]: any }?)
 	crafting.start(_options)
 	SurvivorCore.Crafting = crafting
 
+	-- Progression: the ONE event → (kind, target, amount) translation layer quests and
+	-- achievements consume. Exposed so games can map their own events:
+	--   SurvivorCore.Progression.map("myEvent", function(player, data) return "kill", "boss", 1 end)
+	local progression = require(script.systems.Progression)
+	progression.start(_options)
+	SurvivorCore.Progression = progression
+
+	-- Quests: accept → progress → complete → reward (issue #10). Runtime ops attach onto the
+	-- registry table (register/getAll were available before start; these act on live players):
+	--   SurvivorCore.Quests.accept(player, "gather_reeds")
+	local quests = require(script.systems.Quests)
+	quests.start(_options)
+	SurvivorCore.Quests.accept = quests.accept
+	SurvivorCore.Quests.complete = quests.complete
+	SurvivorCore.Quests.abandon = quests.abandon
+	SurvivorCore.Quests.getLog = quests.getLog
+	SurvivorCore.Quests.isActive = quests.isActive
+	SurvivorCore.Quests.isCompleted = quests.isCompleted
+
+	-- Achievements: always-on counters → threshold → unlock-once (+ toast). Same attach pattern:
+	--   SurvivorCore.Achievements.award(player, "secret_cave")
+	local achievements = require(script.systems.Achievements)
+	achievements.start(_options)
+	SurvivorCore.Achievements.award = achievements.award
+	SurvivorCore.Achievements.addCount = achievements.addCount
+	SurvivorCore.Achievements.isUnlocked = achievements.isUnlocked
+	SurvivorCore.Achievements.getState = achievements.getState
+
 	return SurvivorCore
 end
 
@@ -210,6 +249,12 @@ function SurvivorCore.startClient(_options: { [string]: any }?)
 	require(script.client.InventoryUi).start(_options)
 	require(script.client.CharacterSheet).start(_options)
 	require(script.client.CraftingUi).start(_options)
+
+	-- Goals & progression: toast notifications + the Quests and Achievements tabs (they adopt the
+	-- menu template's scaffolded panels).
+	require(script.client.Toasts).start(_options)
+	require(script.client.QuestsUi).start(_options)
+	require(script.client.AchievementsUi).start(_options)
 
 	-- Tool-swing harvesting input (click an equipped tool at a gatherable node).
 	require(script.client.ToolHarvest).start(_options)

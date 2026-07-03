@@ -5,6 +5,45 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.6.0 — 2026-07-03
+
+### Added
+- **Quests** (#10) — the goals & progression foundation. A `Quests` registry + server runtime:
+  quests carry **objectives** (`gather` / `craft` / `kill` / `use` a target × count; blank target =
+  any) and **rewards**, with `autoStart`, a `requires` prerequisite (completing a quest
+  **auto-starts its chain**), and optional `turnIn` at a **quest giver** — tag any part/model
+  `QuestGiver` + set `Quest = "<id>"` and the engine attaches the accept/turn-in prompt. Progress is
+  driven by the events players already generate — no wiring per quest — and **rewards are never
+  lost**: a full inventory parks the quest as *ready* and the grant retries until it fits. A
+  **Quests menu tab** (key `L`) renders Active (per-objective progress bars) / Ready / Completed.
+  New hooks + bus events: `quest:started/progress/completed/blocked`. Session-scoped (persistence is
+  a future system). See [docs/quests.md](docs/quests.md).
+- **Achievements** — an always-on runtime for the existing registry, ported architecturally from The
+  Counter Earth's proven service: the new shared **Progression** layer translates gameplay events
+  into **auto-derived counters** (`gathers_reed`, `crafts_total`, `kills_husk`, `uses_berry`,
+  `quests_total`, …) so an achievement def is just `{ key, name, counter, threshold }` — the same
+  flat shape in code and no-code. Threshold crossings **unlock once**, fire `achievement:unlocked`,
+  and show a **toast**; an **Achievements menu tab** (key `J`) tracks progress bars (gold when
+  unlocked). Custom events/counters via `SurvivorCore.Progression.map` / `Achievements.addCount` /
+  `Achievements.award`. See [docs/achievements.md](docs/achievements.md).
+- **Toasts** — a small themed top-right notification queue (`Notify` remote + `Toasts.show`),
+  used by quest completions and achievement unlocks (config-gated per system).
+- **No-code quests & achievements** — the admin plugin's Content widget gains **Quests**
+  (single-objective: objective type/target/count, reward, auto-start, requires, turn-in; **+ Quest
+  giver** drops a tagged giver post) and **Achievements** (counter + threshold) editors; the engine
+  loads both from `SurvivorCoreContent` at start.
+- **EventBridge parity** — harvesting, crafting and item-use lifecycle events (`gather:*`,
+  `craft:*`, `item:use`) now also cross the EventBridge bus (combat/mobs already did), so
+  quests/achievements/analytics can consume every gameplay event uniformly.
+
+### Fixed
+- `SurvivorCore.UI.registerPanel` now **adopts** a menu tab the authored template already scaffolds
+  (hiding its placeholder and running the panel's `build` into it) instead of silently doing
+  nothing — this is what lets the Quests/Achievements tabs replace their "coming soon" placeholders.
+
+### Changed
+- Toolchain: **rojo 7.6.1 → 7.7.0** (pin in `rokit.toml`; sandbox-verified against the full CI gate).
+
 ## 0.5.0 — 2026-06-25
 
 ### Added

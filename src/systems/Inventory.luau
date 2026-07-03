@@ -36,6 +36,7 @@ local InventoryTypes = require(script.Parent.Parent.shared.InventoryTypes)
 local ItemData = require(script.Parent.Parent.shared.ItemData)
 local Remotes = require(script.Parent.Parent.shared.Remotes)
 local Hooks = require(script.Parent.Parent.foundation.Hooks)
+local EventBridge = require(script.Parent.Parent.foundation.EventBridge)
 
 local Items = Registries.Items
 
@@ -336,6 +337,7 @@ local function consume(player: Player, itemId: string, slot: number?): boolean
 	-- Every successful consume fires item:use — the seam for eat animations, sounds, or
 	-- modifier logic (e.g. Stats.removeModifier to stop an ongoing poison tick).
 	Hooks.run("item:use", { player = player, itemId = itemId, def = def, slot = slot })
+	EventBridge.fire("item:use", player, { itemId = itemId, slot = slot })
 	fireChanged(player, "use", { itemId = itemId })
 	return true
 end

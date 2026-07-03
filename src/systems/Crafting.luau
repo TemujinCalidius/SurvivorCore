@@ -19,6 +19,7 @@ assert(RunService:IsServer(), "SurvivorCore.Crafting is server-only — require 
 local Inventory = require(script.Parent.Inventory)
 local Registries = require(script.Parent.Parent.registries)
 local Hooks = require(script.Parent.Parent.foundation.Hooks)
+local EventBridge = require(script.Parent.Parent.foundation.EventBridge)
 local Remotes = require(script.Parent.Parent.shared.Remotes)
 local RecipeData = require(script.Parent.Parent.shared.RecipeData)
 local CraftingConfig = require(script.Parent.Parent.shared.CraftingConfig)
@@ -29,6 +30,14 @@ local Crafting = {}
 
 local started = false
 local channeling: { [Player]: boolean } = {} -- players mid-craft (re-entry guard)
+
+-- Craft lifecycle events go to BOTH extension surfaces: Hooks (engine extension) and the
+-- EventBridge bus (quests/achievements/analytics).
+local function emit(event: string, player: Player, ctx: { [string]: any })
+	ctx.player = player
+	Hooks.run(event, ctx)
+	EventBridge.fire(event, player, ctx)
+end
 
 local function ingredientsOf(recipe: any): { { item: string, count: number } }
 	local out = {}
@@ -105,15 +114,15 @@ function Crafting.craft(player: Player, recipeId: string): boolean
 	local ok, reason = Crafting.canCraft(player, recipeId)
 	local recipe = Recipes.get(recipeId)
 	if not ok or not recipe then
-		Hooks.run("craft:blocked", { player = player, recipeId = recipeId, reason = reason })
+		emit("craft:blocked", player, { recipeId = recipeId, reason = reason })
 		return false
 	end
-	Hooks.run("craft:start", { player = player, recipeId = recipeId, recipe = recipe })
+	emit("craft:start", player, { recipeId = recipeId, recipe = recipe })
 	local done, why = consumeProduce(player, recipe)
 	if done then
-		Hooks.run("craft:end", { player = player, recipeId = recipeId, recipe = recipe })
+		emit("craft:end", player, { recipeId = recipeId, recipe = recipe })
 	else
-		Hooks.run("craft:blocked", { player = player, recipeId = recipeId, reason = why })
+		emit("craft:blocked", player, { recipeId = recipeId, reason = why })
 	end
 	return done
 end
@@ -179,12 +188,12 @@ local function channelCraft(player: Player, recipeId: string)
 	local ok, reason = Crafting.canCraft(player, recipeId)
 	local recipe = Recipes.get(recipeId)
 	if not ok or not recipe then
-		Hooks.run("craft:blocked", { player = player, recipeId = recipeId, reason = reason })
+		emit("craft:blocked", player, { recipeId = recipeId, reason = reason })
 		return
 	end
 
 	channeling[player] = true
-	Hooks.run("craft:start", { player = player, recipeId = recipeId, recipe = recipe })
+	emit("craft:start", player, { recipeId = recipeId, recipe = recipe })
 
 	local outName = recipe.output and recipe.output.item or recipeId
 	local bar = showCraftBar(player, Crafting.craftTime(recipe), tostring(outName))
@@ -200,14 +209,14 @@ local function channelCraft(player: Player, recipeId: string)
 
 	-- Re-validate after the channel (items/inventory may have changed) before consuming.
 	if not Crafting.canCraft(player, recipeId) then
-		Hooks.run("craft:blocked", { player = player, recipeId = recipeId, reason = "ingredients" })
+		emit("craft:blocked", player, { recipeId = recipeId, reason = "ingredients" })
 		return
 	end
 	local done, why = consumeProduce(player, recipe)
 	if done then
-		Hooks.run("craft:end", { player = player, recipeId = recipeId, recipe = recipe })
+		emit("craft:end", player, { recipeId = recipeId, recipe = recipe })
 	else
-		Hooks.run("craft:blocked", { player = player, recipeId = recipeId, reason = why })
+		emit("craft:blocked", player, { recipeId = recipeId, reason = why })
 	end
 end
 
