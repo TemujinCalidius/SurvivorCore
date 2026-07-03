@@ -1,5 +1,7 @@
 # Quests
 
+> 📹 **Demo:** [quests, achievements & the no-code editors in action](https://makertube.net/w/uSGJ2MHEFjSSKxMiJBJ6Y5)
+
 The quest system ([`src/systems/Quests.luau`](../src/systems/Quests.luau)) gives players **goals**:
 accept a quest, work its objectives, claim the reward. Progress is driven entirely by the events
 the other systems already fire (gather / craft / kill / use), so a quest needs **zero wiring** —
