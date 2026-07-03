@@ -1,5 +1,7 @@
 # Achievements
 
+> 📹 **Demo:** [quests, achievements & the no-code editors in action](https://makertube.net/w/uSGJ2MHEFjSSKxMiJBJ6Y5)
+
 The achievement system ([`src/systems/Achievements.luau`](../src/systems/Achievements.luau)) tracks
 **milestones**: always-on counters that unlock a badge (once) when they cross a threshold — with a
 toast and an Achievements menu tab. The architecture is ported from The Counter Earth's proven

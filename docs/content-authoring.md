@@ -1,6 +1,6 @@
 # No-code content authoring
 
-> 📹 **Demos:** [creating mobs, weapons & ammo (with full stats)](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU) · [creating an item + gatherable](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE)
+> 📹 **Demos:** [creating quests & achievements](https://makertube.net/w/uSGJ2MHEFjSSKxMiJBJ6Y5) · [creating mobs, weapons & ammo](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU) · [creating an item + gatherable](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE)
 
 The engine ships **zero** items, resources, or recipes — your game supplies them. You can do this
 two ways, and they coexist:
