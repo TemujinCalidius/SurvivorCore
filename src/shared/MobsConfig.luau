@@ -26,6 +26,7 @@ MobsConfig.DEFAULTS = {
 	RequireLineOfSight = true, -- a hostile mob must see a player (raycast) to aggro
 	RespawnSeconds = 30, -- default respawn delay for mobs spawned with respawn = true (0 = no respawn)
 	CorpseSeconds = 5, -- how long a dead mob's body lingers before it's removed (a death reaction can fade it)
+	DefaultCarcassSeconds = 120, -- how long a spawned carcass stays before despawning (0 = until depleted)
 }
 
 Config.defineSection(MobsConfig.SECTION, MobsConfig.DEFAULTS)
