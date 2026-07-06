@@ -37,6 +37,9 @@ authoring tools. If you know Roblox Studio, you can build a survival game.
 - **Quests & achievements** — event-driven goals: quest chains with objectives, rewards and
   quest-giver NPCs, plus milestone achievements with toasts — both tracked automatically from
   what players already do (gather, craft, fight).
+- **Hunting & loot bags** — slain animals leave butcherable carcasses (knife required, real
+  yields); player death drops everything into a lootable bag with a countdown — get back to it
+  before it's gone.
 - **No-code admin plugin** — create items, weapons, ammo and mobs from a Studio form (damage,
   range, arrow curve, weight, aggro, leash) and drop them into the world. No scripting.
 
@@ -93,7 +96,8 @@ The **admin plugin** turns all of this into Studio forms — see
 [Architecture](docs/architecture.md) · [Survival stats + HUD](docs/survival-stats.md) ·
 [Inventory](docs/inventory.md) · [Harvesting](docs/harvesting.md) · [Crafting](docs/crafting.md) ·
 [Combat](docs/combat.md) · [Mobs & AI](docs/mobs.md) · [Quests](docs/quests.md) ·
-[Achievements](docs/achievements.md) · [No-code content](docs/content-authoring.md) ·
+[Achievements](docs/achievements.md) · [Loot bags](docs/loot-bags.md) ·
+[No-code content](docs/content-authoring.md) ·
 [Admin plugin](docs/admin-plugin.md) · [Design language](docs/design-language.md) ·
 [Extending](docs/extending.md)
 

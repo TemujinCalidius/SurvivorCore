@@ -21,6 +21,8 @@
 	  quest:started / quest:progress / quest:completed / quest:blocked
 	                                                 { player, questId, def?, index?, count?, reason? }
 	  achievement:unlocked                           { player, key, def }
+	  player:died                                    { player, position }   -- after any death-drop
+	  lootbag:dropped / lootbag:collected            { player, bag, position?, items? / emptied }
 
 	Per-resource / per-mob-type variants of these dispatch through Reactions (see Reactions.luau):
 	SurvivorCore.Gather.onReaction(resourceId, …) and SurvivorCore.Mobs.onReaction(mobType, …).

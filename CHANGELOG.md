@@ -5,6 +5,37 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.7.0 — 2026-07-06
+
+### Added
+- **Hunting & butchering** (#13) — slaying a mob whose def sets **carcass fields**
+  (`carcassItem` / `carcassHp` / `carcassTool` / `carcassYieldMin`/`Max` / `carcassSeconds`) leaves
+  a **butcherable carcass** — literally a tagged `Gatherable`, so butchering reuses the entire
+  proven harvesting pipeline: tool gate (a knife `toolType`), per-interaction yields, floating HP
+  bar, `gather:*` hooks and progression counters (`gathers_raw_meat` feeds quests + achievements
+  automatically). Carcass looks come from `SurvivorCoreContent.Carcasses.<mobType>` (placeholder
+  otherwise), per-type juice keys on `"<mobType>_carcass"`, and all six fields are editable in the
+  admin plugin's **Mobs** editor. Completes the passive-animal hunting loop the v0.5 FSM began.
+  New generic `Gatherable` attributes: **`PromptText` / `PromptObject`** (custom prompt wording for
+  any gather node). See [docs/mobs.md](docs/mobs.md).
+- **Death loot bags & respawn** (#19, TCE port) — dying drops the player's inventory **and worn
+  equipment** (config-toggleable) into an **anchored, ground-clamped loot bag**: contents as
+  IntValues, an instant-loot prompt anyone can use, a floating **countdown**, an owner-only golden
+  **beacon**, a "You died" toast, and despawn after `LifetimeSeconds`. Pickup is loss-proof —
+  equipment restores to empty equip slots FIRST (a satchel re-grows slots/weight before stacks
+  return), the rest grants up-to-fit and the remainder stays in the bag. New `LootBags` Config
+  section + `SurvivorCore.LootBags`; new lifecycle `player:died` (fired for every death, bag or
+  not) flows into Progression as **`deaths_total`** counters; new hooks `lootbag:dropped` /
+  `lootbag:collected`. The TCE **respawn camera fix** rides along (CameraSubject re-pointed per
+  respawn). See [docs/loot-bags.md](docs/loot-bags.md).
+- **Inventory APIs** — `getEquipment`, `clearAll` (capacity-safe snapshot-and-wipe),
+  `addUpTo` (granted-count adds), `restoreEquip` (direct empty-slot equip) — the death/restore
+  primitives, public for games to reuse.
+
+### Fixed
+- Engine-equipped Tools cloned from creator templates are now forced `CanBeDropped = false` — a
+  template left droppable would strand a stray pickable Tool in the world on death.
+
 ## 0.6.0 — 2026-07-03
 
 ### Added

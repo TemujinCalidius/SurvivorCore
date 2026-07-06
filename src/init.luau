@@ -59,9 +59,13 @@ require(script.shared.CombatConfig)
 require(script.shared.QuestsConfig)
 require(script.shared.AchievementsConfig)
 
+-- Define the "LootBags" (death-drop) Config section, so Config.override(...) works any time
+-- before start().
+require(script.shared.LootBagsConfig)
+
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.6.0"
+SurvivorCore.VERSION = "0.7.0"
 
 -- Foundation
 SurvivorCore.Config = Config
@@ -220,6 +224,12 @@ function SurvivorCore.start(_options: { [string]: any }?)
 	SurvivorCore.Achievements.isUnlocked = achievements.isUnlocked
 	SurvivorCore.Achievements.getState = achievements.getState
 
+	-- LootBags: death drops the player's belongings into a lootable bag (+ player:died lifecycle,
+	-- deaths counters). Booted after Inventory (snapshot/clear APIs) and Progression (death map).
+	local lootBags = require(script.systems.LootBags)
+	lootBags.start(_options)
+	SurvivorCore.LootBags = lootBags
+
 	return SurvivorCore
 end
 
@@ -255,6 +265,10 @@ function SurvivorCore.startClient(_options: { [string]: any }?)
 	require(script.client.Toasts).start(_options)
 	require(script.client.QuestsUi).start(_options)
 	require(script.client.AchievementsUi).start(_options)
+
+	-- Death & respawn juice: keep the camera on the new body, and beacon the owner's loot bag.
+	require(script.client.RespawnCamera).start(_options)
+	require(script.client.LootBagBeacon).start(_options)
 
 	-- Tool-swing harvesting input (click an equipped tool at a gatherable node).
 	require(script.client.ToolHarvest).start(_options)

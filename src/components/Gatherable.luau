@@ -77,6 +77,8 @@ return Components.define({
 		RequireTool = "", -- tool type needed (e.g. "axe"); "" = bare-hand
 		Interaction = "auto", -- "auto" | "prompt" | "tool"
 		DestroyOnDeplete = true, -- false keeps the node for a reaction to transform (stump/fell)
+		PromptText = "", -- prompt-mode ActionText override ("Butcher", "Pick"); "" = "Gather"
+		PromptObject = "", -- prompt-mode ObjectText override; "" = resource / item id
 	},
 	onSetup = function(instance, values)
 		local r = resolve(values)
@@ -103,8 +105,10 @@ return Components.define({
 		end
 
 		local prompt = Instance.new("ProximityPrompt")
-		prompt.ActionText = "Gather"
-		prompt.ObjectText = r.resource or (r.item ~= "" and r.item) or "Resource"
+		prompt.ActionText = if values.PromptText ~= "" then values.PromptText else "Gather"
+		prompt.ObjectText = if values.PromptObject ~= ""
+			then values.PromptObject
+			else (r.resource or (r.item ~= "" and r.item) or "Resource")
 		prompt.HoldDuration = 0.4
 		prompt.RequiresLineOfSight = false
 		prompt.Parent = host

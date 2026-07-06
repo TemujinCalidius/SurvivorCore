@@ -143,6 +143,29 @@ SurvivorCore.Items.register({
 })
 
 -- Two arrow TYPES with different ballistics — exactly what the admin "Arrows / Ammo" editor authors.
+-- Hunting: a knife to butcher carcasses, and the raw meat they yield (risky eaten raw — cook it
+-- once stations arrive).
+SurvivorCore.Items.register({
+	id = "stone_knife",
+	name = "Stone Knife",
+	description = "A keen flake of stone. Equip it to butcher carcasses.",
+	stack = 1,
+	weight = 0.6,
+	category = "tool",
+	toolType = "knife",
+	icon = "rbxassetid://129856164091801",
+})
+SurvivorCore.Items.register({
+	id = "raw_meat",
+	name = "Raw Meat",
+	description = "Fresh from the hunt. Eating it raw fills you up — and turns your stomach.",
+	stack = 10,
+	weight = 0.3,
+	category = "consumable",
+	onConsume = { Hunger = -25, Poison = 8 },
+	icon = "rbxassetid://138699077112926",
+})
+
 SurvivorCore.Items.register({
 	id = "arrow",
 	name = "Arrow",
@@ -211,7 +234,14 @@ SurvivorCore.Mobs.register({
 	walkSpeed = 6,
 	runSpeed = 24,
 	aggroRange = 28, -- bolts when you get within ~28 studs
+	-- Hunting: a slain boar leaves a butcherable carcass (a Gatherable — knife required).
+	carcassItem = "raw_meat",
+	carcassHp = 3,
+	carcassTool = "knife",
+	carcassYieldMin = 1,
+	carcassYieldMax = 2,
 })
+-- (The husk deliberately has NO carcass fields — blank carcassItem = no carcass on death.)
 
 -- Quests: a small chain through the demo loop — gather → craft → fight. `gather_reeds` starts
 -- automatically; finishing it auto-starts `weave_basket` (requires + autoStart); `slay_husk` is
@@ -240,6 +270,17 @@ SurvivorCore.Quests.register({
 	objectives = { { type = "kill", target = "husk", count = 1 } },
 	rewards = { { item = "heavy_arrow", count = 4 } },
 	turnIn = true, -- return to the giver post to claim
+})
+SurvivorCore.Quests.register({
+	id = "hunt_boar",
+	name = "The Hunt",
+	description = "Track the boar, take it down, and butcher it for meat.",
+	objectives = { -- multi-objective: both must complete
+		{ type = "kill", target = "boar", count = 1 },
+		{ type = "gather", target = "raw_meat", count = 2 },
+	},
+	rewards = { { item = "berry", count = 4 } },
+	autoStart = true,
 })
 
 -- Achievements: flat counter + threshold against the engine's auto-derived counters.
@@ -270,6 +311,27 @@ SurvivorCore.Achievements.register({
 	description = "Slay 3 husks.",
 	counter = "kills_husk",
 	threshold = 3,
+})
+SurvivorCore.Achievements.register({
+	key = "hunter",
+	name = "Hunter",
+	description = "Bring down your first boar.",
+	counter = "kills_boar",
+	threshold = 1,
+})
+SurvivorCore.Achievements.register({
+	key = "butcher",
+	name = "Butcher",
+	description = "Carve 3 cuts of raw meat.",
+	counter = "gathers_raw_meat",
+	threshold = 3,
+})
+SurvivorCore.Achievements.register({
+	key = "hard_way",
+	name = "The Hard Way",
+	description = "Die. It happens to everyone.",
+	counter = "deaths_total",
+	threshold = 1,
 })
 SurvivorCore.Items.register({
 	id = "straw_hat",
@@ -343,11 +405,14 @@ local function seedPlayer(player: Player)
 	player:SetAttribute("InvQty_8", 1)
 	player:SetAttribute("InvSlot_9", "heavy_arrow")
 	player:SetAttribute("InvQty_9", 12)
+	player:SetAttribute("InvSlot_10", "stone_knife")
+	player:SetAttribute("InvQty_10", 1)
 	player:SetAttribute("HotbarSlot1", "berry") -- a pre-pinned quick slot
 	player:SetAttribute("HotbarSlot2", "stone_axe") -- press 2 to equip the axe, then click a tree
 	player:SetAttribute("HotbarSlot3", "wood_club") -- press 3 to equip the club, then click a mob
 	player:SetAttribute("HotbarSlot4", "short_bow") -- press 4: aim (RMB) + draw (LMB) — balanced arrows
 	player:SetAttribute("HotbarSlot5", "war_bow") -- press 5: the war bow — heavy arrows that arc steeply
+	player:SetAttribute("HotbarSlot6", "stone_knife") -- press 6: the knife — butcher a boar carcass
 	player:SetAttribute("EquipSlot_Head", "straw_hat") -- a pre-filled equipment slot
 	player:SetAttribute("EquipSlot_Back", "reed_satchel") -- equipped for +slots / +carry weight
 end
@@ -511,6 +576,7 @@ local function buildWeaponTemplates()
 	template("wood_club", Vector3.new(0.5, 3.5, 0.5), Color3.fromRGB(120, 85, 55))
 	template("short_bow", Vector3.new(0.3, 4, 0.3), Color3.fromRGB(150, 110, 70))
 	template("war_bow", Vector3.new(0.35, 5, 0.35), Color3.fromRGB(110, 80, 60))
+	template("stone_knife", Vector3.new(0.3, 1.6, 0.3), Color3.fromRGB(160, 160, 165))
 end
 buildWeaponTemplates()
 

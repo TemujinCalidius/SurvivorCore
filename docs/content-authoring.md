@@ -47,6 +47,8 @@ ReplicatedStorage
    │     • faction = "hostile"        ("hostile" | "passive" | "neutral")
    │     • health = 60
    │     • aggroRange = 40
+   │     • carcassItem = "raw_meat"   (hunting: blank = no carcass; see docs/mobs.md)
+   │     • carcassTool = "knife"
    ├─ Quests     (Folder)        ← flat single-objective quests (normalized at load)
    │  └─ gather_reeds (Configuration)
    │     • name = "Gather Reeds"
@@ -62,7 +64,9 @@ ReplicatedStorage
    │     • counter = "kills_husk"     (see docs/achievements.md for the counter catalogue)
    │     • threshold = 3
    ├─ Tools      (Folder)        ← Tool templates the hotbar equips (named by item id)
-   └─ MobModels  (Folder)        ← rigged mob templates Mobs.spawn clones (named by mob id)
+   ├─ MobModels  (Folder)        ← rigged mob templates Mobs.spawn clones (named by mob id)
+   ├─ Carcasses  (Folder)        ← carcass models spawned on mob death (named by mob id)
+   └─ LootBag    (Model/Part)    ← the death loot-bag look (optional; placeholder otherwise)
 ```
 
 Each child's **Name is the id**; its **attributes are the def fields**
