@@ -5,6 +5,15 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.7.2 — 2026-07-06
+
+### Fixed
+- **Loot-bag beacon never appeared** — the owner's beacon remote fired the same frame the bag was
+  created, so the Instance reference arrived as `nil` on the client (not yet replicated) and the
+  beacon silently skipped. The fire is now delayed a beat past replication.
+- **Looting while dead** — a dead player could scoop their own bag from the corpse before
+  respawning, defeating the corpse-run. The server now rejects collectors who aren't alive.
+
 ## 0.7.1 — 2026-07-06
 
 ### Fixed
