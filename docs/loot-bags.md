@@ -15,7 +15,12 @@ survival stakes system: get back to your bag before it's gone — or before some
    deaths stay reachable), holding the contents as `IntValue` children (item id → count). A
    floating **countdown** shows everyone how long it has left; the **owner** also gets a tall
    golden **beacon** (client-side, only they see it) and a "You died" toast.
-4. After `LifetimeSeconds` the bag despawns with whatever is still inside.
+4. After `LifetimeSeconds` (default **5 minutes**) the bag despawns with whatever is still inside.
+
+**Dying again mid corpse-run:** every death drops its own bag — old and new **coexist in the
+world**, each on its own 5-minute timer, each lootable. Your **beacon always points at your newest
+bag** (a new death re-points it); it clears only when *that* bag is looted empty or expires — an
+older bag despawning never touches it.
 
 ## Looting
 
