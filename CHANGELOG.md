@@ -5,6 +5,16 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.7.3 — 2026-07-06
+
+### Fixed
+- **Loot bag + beacon vanished on respawn (StreamingEnabled places)** — respawning away from the
+  death spot let Roblox stream the bag out of the owner's client: the bag looked deleted and the
+  local `Destroying` fired, killing the beacon. The bag is now a **stream-persistent Model for its
+  owner** (`AddPersistentPlayer`), and the beacon is **position-driven plain data** — no Instance
+  reference, so no replication race (the 0.5s delay is gone) and no streaming fragility. The beam
+  clears on an explicit server signal when the bag is truly emptied/expired.
+
 ## 0.7.2 — 2026-07-06
 
 ### Fixed

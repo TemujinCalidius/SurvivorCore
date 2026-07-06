@@ -198,9 +198,27 @@ local function dropBag(player: Player, position: Vector3)
 		return -- died empty-handed; no bag
 	end
 
+	-- The bag is a MODEL so it can be made stream-persistent for its owner: with the default
+	-- StreamingEnabled place, respawning far from the death spot would otherwise evict the bag
+	-- from the owner's client — it looked deleted (and killed the beacon) even though the server
+	-- still had it.
 	local tmpl = bagTemplate()
-	local bag: Instance = if tmpl then tmpl:Clone() else buildPlaceholderBag()
+	local inner: Instance = if tmpl then tmpl:Clone() else buildPlaceholderBag()
+	local bag: Model
+	if inner:IsA("Model") then
+		bag = inner
+	else
+		bag = Instance.new("Model")
+		inner.Parent = bag
+		if inner:IsA("BasePart") then
+			bag.PrimaryPart = inner
+		end
+	end
 	bag.Name = "LootBag"
+	pcall(function()
+		bag.ModelStreamingMode = Enum.ModelStreamingMode.PersistentPerPlayer
+		bag:AddPersistentPlayer(player)
+	end)
 
 	-- Aggregate contents as IntValue children (item id → qty), equipment included.
 	local counts: { [string]: number } = {}
@@ -268,13 +286,18 @@ local function dropBag(player: Player, position: Vector3)
 	Hooks.run("lootbag:dropped", ctx)
 	EventBridge.fire("lootbag:dropped", player, { position = position, items = total })
 
-	-- Owner-only client juice: beacon + "your things dropped" toast. The beacon fire is DELAYED a
-	-- beat — the bag was created this frame, and an Instance sent before it replicates arrives as
-	-- nil on the client (the beacon would silently never appear).
+	-- Owner-only client juice: beacon + "your things dropped" toast. The beacon payload is PLAIN
+	-- DATA (position + lifetime) — no Instance reference, so there is no replication race and no
+	-- streaming fragility; the client builds the beam at the position and keeps it until the bag
+	-- is truly gone (the nil-fire below) or the lifetime lapses.
+	local host2 = bagHost(bag)
+	local beaconPos = if host2 then host2.Position else position
 	if cfg.OwnerBeacon ~= false then
-		task.delay(0.5, function()
-			if bag.Parent and player.Parent then
-				Remotes.event("LootBagDropped"):FireClient(player, bag, lifetime)
+		Remotes.event("LootBagDropped"):FireClient(player, beaconPos, lifetime)
+		bag.Destroying:Connect(function()
+			-- Truly gone server-side (emptied or expired) → clear the owner's beacon early.
+			if player.Parent then
+				Remotes.event("LootBagDropped"):FireClient(player, nil)
 			end
 		end)
 	end
