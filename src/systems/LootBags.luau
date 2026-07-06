@@ -113,6 +113,12 @@ local function collect(bag: Instance, player: Player)
 	if looting[player] then
 		return
 	end
+	-- Dead players can't loot — the corpse falls right next to the bag, and a quick E while dead
+	-- would scoop everything back before the respawn corpse-run even begins.
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if not hum or hum.Health <= 0 then
+		return
+	end
 	looting[player] = true
 
 	local entries = {}
@@ -262,9 +268,15 @@ local function dropBag(player: Player, position: Vector3)
 	Hooks.run("lootbag:dropped", ctx)
 	EventBridge.fire("lootbag:dropped", player, { position = position, items = total })
 
-	-- Owner-only client juice: beacon + "your things dropped" toast.
+	-- Owner-only client juice: beacon + "your things dropped" toast. The beacon fire is DELAYED a
+	-- beat — the bag was created this frame, and an Instance sent before it replicates arrives as
+	-- nil on the client (the beacon would silently never appear).
 	if cfg.OwnerBeacon ~= false then
-		Remotes.event("LootBagDropped"):FireClient(player, bag, lifetime)
+		task.delay(0.5, function()
+			if bag.Parent and player.Parent then
+				Remotes.event("LootBagDropped"):FireClient(player, bag, lifetime)
+			end
+		end)
 	end
 	Remotes.event("Notify"):FireClient(player, {
 		kind = "death",
