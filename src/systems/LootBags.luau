@@ -36,6 +36,12 @@ local LootBags = {}
 local started = false
 local looting: { [Player]: boolean } = {} -- re-entry guard per collector
 
+-- Each owner's NEWEST bag — the one their beacon points at. Older bags coexist in the world on
+-- their own timers; only the latest bag's fate may clear the owner's beacon (dying again mid
+-- corpse-run re-points the beacon at the new bag, and the old bag's later despawn must not
+-- touch it).
+local latestBag: { [Player]: Instance } = {}
+
 -- ── Bag construction ─────────────────────────────────────────────────────────
 
 local function bagTemplate(): PVInstance?
@@ -292,12 +298,17 @@ local function dropBag(player: Player, position: Vector3)
 	-- is truly gone (the nil-fire below) or the lifetime lapses.
 	local host2 = bagHost(bag)
 	local beaconPos = if host2 then host2.Position else position
+	latestBag[player] = bag
 	if cfg.OwnerBeacon ~= false then
 		Remotes.event("LootBagDropped"):FireClient(player, beaconPos, lifetime)
 		bag.Destroying:Connect(function()
-			-- Truly gone server-side (emptied or expired) → clear the owner's beacon early.
-			if player.Parent then
-				Remotes.event("LootBagDropped"):FireClient(player, nil)
+			-- Clear the owner's beacon ONLY if this is still their newest bag (an older bag
+			-- despawning/emptying must not wipe the beacon that points at a newer one).
+			if latestBag[player] == bag then
+				latestBag[player] = nil
+				if player.Parent then
+					Remotes.event("LootBagDropped"):FireClient(player, nil)
+				end
 			end
 		end)
 	end
@@ -357,6 +368,7 @@ function LootBags.start(_options: { [string]: any }?)
 	Players.PlayerAdded:Connect(watchPlayer)
 	Players.PlayerRemoving:Connect(function(player)
 		looting[player] = nil
+		latestBag[player] = nil
 	end)
 end
 
