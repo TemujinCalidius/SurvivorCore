@@ -65,7 +65,7 @@ require(script.shared.LootBagsConfig)
 
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.7.2"
+SurvivorCore.VERSION = "0.7.3"
 
 -- Foundation
 SurvivorCore.Config = Config
