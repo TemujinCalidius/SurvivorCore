@@ -82,6 +82,15 @@ local function resolveMob(model: Model)
 		attackDamage = num("AttackDamage", "attackDamage", "DefaultAttackDamage"),
 		attackCooldown = num("AttackCooldown", "attackCooldown", "DefaultAttackCooldown"),
 		wanderRadius = num("WanderRadius", "wanderRadius", "DefaultWanderRadius"),
+		-- Carcass (hunting/butchering): blank carcassItem = no carcass on death.
+		carcassItem = tostring(attrOr(model, "CarcassItem") or def.carcassItem or ""),
+		carcassHp = math.floor(tonumber(attrOr(model, "CarcassHp")) or tonumber(def.carcassHp) or 3),
+		carcassTool = tostring(attrOr(model, "CarcassTool") or def.carcassTool or ""),
+		carcassYieldMin = math.floor(tonumber(attrOr(model, "CarcassYieldMin")) or tonumber(def.carcassYieldMin) or 1),
+		carcassYieldMax = math.floor(tonumber(attrOr(model, "CarcassYieldMax")) or tonumber(def.carcassYieldMax) or 1),
+		carcassSeconds = tonumber(attrOr(model, "CarcassSeconds")) or tonumber(def.carcassSeconds) or tonumber(
+			cfg.DefaultCarcassSeconds
+		) or 120,
 	}
 end
 
@@ -279,6 +288,77 @@ local function step(s: any)
 	end
 end
 
+-- Hunting/butchering (#13): a slain mob whose def sets carcassItem leaves a CARCASS — a tagged
+-- `Gatherable` node, so butchering reuses the whole harvesting pipeline (knife gate, per-hit
+-- yields, HP bar, gather:* hooks, counters). Reactions key on "<mobType>_carcass".
+local function spawnCarcass(s: any, position: Vector3)
+	-- Prefer a creator template; strip the clone of any bound/stashed state (a template saved from
+	-- a live Gatherable would otherwise never bind, or spawn half-butchered).
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local content = ReplicatedStorage:FindFirstChild("SurvivorCoreContent")
+	local templates = content and content:FindFirstChild("Carcasses")
+	local template = templates and templates:FindFirstChild(s.mobType)
+
+	local carcass: Instance
+	if template and template:IsA("PVInstance") then
+		carcass = template:Clone()
+		carcass:SetAttribute("_scBound", nil)
+		for attr in carcass:GetAttributes() do
+			if string.sub(attr, 1, 1) == "_" then
+				carcass:SetAttribute(attr, nil)
+			end
+		end
+	else
+		local part = Instance.new("Part")
+		part.Name = s.mobType .. "_carcass"
+		part.Size = Vector3.new(3, 1, 1.6) -- a low, lying body shape
+		part.Color = Color3.fromRGB(115, 62, 52)
+		part.Material = Enum.Material.SmoothPlastic
+		carcass = part
+	end
+
+	-- Rest the carcass on the ground below the death position (mid-air deaths clamp down).
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { s.model, carcass }
+	local hit = Workspace:Raycast(position + Vector3.new(0, 2, 0), Vector3.new(0, -60, 0), params)
+	local groundY = if hit then hit.Position.Y else position.Y
+	local height = if carcass:IsA("BasePart") then carcass.Size.Y else 1
+	(carcass :: PVInstance):PivotTo(CFrame.new(position.X, groundY + height / 2 + 0.05, position.Z))
+	for _, p in carcass:GetDescendants() do
+		if p:IsA("BasePart") then
+			p.Anchored = true
+		end
+	end
+	if carcass:IsA("BasePart") then
+		carcass.Anchored = true
+	end
+
+	-- ALL attributes before the tag — the Gatherable component binds synchronously on tag-added.
+	carcass:SetAttribute("Resource", s.mobType .. "_carcass") -- reaction/prompt key (no def needed)
+	carcass:SetAttribute("ItemId", s.carcassItem)
+	carcass:SetAttribute("HP", s.carcassHp)
+	carcass:SetAttribute("RequireTool", s.carcassTool)
+	carcass:SetAttribute("YieldMin", s.carcassYieldMin)
+	carcass:SetAttribute("YieldMax", s.carcassYieldMax)
+	carcass:SetAttribute("Interaction", "prompt")
+	carcass:SetAttribute("PromptText", "Butcher")
+	carcass:SetAttribute("PromptObject", s.mobType .. " carcass")
+	carcass:SetAttribute("DestroyOnDeplete", true)
+	CollectionService:AddTag(carcass, "Gatherable")
+	-- NEVER parent to the mob model — the CorpseSeconds cleanup would destroy it too.
+	carcass.Parent = Workspace
+
+	if s.carcassSeconds > 0 then
+		task.delay(s.carcassSeconds, function()
+			if carcass.Parent then
+				carcass:Destroy()
+			end
+		end)
+	end
+	return carcass
+end
+
 -- The mob died: fire the lifecycle (Hooks + per-type Reactions + EventBridge), let a death reaction
 -- transform the body, then clean up — and respawn if requested.
 local function onDied(s: any)
@@ -299,6 +379,14 @@ local function onDied(s: any)
 	Hooks.run("mob:died", ctx)
 	Reactions.run(s.mobType, "died", ctx)
 	EventBridge.fire("mob:died", s.lastDamageBy, { mob = s.model, mobType = s.mobType })
+
+	-- Leave a butcherable carcass (hunting) when the def asks for one.
+	if s.carcassItem ~= "" and ctx.position then
+		local ok, err = pcall(spawnCarcass, s, ctx.position)
+		if not ok then
+			warn(`[SurvivorCore.Mobs] carcass spawn failed for '{s.mobType}': {tostring(err)}`)
+		end
+	end
 
 	local corpse = tonumber(MobsConfig.get().CorpseSeconds) or 5
 	local model = s.model
@@ -376,6 +464,12 @@ function Mobs.adopt(model: Model): any?
 		attackDamage = r.attackDamage,
 		attackCooldown = r.attackCooldown,
 		wanderRadius = r.wanderRadius,
+		carcassItem = r.carcassItem,
+		carcassHp = r.carcassHp,
+		carcassTool = r.carcassTool,
+		carcassYieldMin = r.carcassYieldMin,
+		carcassYieldMax = r.carcassYieldMax,
+		carcassSeconds = r.carcassSeconds,
 		requireLoS = MobsConfig.get().RequireLineOfSight ~= false,
 		spawnPos = root.Position,
 		spawnCFrame = model:GetPivot(),

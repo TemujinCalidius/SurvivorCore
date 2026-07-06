@@ -395,6 +395,124 @@ function Inventory.getSlots(player: Player): { { slot: number, itemId: string, q
 	return out
 end
 
+-- A read-only snapshot of WORN equipment: { { slot = "back", itemId = "reed_satchel" }, … }.
+function Inventory.getEquipment(player: Player): { { slot: string, itemId: string } }
+	local out = {}
+	for _, slotName in InventoryTypes.EQUIP_SLOTS do
+		local id = tostring(player:GetAttribute(InventoryTypes.equipSlotAttr(slotName)) or "")
+		if id ~= "" then
+			table.insert(out, { slot = slotName, itemId = id })
+		end
+	end
+	return out
+end
+
+-- Add as many of `amount` as actually fit (weight + slots), one unit at a time, and return the
+-- granted count. `Inventory.add` is all-or-nothing on weight but can PARTIALLY place on slot
+-- exhaustion — loot-bag restore needs the exact number granted so nothing dupes or vanishes.
+function Inventory.addUpTo(player: Player, itemId: string, amount: number): number
+	local id = sanitizeItemId(itemId)
+	if id == "" then
+		return 0
+	end
+	local granted = 0
+	for _ = 1, math.max(0, math.floor(tonumber(amount) or 0)) do
+		if not addQty(player, id, 1) then
+			break
+		end
+		granted += 1
+	end
+	if granted > 0 then
+		tryAutoHotbar(player, id)
+		fireChanged(player, "add", { itemId = id })
+	end
+	return granted
+end
+
+-- Directly restore an item into an EMPTY equip slot (the loot-bag pickup path: re-equipping a
+-- dropped satchel FIRST re-grows slots/weight before ordinary stacks restore). Validates the def
+-- actually belongs in that slot.
+function Inventory.restoreEquip(player: Player, slotName: string, itemId: string): boolean
+	if not table.find(InventoryTypes.EQUIP_SLOTS, slotName) then
+		return false
+	end
+	local attr = InventoryTypes.equipSlotAttr(slotName)
+	if tostring(player:GetAttribute(attr) or "") ~= "" then
+		return false -- occupied; caller falls back to a normal stack grant
+	end
+	local def = readDef(sanitizeItemId(itemId))
+	local slotOk = def and typeof(def.equipment) == "table" and def.equipment.slot == slotName
+	if not slotOk then
+		return false
+	end
+	player:SetAttribute(attr, def.id or itemId)
+	recalcBackpackCapacity(player)
+	refreshWeight(player)
+	fireChanged(player, "equip", { itemId = itemId, equipSlot = slotName })
+	return true
+end
+
+-- Snapshot-and-clear EVERYTHING (death path). Returns the snapshot so the caller (loot bags) can
+-- spill it into the world. Order is load-bearing: slots are captured and cleared while the
+-- backpack bonus is still live — clearing the Back slot first would shrink MaxInvSlots and orphan
+-- the bonus slots' items mid-flight.
+function Inventory.clearAll(
+	player: Player,
+	opts: { equipment: boolean? }?
+): {
+	slots: { { itemId: string, qty: number } },
+	equipment: { { slot: string, itemId: string } },
+}
+	local dropEquipment = (opts and opts.equipment) ~= false
+
+	-- 1-2. Capture maxSlots with the satchel bonus live, snapshot slots — plus a defensive sweep
+	-- for orphaned InvSlot_N beyond the current max (leftovers from an earlier capacity shrink).
+	local maxSlots = getMaxSlots(player)
+	local slotNumbers: { number } = {}
+	for n = 1, maxSlots do
+		table.insert(slotNumbers, n)
+	end
+	for attr in player:GetAttributes() do
+		local n = tonumber(string.match(attr, "^InvSlot_(%d+)$"))
+		if n and n > maxSlots then
+			table.insert(slotNumbers, n)
+		end
+	end
+	local slots = {}
+	for _, n in slotNumbers do
+		local id = getSlotItemId(player, n)
+		if id ~= "" then
+			table.insert(slots, { itemId = id, qty = getSlotQty(player, n) })
+		end
+	end
+
+	-- 3. Snapshot equipment (before any clearing).
+	local equipment = if dropEquipment then Inventory.getEquipment(player) else {}
+
+	-- 4. Hotbar pins + the equipped-slot attr (ToolEquip drops the held tool off this signal).
+	for slot = 1, HOTBAR_SIZE do
+		player:SetAttribute(InventoryTypes.hotbarSlotAttr(slot), nil)
+	end
+	player:SetAttribute(InventoryTypes.HOTBAR_EQUIPPED_ATTR, nil)
+
+	-- 5. Clear the slots (including orphans), THEN 6. equipment.
+	for _, n in slotNumbers do
+		setSlot(player, n, "", 0)
+	end
+	if dropEquipment then
+		for _, slotName in InventoryTypes.EQUIP_SLOTS do
+			player:SetAttribute(InventoryTypes.equipSlotAttr(slotName), nil)
+		end
+	end
+
+	-- 7. Recalc capacity/weight once, and let every UI seam re-render.
+	recalcBackpackCapacity(player)
+	refreshWeight(player)
+	fireChanged(player, "clear")
+
+	return { slots = slots, equipment = equipment }
+end
+
 -- Move/merge/swap two inventory slots (the drag-and-drop primitive). Same item → merge up to
 -- the stack cap (overflow stays in the source); different (or one empty) → swap.
 function Inventory.move(player: Player, fromSlot: number, destSlot: number): boolean

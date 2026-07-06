@@ -76,6 +76,36 @@ tagged placeholder rig for you.)
 SurvivorCore.Mobs.spawn("husk", CFrame.new(40, 5, 20), { respawn = true })
 ```
 
+## Hunting & butchering
+
+Give a mob def **carcass fields** and slaying it leaves a **butcherable carcass** — which is simply
+a tagged [`Gatherable`](harvesting.md) node, so butchering reuses the whole harvesting pipeline
+(tool gate, per-hit yields, floating HP bar, `gather:*` hooks, progression counters):
+
+```lua
+SurvivorCore.Mobs.register({
+    id = "boar", faction = "passive", health = 40,
+    carcassItem = "raw_meat",   -- blank = no carcass on death
+    carcassHp = 3,              -- butcher interactions to deplete
+    carcassTool = "knife",      -- tool type required ("" = bare-hand)
+    carcassYieldMin = 1,
+    carcassYieldMax = 2,
+    -- carcassSeconds = 120,    -- lifetime before despawn (0 = stays until depleted)
+})
+```
+
+The carcass uses a creator template (`SurvivorCoreContent.Carcasses.<mobType>`) or a plain
+placeholder, and its prompt reads **"Butcher — <mobType> carcass"**. Per-type juice keys on
+`"<mobType>_carcass"`:
+
+```lua
+SurvivorCore.Gather.onReaction("boar_carcass", "depleted", function(ctx) scatterBones(ctx.position) end)
+```
+
+Butcher counters (`gathers_raw_meat`, …) feed [quests](quests.md) and
+[achievements](achievements.md) automatically. All six fields are editable in the admin plugin's
+**Mobs** editor.
+
 ## Reactions (the juice)
 
 Global `Hooks.on("mob:died", …)` fire for every mob. For behavior tied to **one** mob type, use the

@@ -156,6 +156,7 @@ Engine systems fire hooks with `Hooks.run("name", ctx)`. The full catalogue live
 | `combat:hit` / `combat:kill` | combat ([docs](combat.md)) |
 | `quest:started` / `quest:progress` / `quest:completed` / `quest:blocked` | quests ([docs](quests.md)) |
 | `achievement:unlocked` | achievements ([docs](achievements.md)) |
+| `player:died` · `lootbag:dropped` / `lootbag:collected` | death & loot bags ([docs](loot-bags.md)) |
 
 These gameplay events ALSO cross the **EventBridge** with the same names — that bus is what quests,
 achievements, and analytics consume (via the `Progression` translation layer,

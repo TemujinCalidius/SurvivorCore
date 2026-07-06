@@ -62,6 +62,9 @@ local function makeTool(def: any, itemId: string): Tool
 		end
 	end
 	tool.Name = def.name or itemId
+	-- Engine tools must never drop as world pickups (death would strand a stray Tool otherwise) —
+	-- enforce on creator templates too, which often ship with Roblox's CanBeDropped=true default.
+	tool.CanBeDropped = false
 	tool:SetAttribute(TOOL_MARKER, true)
 	tool:SetAttribute("_ItemId", itemId)
 	tool:SetAttribute("ToolType", def.toolType)
