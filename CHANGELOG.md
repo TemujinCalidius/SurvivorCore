@@ -5,6 +5,13 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.7.4 — 2026-07-06
+
+### Fixed
+- **Beacon scoped to the newest bag** — dying again mid corpse-run re-points the owner's beacon at
+  the new bag (old and new bags coexist, each on its own 5-minute timer); previously the OLDER
+  bag's later despawn/looting would wipe the beacon that pointed at the newer bag.
+
 ## 0.7.3 — 2026-07-06
 
 ### Fixed
