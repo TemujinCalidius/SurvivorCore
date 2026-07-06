@@ -87,14 +87,17 @@ local function bindHotbar(root: Instance)
 		local active = math.floor(tonumber(localPlayer:GetAttribute(InventoryTypes.HOTBAR_EQUIPPED_ATTR)) or 0)
 
 		local icon = slot:FindFirstChild("Icon")
+		local qty = totalQty(itemId)
 		if icon and (icon:IsA("ImageLabel") or icon:IsA("ImageButton")) then
 			local id = if itemId ~= "" then SlotGrid.resolveItemIcon(itemId) else ""
 			icon.Image = id
 			icon.Visible = id ~= ""
+			-- A pin without a backing stack is inert (the server refuses to use/equip it) — show it
+			-- dimmed, the same 0.45 "can't afford" convention the Crafting tab uses.
+			icon.ImageTransparency = if itemId ~= "" and qty <= 0 then 0.45 else 0
 		end
 		local count = slot:FindFirstChild("Count")
 		if count and count:IsA("TextLabel") then
-			local qty = totalQty(itemId)
 			count.Text = if qty > 1 then tostring(qty) else ""
 			count.Visible = qty > 1
 		end

@@ -20,6 +20,7 @@ local RunService = game:GetService("RunService")
 assert(RunService:IsServer(), "SurvivorCore.ToolEquip is server-only — require it via SurvivorCore.start()")
 
 local Registries = require(script.Parent.Parent.registries)
+local Inventory = require(script.Parent.Inventory)
 local InventoryTypes = require(script.Parent.Parent.shared.InventoryTypes)
 
 local ToolEquip = {}
@@ -118,6 +119,12 @@ local function refresh(player: Player)
 	end
 	local def = itemId ~= "" and Registries.Items.get(itemId) or nil
 	local toolType = def and def.toolType
+
+	-- Possession gate: a pin is only a POINTER — never equip an item the player doesn't actually
+	-- carry (a stale/seeded pin without a backing stack would otherwise conjure a ghost tool).
+	if toolType and Inventory.getQty(player, itemId) <= 0 then
+		toolType = nil
+	end
 
 	-- Already holding the right tool? Leave it (avoids re-equip flicker on a re-press).
 	local held = currentEngineTool(player)

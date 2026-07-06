@@ -580,8 +580,10 @@ local function buildWeaponTemplates()
 end
 buildWeaponTemplates()
 
-SurvivorCore.Mobs.spawn("husk", CFrame.new(40, 5, 20), { respawn = true })
-SurvivorCore.Mobs.spawn("husk", CFrame.new(48, 5, 32), { respawn = true })
+-- Husks live out past their aggro+wander reach of spawn — new players shouldn't get farmed at
+-- the spawn point before they've picked up a weapon (they'll still hunt you in their territory).
+SurvivorCore.Mobs.spawn("husk", CFrame.new(70, 5, 45), { respawn = true })
+SurvivorCore.Mobs.spawn("husk", CFrame.new(82, 5, 58), { respawn = true })
 SurvivorCore.Mobs.spawn("boar", CFrame.new(-30, 5, 18))
 
 -- The quest-giver post: offers `slay_husk` (hold E to accept; return to turn in). Any mesh works —
