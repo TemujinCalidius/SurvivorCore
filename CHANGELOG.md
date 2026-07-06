@@ -5,6 +5,17 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## Unreleased
+
+### Fixed
+- **Ghost tools** — the hotbar→Tool bridge now verifies the player actually CARRIES a pinned item
+  before equipping it: a pin is only a pointer, and a stale/seeded pin without a backing stack
+  could previously conjure a usable Tool out of thin air.
+- The hotbar now **dims** a pinned item's icon (same 0.45 convention as the Crafting tab) when the
+  player has none of it, so an inert pin reads as inert.
+- Demo: the husks spawn farther out — new players are no longer farmed at the spawn point before
+  they've picked up a weapon.
+
 ## 0.7.0 — 2026-07-06
 
 ### Added
