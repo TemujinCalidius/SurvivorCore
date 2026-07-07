@@ -131,6 +131,9 @@ function ConfigAdmin.coerce(field: any, raw: any): any
 		if n == nil then
 			return { ok = false, error = "expected a number" }
 		end
+		if n ~= n or n == math.huge or n == -math.huge then
+			return { ok = false, error = "expected a finite number" }
+		end
 		if field.min then
 			n = math.max(n, field.min)
 		end

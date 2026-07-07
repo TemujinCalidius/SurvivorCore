@@ -197,6 +197,10 @@ function ContentAdminUi.mountCategory(
 	local scroll = Theme.scroll(32, 0, 8)
 	scroll.Parent = container
 
+	-- A failed Create/Override's reason, rendered by refresh() under the create row (the row
+	-- itself is destroyed and rebuilt by record()'s refresh, so the message must live here).
+	local lastError: string? = nil
+
 	local function refresh()
 		for _, child in scroll:GetChildren() do
 			if not child:IsA("UIBase") then
@@ -222,7 +226,9 @@ function ContentAdminUi.mountCategory(
 		})
 		createBtn.Parent = createRow
 		createBtn.MouseButton1Click:Connect(function()
-			actions.create(catKey, idBox.Text)
+			local res = actions.create(catKey, idBox.Text)
+			lastError = if typeof(res) == "table" and res.ok == false then res.message else nil
+			refresh()
 		end)
 		local overrideBtn = Theme.button({
 			Size = UDim2.fromOffset(84, 28),
@@ -233,8 +239,25 @@ function ContentAdminUi.mountCategory(
 		})
 		overrideBtn.Parent = createRow
 		overrideBtn.MouseButton1Click:Connect(function()
-			actions.createOverride(catKey, idBox.Text)
+			local res = actions.createOverride(catKey, idBox.Text)
+			lastError = if typeof(res) == "table" and res.ok == false then res.message else nil
+			refresh()
 		end)
+
+		if lastError then
+			local message = lastError :: string
+			lastError = nil -- shown once; the next refresh clears it
+			Theme.label({
+				Size = UDim2.fromScale(1, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				Text = `✗ {message}`,
+				TextColor3 = Theme.COLOR.DANGER,
+				TextWrapped = true,
+				TextSize = 12,
+				LayoutOrder = 2,
+			}).Parent =
+				scroll
+		end
 
 		Theme.label({
 			Size = UDim2.fromScale(1, 0),
@@ -245,7 +268,7 @@ function ContentAdminUi.mountCategory(
 			TextColor3 = Theme.COLOR.DIM,
 			TextWrapped = true,
 			TextSize = 11,
-			LayoutOrder = 2,
+			LayoutOrder = 3,
 		}).Parent =
 			scroll
 
@@ -256,13 +279,13 @@ function ContentAdminUi.mountCategory(
 				Text = `No {string.lower(cat.title)} yet — create one above.`,
 				TextColor3 = Theme.COLOR.DIM,
 				TextSize = 12,
-				LayoutOrder = 3,
+				LayoutOrder = 4,
 			}).Parent =
 				scroll
 		else
 			for i, entry in roster do
 				local panel = ContentAdminUi.buildRosterEntry(catKey, entry, ContentAdmin, actions)
-				panel.LayoutOrder = 3 + i
+				panel.LayoutOrder = 4 + i
 				panel.Parent = scroll
 			end
 		end

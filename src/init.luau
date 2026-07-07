@@ -147,6 +147,29 @@ function SurvivorCore.start(_options: { [string]: any }?)
 			Registries.Mobs.applyOverrides(overrides:FindFirstChild("Mobs"))
 			Registries.Quests.applyOverrides(overrides:FindFirstChild("Quests"))
 			Registries.Achievements.applyOverrides(overrides:FindFirstChild("Achievements"))
+
+			-- Quest-override caveat, made LOUD: QuestData.normalize prefers a def's nested
+			-- objectives/rewards tables, so flat objective*/reward* override fields silently do
+			-- nothing on a code-registered quest that uses the canonical nested shape. The id
+			-- matched, so applyOverrides' typo warning didn't fire — surface it here instead.
+			local questOverrides = overrides:FindFirstChild("Quests")
+			if questOverrides then
+				for _, child in questOverrides:GetChildren() do
+					local def = Registries.Quests.get(child.Name)
+					if def and typeof(def.objectives) == "table" then
+						for attr in child:GetAttributes() do
+							if string.match(attr, "^objective") or string.match(attr, "^reward") then
+								warn(
+									`[SurvivorCore] quest override '{child.Name}': objective*/reward* fields are`
+										.. " ignored for code quests with nested objectives — only name/description/"
+										.. "autoStart/requires/turnIn merge"
+								)
+								break
+							end
+						end
+					end
+				end
+			end
 		end
 	end
 

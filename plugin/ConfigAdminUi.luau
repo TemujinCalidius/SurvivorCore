@@ -178,6 +178,15 @@ local function mountSection(
 
 	local currentSection: any = nil
 
+	-- Route a rejected edit's reason to the footer (set AFTER record()'s refresh, so it sticks).
+	local function editField(editSectionId, groupName, field, raw, default)
+		local res = applyEdit(editSectionId, groupName, field, raw, default)
+		if typeof(res) == "table" and res.ok == false and res.error then
+			status.Text = `✗ {field.label}: {res.error}`
+		end
+		return res
+	end
+
 	local function refresh()
 		for _, child in scroll:GetChildren() do
 			if not child:IsA("UIBase") then
@@ -246,9 +255,9 @@ local function mountSection(
 
 		for _, group in section.groups do
 			order += 1
+			-- Theme.panel() auto-sizes (AutomaticSize.Y) — a fixed-height formula here would
+			-- miss the panel's own padding + per-row list gaps and clip the last row.
 			local panel = Theme.panel()
-			panel.Size = UDim2.new(1, 0, 0, 22 + ROW_H * #group.fields + 8)
-			panel.AutomaticSize = Enum.AutomaticSize.None
 			panel.LayoutOrder = order
 			panel.Parent = scroll
 
@@ -265,7 +274,7 @@ local function mountSection(
 			for i, field in group.fields do
 				local default = if typeof(groupDefaults) == "table" then groupDefaults[field.attr] else nil
 				local eff = ConfigAdmin.readEffective(section.id, group.name, field.attr, default)
-				local row = buildRow(ConfigAdmin, section.id, group.name, field, eff, applyEdit, applyReset)
+				local row = buildRow(ConfigAdmin, section.id, group.name, field, eff, editField, applyReset)
 				row.LayoutOrder = i
 				row.Parent = panel
 			end
@@ -287,9 +296,10 @@ local function mountSection(
 	return { refresh = refresh }
 end
 
--- Build the Nav pages: one per section when the engine is present, else a single explainer page.
--- Callbacks are the plugin main's record() wrappers.
-function ConfigAdminUi.pages(ConfigAdmin: any, applyEdit, applyReset, applyResetSection): { any }
+-- Build the Nav pages: one per section when the engine is present, else a single explainer page
+-- whose Refresh triggers `onEngineFound` (the plugin main rebuilds the whole window) once the
+-- engine appears — the page list is otherwise fixed for the life of the mount.
+function ConfigAdminUi.pages(ConfigAdmin: any, applyEdit, applyReset, applyResetSection, onEngineFound): { any }
 	local pages = {}
 	local schema = ConfigAdmin.readSchema()
 	if schema.ok then
@@ -314,7 +324,7 @@ function ConfigAdminUi.pages(ConfigAdmin: any, applyEdit, applyReset, applyReset
 					Size = UDim2.new(1, -24, 0, 100),
 					Position = UDim2.fromOffset(12, 40),
 					Text = (schema.reason or "Engine not found.")
-						.. " Once the engine is in the place, close and reopen this window to load the sections.",
+						.. " Once the engine is in the place, click Refresh to load the sections.",
 					TextColor3 = Theme.COLOR.DIM,
 					TextWrapped = true,
 					TextYAlignment = Enum.TextYAlignment.Top,
@@ -322,9 +332,8 @@ function ConfigAdminUi.pages(ConfigAdmin: any, applyEdit, applyReset, applyReset
 				message.Parent = frame
 				local function refresh()
 					local retry = ConfigAdmin.readSchema()
-					if retry.ok then
-						message.Text = "Engine found — close and reopen the SurvivorCore Studio window"
-							.. " to load the Engine Config sections."
+					if retry.ok and onEngineFound then
+						onEngineFound() -- the plugin main remounts the window with the full page list
 					end
 				end
 				header.refreshBtn.MouseButton1Click:Connect(refresh)

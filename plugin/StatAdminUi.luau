@@ -264,7 +264,9 @@ function StatAdminUi.mount(
 				BackgroundColor3 = COL_PANEL,
 				BorderSizePixel = 0,
 				LayoutOrder = order,
-				Size = UDim2.new(1, 0, 0, 22 + ROW_H * #StatAdmin.TUNABLE + 8),
+				-- Content height = padding (4+4) + header (22) + rows (ROW_H each) + 2px list
+				-- gaps between the header and every row — the +2 per row below covers the gaps.
+				Size = UDim2.new(1, 0, 0, 22 + (ROW_H + 2) * #StatAdmin.TUNABLE + 10),
 				AutomaticSize = Enum.AutomaticSize.None,
 			}, {
 				corner(8),

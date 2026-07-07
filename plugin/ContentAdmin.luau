@@ -337,6 +337,10 @@ function ContentAdmin.create(catKey: string, rawId: any): (boolean, string)
 	if folder:FindFirstChild(id) then
 		return false, `'{id}' already exists.`
 	end
+	if ContentAdmin.getOverrideNode(catKey, id) then
+		-- Authoring over an override would leave ONE roster entry masking the other.
+		return false, `'{id}' has an override — remove the override first (or keep editing it).`
+	end
 	local node = Instance.new("Configuration")
 	node.Name = id
 	for _, f in cat.fields do

@@ -113,6 +113,9 @@ knowing:
 - **Reset section** (footer) removes every override on that page in one undo step.
 - The two Inventory **lists** (equip slots, auto-hotbar categories) are code-managed — set them
   via `Config.override("Inventory", …)`.
+- **After re-syncing an UPDATED engine** (one whose config fields/defaults changed), restart
+  Studio — Studio caches required modules per session, so the plugin keeps seeing the old schema
+  until it reloads.
 
 Resolution order everywhere: **engine default → `Config.override(...)` in your game code → the
 instance (highest)**. Fields you never touched keep following engine defaults across updates —

@@ -18,6 +18,7 @@
 ]]
 
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
+local UserInputService = game:GetService("UserInputService")
 
 local Theme = require(script.Theme)
 local Nav = require(script.Nav)
@@ -120,7 +121,8 @@ local actions = {
 	end,
 	create = function(catKey: string, rawId: any): any
 		return record(`Content: create {catKey}`, function()
-			return ContentAdmin.create(catKey, rawId)
+			local ok, message = ContentAdmin.create(catKey, rawId)
+			return { ok = ok, message = message }
 		end)
 	end,
 	delete = function(catKey: string, id: string): any
@@ -135,7 +137,8 @@ local actions = {
 	end,
 	createOverride = function(catKey: string, rawId: any): any
 		return record(`Content: override {catKey}`, function()
-			return ContentAdmin.createOverride(catKey, rawId)
+			local ok, message = ContentAdmin.createOverride(catKey, rawId)
+			return { ok = ok, message = message }
 		end)
 	end,
 	setOverride = function(catKey: string, id: string, field: any, raw: any): any
@@ -156,116 +159,152 @@ local searchGeneration = 0
 local lastNonSearchId = "overview"
 
 -- ── NAV assembly (data-driven; new editors slot in as more pages) ─────────────
-local pages = {}
+-- The whole window is built by mountUi() so it can REBUILD: opening an engine-less place yields
+-- a single Engine Config explainer page whose Refresh remounts everything once the engine syncs.
+local restoring = false
 
-table.insert(pages, {
-	id = "overview",
-	label = "Overview",
-	section = "",
-	mount = function(frame)
-		return OverviewPage.mount(frame, {
-			StatAdmin = StatAdmin,
-			ContentAdmin = ContentAdmin,
-			selectPage = function(id: string)
-				nav.selectPage(id)
-			end,
-		})
-	end,
-})
+local function mountUi()
+	for _, child in root:GetChildren() do
+		child:Destroy()
+	end
 
-table.insert(pages, {
-	id = "stats",
-	label = "Survival Stats",
-	section = "Stats",
-	mount = function(frame)
-		return StatAdminUi.mount(frame, StatAdmin, applyEdit, applyReset, applyPreview, applyClear)
-	end,
-})
+	local pages = {}
 
-for _, page in ConfigAdminUi.pages(ConfigAdmin, applyConfigEdit, applyConfigReset, applyConfigResetSection) do
-	table.insert(pages, page)
-end
-
-for _, catKey in ContentAdmin.ORDER do
-	local cat = ContentAdmin.CATEGORIES[catKey]
 	table.insert(pages, {
-		id = "content/" .. catKey,
-		label = cat.title,
-		section = "Content",
-		badge = function()
-			return #ContentAdmin.listRoster(catKey)
-		end,
+		id = "overview",
+		label = "Overview",
+		section = "",
 		mount = function(frame)
-			return ContentAdminUi.mountCategory(frame, catKey, ContentAdmin, actions)
+			return OverviewPage.mount(frame, {
+				StatAdmin = StatAdmin,
+				ContentAdmin = ContentAdmin,
+				selectPage = function(id: string)
+					nav.selectPage(id)
+				end,
+			})
 		end,
 	})
-end
 
-table.insert(pages, {
-	id = "search",
-	label = "Search",
-	section = "",
-	hidden = true,
-	mount = function(frame)
-		return SearchPage.mount(frame, {
-			ContentAdmin = ContentAdmin,
-			ContentAdminUi = ContentAdminUi,
-			actions = actions,
-			getQuery = function()
-				return currentQuery
+	table.insert(pages, {
+		id = "stats",
+		label = "Survival Stats",
+		section = "Stats",
+		mount = function(frame)
+			return StatAdminUi.mount(frame, StatAdmin, applyEdit, applyReset, applyPreview, applyClear)
+		end,
+	})
+
+	local configPages = ConfigAdminUi.pages(
+		ConfigAdmin,
+		applyConfigEdit,
+		applyConfigReset,
+		applyConfigResetSection,
+		function() -- onEngineFound: remount with the full section list
+			task.defer(mountUi)
+		end
+	)
+	for _, page in configPages do
+		table.insert(pages, page)
+	end
+
+	for _, catKey in ContentAdmin.ORDER do
+		local cat = ContentAdmin.CATEGORIES[catKey]
+		table.insert(pages, {
+			id = "content/" .. catKey,
+			label = cat.title,
+			section = "Content",
+			badge = function()
+				return #ContentAdmin.listRoster(catKey)
+			end,
+			mount = function(frame)
+				return ContentAdminUi.mountCategory(frame, catKey, ContentAdmin, actions)
 			end,
 		})
-	end,
-})
+	end
 
--- Restore the last-open page (validated against the live page list — ids may change across
--- plugin versions or when the engine's schema grows/shrinks).
-local restoredId = "overview"
-local saved = plugin:GetSetting(SETTING_LAST_PAGE)
-if typeof(saved) == "string" then
-	for _, page in pages do
-		if page.id == saved and not page.hidden then
-			restoredId = saved
-			break
+	table.insert(pages, {
+		id = "search",
+		label = "Search",
+		section = "",
+		hidden = true,
+		mount = function(frame)
+			return SearchPage.mount(frame, {
+				ContentAdmin = ContentAdmin,
+				ContentAdminUi = ContentAdminUi,
+				actions = actions,
+				getQuery = function()
+					return currentQuery
+				end,
+			})
+		end,
+	})
+
+	-- Restore the last-open page (validated against the live page list — ids may change across
+	-- plugin versions or when the engine's schema grows/shrinks).
+	local restoredId = "overview"
+	local saved = plugin:GetSetting(SETTING_LAST_PAGE)
+	if typeof(saved) == "string" then
+		for _, page in pages do
+			if page.id == saved and not page.hidden then
+				restoredId = saved
+				break
+			end
 		end
 	end
-end
 
-nav = Nav.mount(root, pages, {
-	initialId = restoredId,
-	onNavigate = function(id: string)
-		lastNonSearchId = id
-		if plugin:GetSetting(SETTING_LAST_PAGE) ~= id then
-			plugin:SetSetting(SETTING_LAST_PAGE, id)
-		end
-	end,
-	onSearch = function(text: string)
-		currentQuery = text
-		searchGeneration += 1
-		local generation = searchGeneration
-		task.delay(0.25, function()
-			if generation ~= searchGeneration or not widget.Enabled then
+	-- The mount-time selectPage must NOT write the setting: an engine-less session falls back to
+	-- "overview", and persisting that would clobber a saved config page the user will want back.
+	restoring = true
+	nav = Nav.mount(root, pages, {
+		initialId = restoredId,
+		onNavigate = function(id: string)
+			lastNonSearchId = id
+			searchGeneration += 1 -- explicit navigation cancels any pending search-page jump
+			if restoring then
 				return
 			end
-			if string.match(currentQuery, "^%s*$") then
-				if nav.getActiveId() == "search" then
-					nav.selectPage(lastNonSearchId)
-				end
-			else
-				nav.selectPage("search")
-				nav.refreshAll() -- re-render the results with the new query
+			if plugin:GetSetting(SETTING_LAST_PAGE) ~= id then
+				plugin:SetSetting(SETTING_LAST_PAGE, id)
 			end
-		end)
-	end,
-})
+		end,
+		onSearch = function(text: string)
+			currentQuery = text
+			searchGeneration += 1
+			local generation = searchGeneration
+			task.delay(0.25, function()
+				if generation ~= searchGeneration or not widget.Enabled then
+					return
+				end
+				if string.match(currentQuery, "^%s*$") then
+					if nav.getActiveId() == "search" then
+						nav.selectPage(lastNonSearchId)
+					end
+				else
+					nav.selectPage("search")
+					nav.refreshAll() -- re-render the results with the new query
+				end
+			end)
+		end,
+	})
+	restoring = false
+end
 
--- An undo/redo can revert any edit the pages show — refresh so they never go stale.
-ChangeHistoryService.OnUndo:Connect(function()
-	nav.refreshAll()
-end)
-ChangeHistoryService.OnRedo:Connect(function()
-	nav.refreshAll()
-end)
+mountUi()
+
+-- An undo/redo can revert any edit the pages show — refresh so they never go stale. Skip while
+-- the user is mid-edit in one of OUR text boxes (the rebuild would destroy the focused box and
+-- eat the typed text); the per-page Refresh button covers that rare overlap.
+local function onHistoryChanged()
+	local focused = UserInputService:GetFocusedTextBox()
+	if focused and focused:IsDescendantOf(widget) then
+		return
+	end
+	if nav then
+		nav.refreshAll()
+	end
+end
+ChangeHistoryService.OnUndo:Connect(onHistoryChanged)
+ChangeHistoryService.OnRedo:Connect(onHistoryChanged)
 
 button.Click:Connect(function()
 	widget.Enabled = not widget.Enabled

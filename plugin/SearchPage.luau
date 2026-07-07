@@ -50,8 +50,8 @@ function SearchPage.mount(container: Frame, deps: any): { refresh: () -> () }
 				end
 			end
 			total += #matches
-			if #matches == 0 then
-				continue
+			if #matches == 0 or shown >= MAX_RESULTS then
+				continue -- past the cap, count the matches but don't render an empty header
 			end
 			order += 1
 			Theme.label({

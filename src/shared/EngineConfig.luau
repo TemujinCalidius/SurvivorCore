@@ -419,6 +419,9 @@ local function resolveValue(field: Field, raw: any): (boolean, any, string?)
 		if typeof(raw) ~= "number" then
 			return false, nil, "expected a number"
 		end
+		if raw ~= raw or raw == math.huge or raw == -math.huge then
+			return false, nil, "expected a finite number"
+		end
 		local v = raw
 		if field.min then
 			v = math.max(v, field.min)
