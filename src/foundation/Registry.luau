@@ -69,6 +69,32 @@ function Registry.new(name: string, options: Options?)
 		end
 	end
 
+	-- Owner override path (issue #40): field-merge each child Configuration's attributes onto the
+	-- ALREADY-registered def with the same key (code- or folder-registered — the def table is
+	-- shared by reference, so live .get()/.getAll() consumers see the merged fields). Deltas-only:
+	-- an override child carries ONLY the attributes it changes. Unknown keys WARN (louder than
+	-- loadFromFolder's silent skip — an override that matches nothing is a typo, and this is the
+	-- only place it can be surfaced). The key field itself can't be overridden. Boot-time only:
+	-- callers (SurvivorCore.start) run this before systems cache or replicate defs.
+	function self.applyOverrides(folder: Instance?)
+		if folder == nil then
+			return
+		end
+		for _, child in folder:GetChildren() do
+			local key = child.Name
+			local def = byId[key]
+			if def == nil then
+				warn(`[{name}] override '{tostring(key)}' matches no registered def — skipped (typo?)`)
+				continue
+			end
+			for attrName, value in child:GetAttributes() do
+				if attrName ~= keyField then
+					def[attrName] = value
+				end
+			end
+		end
+	end
+
 	function self.get(key: any): any
 		return byId[key]
 	end

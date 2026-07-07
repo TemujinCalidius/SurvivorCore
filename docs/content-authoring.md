@@ -103,6 +103,35 @@ Open Studio → the **SurvivorCore** toolbar → **Content**. Seven builders:
 Each edit is one Studio **undo** step. Behind the scenes it creates/edits the
 `SurvivorCoreContent` instances above, so pressing Play registers your content with no code.
 
+## Overrides — tune code-registered defs without code
+
+The authoring folders above can't touch a def that was registered **from code** (the engine's
+loader skips already-registered ids — code wins). The **`Overrides`** folder can:
+
+```text
+SurvivorCoreContent/
+  └─ Overrides (Folder)          ← mirrors the category folders above
+     └─ Items (Folder)
+        └─ berry (Configuration) ← name of a CODE-registered def
+           • name = "Sweet Berries"   (ONLY the fields you change)
+           • stack = 99
+```
+
+At `start()` the engine **field-merges** each override's attributes onto the registered def —
+before components bind and before the client data caches publish, so tooltips/recipes/gatherables
+all see the merged values. Rules:
+
+- **Deltas-only**: an override carries only the attributes it changes; anything absent inherits
+  the code value. Deleting the override restores the pristine code def on the next Play.
+- The **id can't be renamed** by an override, and an id matching **no registered def warns in
+  Output on Play** (`override 'x' matches no registered def`) — your typo backstop.
+- **Quest caveat**: a code-registered quest with nested objective/reward tables ignores the flat
+  `objective*`/`reward*` override fields (name/description/autoStart/requires/turnIn still merge).
+  Overrides of no-code quests merge fully.
+
+The admin plugin's category pages author these for you (**+ Override**, blue pill, blank = inherit)
+— see [admin-plugin.md](admin-plugin.md).
+
 ## Binding a world object
 
 A creator builds any mesh, tags it **`Gatherable`** (CollectionService), and sets a `Resource`

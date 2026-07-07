@@ -5,6 +5,34 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## Unreleased
+
+### Added
+- **Engine Config, no-code** (#21) — a new persisted instance, **`SurvivorCoreEngineConfig`**,
+  layers owner overrides over EVERY engine Config section (Movement incl. feedback asset ids,
+  Combat + Bow, Mobs, Harvesting, Crafting, Inventory scalars, Consequences, LootBags, Quests,
+  Achievements, and UI incl. the full **Theme** — colors and fonts). Same locked, **deltas-only**
+  model as `SurvivalStatsConfig`: an attribute exists only where the owner diverged from the
+  engine default, so untouched fields keep following engine updates. Applied as the FIRST step of
+  `start()`/`startClient()` (edits take effect on the next Play); invalid saved values warn and
+  are skipped, never fatal. The schema (`src/shared/EngineConfig.luau`, ~94 typed fields across 11
+  sections) is the single source of truth the plugin renders from.
+- **Content overrides** (#40) — `SurvivorCoreContent/Overrides/<Category>` entries **field-merge
+  onto defs registered from code** (previously untouchable no-code: the loader skips registered
+  ids). Deltas-only: blank = inherit; deleting an override restores the code def; an id matching
+  no def **warns at boot** (typo backstop). Applied before components bind and before the client
+  data caches publish, so tooltips and gatherables see merged values. New
+  `Registry.applyOverrides(folder)`.
+- **SurvivorCore Studio** — the admin plugin rebuilt as its own **floating window** (drag-dockable,
+  660×580 default) with a **sidebar**: Overview (engine status + content counts), Survival Stats,
+  **Engine Config** (one page per section; color fields edited as `R, G, B` with a live swatch,
+  fonts by name with a cycle button; per-section reset), and Content (one page per category with
+  count badges, **+ Override** authoring, blue override pills). A rail **search box** finds any
+  content entry by id/name across categories with editable results in place. Last-open page is
+  remembered; undo/redo now refreshes the forms. New shared plugin visual system
+  (`plugin/Theme.luau`) replaces the copy-pasted styling. *(Window identity changed — your old
+  dock position resets once.)*
+
 ## 0.7.4 — 2026-07-06
 
 ### Fixed

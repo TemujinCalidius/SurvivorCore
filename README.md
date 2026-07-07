@@ -40,8 +40,11 @@ authoring tools. If you know Roblox Studio, you can build a survival game.
 - **Hunting & loot bags** — slain animals leave butcherable carcasses (knife required, real
   yields); player death drops everything into a lootable bag with a countdown — get back to it
   before it's gone.
-- **No-code admin plugin** — create items, weapons, ammo and mobs from a Studio form (damage,
-  range, arrow curve, weight, aggro, leash) and drop them into the world. No scripting.
+- **SurvivorCore Studio (no-code admin plugin)** — one floating window with sidebar + search:
+  tune **every engine config section** (movement, combat, mobs, loot bags, UI theme colors &
+  fonts, …) as locked deltas that survive engine updates; create items, weapons, ammo, mobs,
+  quests and achievements from forms; **override code-registered content** field-by-field; drop
+  any of it into the world. No scripting.
 
 Everything is **content-free by design**, **server-authoritative**, and **restyleable** — the UI
 is real Instances driven by attributes, and every default is overridable.
