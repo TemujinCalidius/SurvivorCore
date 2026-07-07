@@ -1,6 +1,6 @@
 # Mobs & AI
 
-> 📹 **Demo:** [creating mobs & fleeing hunt-NPCs, plus combat and the admin plugin](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU)
+> 📹 **Demos:** [creating mobs & fleeing hunt-NPCs, plus combat and the admin plugin](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU) · [hunting a boar & butchering the carcass](https://makertube.net/w/oVJwYUhCKxA2ZvgvocdhwZ)
 
 The **mob & AI engine** ([`src/systems/Mobs.luau`](../src/systems/Mobs.luau)) is the shared,
 content-free creature substrate that combat (#12), animals (#13) and monsters (#14) all build on.
