@@ -1,5 +1,7 @@
 # Death, loot bags & respawn
 
+> 📹 **Demo:** [death, loot bags, the owner beacon & the corpse run](https://makertube.net/w/oVJwYUhCKxA2ZvgvocdhwZ)
+
 When a player dies, SurvivorCore drops their belongings into a **loot bag** at the spot they fell
 ([`src/systems/LootBags.luau`](../src/systems/LootBags.luau), ported from The Counter Earth). The
 survival stakes system: get back to your bag before it's gone — or before someone else does.
