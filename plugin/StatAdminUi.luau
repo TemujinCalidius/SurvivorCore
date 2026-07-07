@@ -6,34 +6,22 @@
 	ChangeHistoryService recording, then refresh). Styling follows docs/design-language.md.
 ]]
 
+local Theme = require(script.Parent.Theme)
+
 local StatAdminUi = {}
 
-local COL_BG = Color3.fromRGB(18, 21, 28)
-local COL_PANEL = Color3.fromRGB(28, 32, 42)
-local COL_TEXT = Color3.fromRGB(235, 238, 245)
-local COL_DIM = Color3.fromRGB(150, 160, 180)
-local COL_ACCENT = Color3.fromRGB(120, 170, 255) -- marks an overridden field
-local COL_FIELD = Color3.fromRGB(38, 43, 56)
-local FONT = Enum.Font.GothamMedium
-local ROW_H = 26
+local COL_BG = Theme.COLOR.BG
+local COL_PANEL = Theme.COLOR.PANEL
+local COL_TEXT = Theme.COLOR.TEXT
+local COL_DIM = Theme.COLOR.DIM
+local COL_ACCENT = Theme.COLOR.ACCENT -- marks an overridden field
+local COL_FIELD = Theme.COLOR.FIELD
+local FONT = Theme.FONT
+local ROW_H = Theme.ROW_H
 local FOOTER_H = 36 -- the Preview / Clear control bar at the bottom
 
-local function make(class: string, props: { [string]: any }, children: { Instance }?): Instance
-	local inst = Instance.new(class)
-	for key, value in props do
-		(inst :: any)[key] = value
-	end
-	if children then
-		for _, child in children do
-			child.Parent = inst
-		end
-	end
-	return inst
-end
-
-local function corner(radius: number): Instance
-	return make("UICorner", { CornerRadius = UDim.new(0, radius) })
-end
+local make = Theme.make
+local corner = Theme.corner
 
 -- A single field row: [reset] label .... control. `applyEdit/applyReset` take (stat, attr, …).
 local function buildRow(stat: string, spec: any, eff: any, applyEdit, applyReset): Instance
