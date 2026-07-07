@@ -1,20 +1,32 @@
-# SurvivorCore admin plugin
+# SurvivorCore Studio (the admin plugin)
 
-A small **Studio plugin** that gives the experience owner friendly forms instead of hand-editing
-Attributes in the Explorer. It adds two toolbar buttons under **SurvivorCore**:
+A **Studio plugin** that gives the experience owner friendly forms instead of hand-editing
+Attributes in the Explorer. One **SurvivorCore › Studio** toolbar button opens one **floating
+window** (drag-dock it anywhere) with a sidebar of editors:
 
+- **Overview** — is the engine synced, what content exists (click through), how the model works.
 - **Survival Stats** — tune the survival-stat rates/thresholds/HUD on the `SurvivalStatsConfig`
-  instance (the deltas-only, locked model below).
+  instance (the deltas-only, locked model below), with an Edit-mode **HUD preview**.
+- **Engine Config** — every engine Config section (issue #21): Movement (speeds, energy, audio,
+  feedback **asset ids**), Combat + Bow, Mobs & AI, Harvesting, Crafting, Inventory, Consequences,
+  Loot bags, Quests, Achievements, and **UI & theme** (keybinds, chat placement, layout — and the
+  full **Theme**: colors edited as `R, G, B` with a live swatch, fonts by name). Same deltas-only
+  model, persisted on **`SurvivorCoreEngineConfig`**; edits apply on the **next Play**.
 - **Content** — create/edit/delete **items**, **weapons**, **arrows**, **gatherable resources**,
-  **mobs**, **quests** and **achievements** with no code (the Builder slice). It writes
-  `SurvivorCoreContent` instances the engine loads at `start()` — see
-  [content-authoring.md](content-authoring.md). Gatherables/mobs get **+ Add to World**, weapons
-  **+ Tool model**, quests **+ Quest giver** — each drops the tagged instance in front of the
-  camera. Unlike the stats editor, content is full owner-authored defs (not deltas). Every edit is
-  one Studio undo step.
+  **mobs**, **quests** and **achievements** with no code, one page per category with entry counts —
+  plus **Overrides** that tune defs registered *from code* (issue #40, below). Gatherables/mobs get
+  **+ Add to World**, weapons **+ Tool model**, quests **+ Quest giver**. See
+  [content-authoring.md](content-authoring.md).
 
-The rest of this page covers the Survival Stats editor; both install the same way. It's the
-[Builder / Admin plugin](https://github.com/TemujinCalidius/SurvivorCore/issues/11).
+The **search box** at the top of the sidebar finds any content entry by id or name across every
+category and shows fully **editable** results in place. The window remembers your last-open page.
+Every edit is one Studio **undo** step (and undo/redo refreshes the forms).
+
+This is the [Builder / Admin plugin](https://github.com/TemujinCalidius/SurvivorCore/issues/11).
+
+> **Upgrading from the tabbed panel?** The window identity changed (`SurvivorCore Studio`), so
+> Studio forgets the old panel's dock position **once** — the new window opens floating; dock it
+> wherever you like and Studio remembers from then on.
 
 > 📹 **Demos:** [HUD, survival stats & the admin plugin](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P) · [no-code item & gatherable creation](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE) · [no-code weapon, ammo & mob creation](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU) · [no-code quest & achievement creation](https://makertube.net/w/uSGJ2MHEFjSSKxMiJBJ6Y5)
 
@@ -44,16 +56,17 @@ SurvivorCoreStatAdmin.rbxm` — and drop it into that folder, or open it from St
 
 Then **restart Studio** — a brand-new plugin's toolbar only registers when Studio loads it. (After
 this first install, re-running the `--plugin` build hot-reloads the plugin live, no restart needed.)
-A **SurvivorCore › Survival Stats** button then appears on the **Plugins** ribbon tab; click it to
-toggle the dock widget.
+A **SurvivorCore › Studio** button then appears on the **Plugins** ribbon tab; click it to toggle
+the window.
 
-> **Open a place that has the engine in it.** The plugin tunes the stats of whatever place is open,
-> reading the live roster from `ReplicatedStorage.SurvivorCore` — so sync the engine (or drop in
-> `SurvivorCore.rbxm`) first. With no engine present it opens to an instructional empty state and
-> writes nothing. Note that restarting Studio drops an *unsaved* Rojo-synced place, so reconnect
-> Rojo and re-sync (or save the place before restarting) to bring the engine back.
+> **Open a place that has the engine in it.** The plugin edits whatever place is open, reading the
+> stat roster and the Engine Config schema live from `ReplicatedStorage.SurvivorCore` — so sync the
+> engine (or drop in `SurvivorCore.rbxm`) first. With no engine present it opens to an
+> instructional empty state and writes nothing. Note that restarting Studio drops an *unsaved*
+> Rojo-synced place, so reconnect Rojo and re-sync (or save the place before restarting) to bring
+> the engine back.
 
-## Using it
+## Survival Stats
 
 Each stat shows the seven tunable fields, each displaying its **effective** value (your override if
 you've set one, otherwise the live engine default):
@@ -64,53 +77,90 @@ you've set one, otherwise the live engine default):
 - **Icon** — the HUD icon asset id.
 - **Value format** — `fraction` (`99/100`) · `percent` · `value` · `none`.
 
-Edit a field (type a number / click to toggle or cycle) and it's applied immediately. The dot at the
-left of a row is **filled + blue when that field is overridden**, hollow when it's following the
-engine default. Click the dot to **reset** the field. Every edit is a single **undo** step.
+Edit a field (type a number / click to toggle or cycle) and it's applied immediately — stats apply
+**live**, no restart. The dot at the left of a row is **filled + blue when that field is
+overridden**, hollow when it's following the engine default. Click the dot to **reset** the field.
 
-It reads the stat roster + defaults live from the engine in the place, so it always reflects the
-version you're running. With no engine synced it shows an instructional empty state and writes
-nothing.
+The plugin can tune **only** the seven owner-facing fields above. It deliberately **cannot** touch
+`Invert` or `DangerHigh` — those are engine-owned stat *semantics*; a guardrail makes them
+impossible to write.
 
 ### Preview the HUD in Edit mode
 
 Roblox doesn't run the HUD's client binder in Studio's **Edit** view, so an authored `SurvivalHud`
-normally shows its static template there — full bars, blank readouts, and only the shipped *default*
-icons (an icon override you set above isn't visible until you press Play). The footer's **Preview
-HUD** button paints, in Edit, what the running game *would* render: each bar's resolved icon
-(including your overrides), a sample partial fill, and a sample value readout — so you can tune and
-**see the result without pressing Play**. **Clear** restores the HUD; both are a single **undo**
-step. (Preview resolves icons exactly like the engine — per-bar `Icon` attribute › the stat's
-effective `icon` — and edits the `SurvivalHud` in StarterGui, so on the Rojo-mounted demo a re-sync
-also resets it.)
+normally shows its static template there. The footer's **Preview HUD** button paints, in Edit, what
+the running game *would* render: each bar's resolved icon (including your overrides), a sample
+partial fill, and a sample value readout — so you can tune and **see the result without pressing
+Play**. **Clear** restores the HUD; both are a single **undo** step.
+
+## Engine Config
+
+Every page under **Engine Config** edits one engine Config section with the exact same row model as
+the stats editor (override dot, engine-default placeholder, blue = overridden). Differences worth
+knowing:
+
+- **Persisted on `SurvivorCoreEngineConfig`** (a Configuration in ReplicatedStorage, one child per
+  section, one grandchild per group) — created on your first real override, deltas-only, never
+  seeded, never overwritten by the engine.
+- **Applies on the next Play / server start.** The engine layers the instance over its defaults as
+  the very first step of `start()`/`startClient()` — before any system boots — so live-reading and
+  boot-caching systems all agree. (Survival Stats stay live-applied; everything else is
+  boot-applied. The footer reminds you.)
+- **Theme colors** are edited as `R, G, B` (0–255) with a live **swatch**; **fonts** by
+  `Enum.Font` name (the ↻ button cycles common ones; any valid name can be typed). Invalid values
+  are rejected in the form, and a hand-authored bad attribute is **warned about and skipped at
+  boot** — never fatal.
+- **Reset section** (footer) removes every override on that page in one undo step.
+- The two Inventory **lists** (equip slots, auto-hotbar categories) are code-managed — set them
+  via `Config.override("Inventory", …)`.
+
+Resolution order everywhere: **engine default → `Config.override(...)` in your game code → the
+instance (highest)**. Fields you never touched keep following engine defaults across updates —
+that's the locked model.
+
+## Content: authored entries & overrides
+
+Each category page lists the **merged roster**:
+
+- **Authored entries** — full defs this plugin created under `SurvivorCoreContent/<Category>`;
+  every field editable, **Delete** removes the def.
+- **Override entries** (blue *override* pill) — **deltas over a def registered from code** (e.g. a
+  starter kit's `SurvivorCore.Items.register{...}`). Code-registered defs can't be listed here in
+  Edit mode (registries fill at runtime), so: type the id, click **+ Override**, and set **only the
+  fields you want to change** — **blank = inherit** the code value (booleans cycle
+  `(inherit) → true → false`). **Remove** deletes the override and the pristine code def returns on
+  the next Play. A typo'd id can only be caught at runtime: the engine **warns in Output on Play**
+  (`override 'x' matches no registered def`).
+
+Overrides live under `SurvivorCoreContent/Overrides/<Category>` and are field-merged onto the
+registered defs at `start()` — before anything caches or replicates, so tooltips, recipes and
+gatherables all see the merged values. One caveat: on a **code-registered quest** with nested
+objective/reward tables, the flat `objective*`/`reward*` override fields are ignored (name/
+description/autoStart/requires/turnIn still merge); overrides of no-code quests merge fully.
 
 ## Why your tuning is "locked" — it survives re-syncs and engine updates
 
-This is the important part. The engine resolves each stat as **engine default → `Config.override` →
-the `SurvivalStatsConfig` instance (highest priority)**, and it only ever *seeds* that instance
-when it's missing — it never overwrites it. The plugin builds on that with a **deltas-only** rule:
+The engine resolves configuration as **engine default → `Config.override` → your instance
+(highest priority)**, and it never overwrites your instances. The plugin builds on that with the
+**deltas-only** rule:
 
 - It **writes an attribute only when you change a field from the engine default.**
-- **Resetting** a field (or typing the default back in) **removes** the attribute, so the field goes
-  back to following the engine default.
+- **Resetting** a field (or typing the default back in) **removes** the attribute, so the field
+  goes back to following the engine default.
 
 So two good things hold across a SurvivorCore update:
 
-1. **Your explicit overrides are never lost** — they live on your instance, which the engine never
+1. **Your explicit overrides are never lost** — they live on your instances, which the engine never
    overwrites.
 2. **Fields you didn't touch keep following engine defaults** — so a future release that improves a
-   default rate reaches your game, instead of being frozen at today's value.
+   default reaches your game, instead of being frozen at today's value.
 
-The plugin can tune **only** the seven owner-facing fields above. It deliberately **cannot** touch
-`Invert` or `DangerHigh` — those are engine-owned stat *semantics* (which way a bar fills / which end
-is dangerous); the engine ignores them on the instance, and a guardrail in the plugin makes it
-impossible to write them.
-
-> **Caveat — the engine's own demo.** In this repo's demo, `SurvivalStatsConfig` is *Rojo-mounted*,
-> so a `rojo serve` re-sync reverts plugin edits there. That's a demo artifact: a **real** game seeds
-> the instance once (install-if-absent, not Rojo-managed), so the plugin's edits persist across engine
-> updates — which is the whole point.
+> **Caveat — the engine's own demo.** In this repo's demo, config instances are *Rojo-mounted*, so
+> a `rojo serve` re-sync reverts plugin edits there. That's a demo artifact: a **real** game keeps
+> its instances in the place file, so plugin edits persist across engine updates — which is the
+> whole point.
 
 ---
 
-See also: [Survival Stats + HUD](survival-stats.md) · [Design Language](design-language.md).
+See also: [Survival Stats + HUD](survival-stats.md) · [Content authoring](content-authoring.md) ·
+[Design Language](design-language.md).

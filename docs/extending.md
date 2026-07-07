@@ -192,6 +192,15 @@ SurvivorCore.Config.override("Energy", { DrainPerSecond = 10 }) -- your tweak
 SurvivorCore.Config.get("Energy.DrainPerSecond")               -- 10
 ```
 
+Full resolution order (each layer wins over the previous):
+
+1. **Engine defaults** — `defineSection` at require time.
+2. **Your game's `Config.override(...)`** — code-time tuning, any time before `start()`.
+3. **The `SurvivorCoreEngineConfig` instance** — the no-code layer the
+   [admin plugin's Engine Config editor](admin-plugin.md) writes (deltas-only). Layered over
+   everything as the first step of `start()`/`startClient()`, so it applies on the next Play.
+   (`SurvivalStatsConfig` is its live-applied sibling for survival stats.)
+
 ## `Assets` — keep IDs out of code
 
 The engine **never** hardcodes asset IDs — your game registers them and the engine reads them
