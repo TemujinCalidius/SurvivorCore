@@ -23,6 +23,7 @@
 	  achievement:unlocked                           { player, key, def }
 	  player:died                                    { player, position }   -- after any death-drop
 	  lootbag:dropped / lootbag:collected            { player, bag, position?, items? / emptied }
+	  trade:started / trade:completed                { player, partner, gave?, got? }   -- fired per player
 
 	Per-resource / per-mob-type variants of these dispatch through Reactions (see Reactions.luau):
 	SurvivorCore.Gather.onReaction(resourceId, …) and SurvivorCore.Mobs.onReaction(mobType, …).
