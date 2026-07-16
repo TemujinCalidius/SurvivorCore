@@ -39,6 +39,7 @@ local CombatConfig = require(script.Parent.CombatConfig)
 local QuestsConfig = require(script.Parent.QuestsConfig)
 local AchievementsConfig = require(script.Parent.AchievementsConfig)
 local LootBagsConfig = require(script.Parent.LootBagsConfig)
+local TradingConfig = require(script.Parent.TradingConfig)
 
 local EngineConfig = {}
 
@@ -297,6 +298,22 @@ EngineConfig.SECTIONS = {
 		},
 	},
 	{
+		id = "Trading",
+		title = "Trading",
+		groups = {
+			{
+				label = "Player trading",
+				fields = {
+					boolean("Enabled", "Enable trading"),
+					num("MaxDistance", "Max trade distance (studs)", 0),
+					num("RequestTimeoutSeconds", "Request timeout (s)", 1),
+					boolean("ResetConfirmOnChange", "Reset confirms on change"),
+					boolean("AllowEquippedItems", "Allow trading worn gear"),
+				},
+			},
+		},
+	},
+	{
 		id = "UI",
 		title = "UI & theme",
 		groups = {
@@ -391,6 +408,7 @@ local DEFAULTS_BY_SECTION: { [string]: any } = {
 	Inventory = InventoryConfig.DEFAULTS,
 	Consequences = ConsequenceConfig.DEFAULTS,
 	LootBags = LootBagsConfig.DEFAULTS,
+	Trading = TradingConfig.DEFAULTS,
 	Quests = QuestsConfig.DEFAULTS,
 	Achievements = AchievementsConfig.DEFAULTS,
 	UI = UiConfig.DEFAULTS,

@@ -63,6 +63,10 @@ require(script.shared.AchievementsConfig)
 -- before start().
 require(script.shared.LootBagsConfig)
 
+-- Define the "Trading" (player-to-player trade) Config section, so Config.override(...) works any
+-- time before start().
+require(script.shared.TradingConfig)
+
 -- The no-code layer over ALL of the sections above: the persisted SurvivorCoreEngineConfig
 -- instance (written by the admin plugin, deltas-only). apply() runs as the first step of
 -- start()/startClient(), AFTER game-code Config.override calls — the instance wins.
@@ -279,6 +283,12 @@ function SurvivorCore.start(_options: { [string]: any }?)
 	lootBags.start(_options)
 	SurvivorCore.LootBags = lootBags
 
+	-- Trade: secure player-to-player item swaps. Booted after Inventory (add/remove/canAccept) and
+	-- Progression (trades_total map).
+	local trade = require(script.systems.Trade)
+	trade.start(_options)
+	SurvivorCore.Trade = trade
+
 	return SurvivorCore
 end
 
@@ -322,6 +332,9 @@ function SurvivorCore.startClient(_options: { [string]: any }?)
 	-- Death & respawn juice: keep the camera on the new body, and beacon the owner's loot bag.
 	require(script.client.RespawnCamera).start(_options)
 	require(script.client.LootBagBeacon).start(_options)
+
+	-- Player-to-player trading window (server-driven; drag items from the inventory grid to offer).
+	require(script.client.TradeUi).start(_options)
 
 	-- Tool-swing harvesting input (click an equipped tool at a gatherable node).
 	require(script.client.ToolHarvest).start(_options)

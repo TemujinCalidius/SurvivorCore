@@ -5,6 +5,21 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## Unreleased
+
+### Added
+- **Player trading** (#15) — secure, server-authoritative, **dupe-proof** face-to-face item swaps.
+  Walk up and trigger a **"Trade"** prompt; the target Accepts/Declines; both stage loose backpack
+  stacks (drag from the inventory grid, with −/+ qty steppers) and must **Confirm** before anything
+  moves. The swap is one synchronous, no-yield commit — re-validate holds → pre-flight both
+  receivers have room (new **`Inventory.canAccept`**) → remove both → grant with `addUpTo` → refund
+  any residue — so item count is conserved on every path. Auto-cancels on death / leave / walking
+  out of range (`MaxDistance`) / request timeout; a staging change resets both confirms. New
+  `Trade` server system + `TradeUi` client window, the `"Trading"` Config section (tunable in
+  SurvivorCore Studio), hooks `trade:started` / `trade:completed`, and a `trades_total` progression
+  counter. v1 trades loose backpack stacks only (worn gear reserved behind `AllowEquippedItems`).
+  See [docs/trading.md](docs/trading.md).
+
 ## 0.8.0 — 2026-07-16
 
 ### Added

@@ -429,6 +429,116 @@ function Inventory.addUpTo(player: Player, itemId: string, amount: number): numb
 	return granted
 end
 
+-- Normalize a basket given as either a list ({ { itemId, qty }, … }) or a map ({ itemId = qty })
+-- into a clean list, dropping empty ids / non-positive quantities.
+local function normalizeBasket(basket: any): { { itemId: string, qty: number } }
+	local out = {}
+	if type(basket) ~= "table" then
+		return out
+	end
+	if #basket > 0 then
+		for _, e in ipairs(basket) do
+			if type(e) == "table" then
+				local id = sanitizeItemId(e.itemId)
+				local qty = math.floor(tonumber(e.qty) or 0)
+				if id ~= "" and qty > 0 then
+					table.insert(out, { itemId = id, qty = qty })
+				end
+			end
+		end
+	else
+		for k, v in pairs(basket) do
+			if type(k) == "string" then
+				local id = sanitizeItemId(k)
+				local qty = math.floor(tonumber(v) or 0)
+				if id ~= "" and qty > 0 then
+					table.insert(out, { itemId = id, qty = qty })
+				end
+			end
+		end
+	end
+	return out
+end
+
+-- Non-mutating fit oracle: would ALL of `incoming` fit (weight + slots) if the player ALSO shed
+-- `opts.alsoRemoving` first? Mirrors addQty's fill order exactly (partial stacks, then empties) on
+-- a working copy of the slot occupancy, so it's an exact predicate — the anti-dupe pre-flight the
+-- trade commit needs (there is otherwise no whole-basket capacity check). `incoming` /
+-- `alsoRemoving` accept either a { { itemId, qty } } list or an { itemId = qty } map.
+function Inventory.canAccept(player: Player, incoming: any, opts: { alsoRemoving: any? }?): boolean
+	local maxWeight = tonumber(player:GetAttribute(InventoryTypes.MAX_CARRY_WEIGHT_ATTR)) or BASE_POCKET_WEIGHT
+	local maxSlots = getMaxSlots(player)
+
+	-- Working copy of slot occupancy.
+	local sItem, sQty = {}, {}
+	for n = 1, maxSlots do
+		sItem[n] = getSlotItemId(player, n)
+		sQty[n] = getSlotQty(player, n)
+	end
+	local weightLeft = maxWeight - computeWeight(player)
+
+	-- Simulate the player shedding their own basket first (LIFO, like removeQty), freeing weight.
+	for _, r in normalizeBasket(opts and opts.alsoRemoving) do
+		local def = readDef(r.itemId)
+		local left = r.qty
+		for n = maxSlots, 1, -1 do
+			if left <= 0 then
+				break
+			end
+			if sItem[n] == r.itemId then
+				local t = math.min(left, sQty[n])
+				sQty[n] -= t
+				if sQty[n] == 0 then
+					sItem[n] = ""
+				end
+				left -= t
+				weightLeft += weightOf(def) * t
+			end
+		end
+	end
+
+	-- Simulate placing the incoming basket (partial stacks first, then empty slots) + weight.
+	for _, it in normalizeBasket(incoming) do
+		local def = readDef(it.itemId)
+		if not def then
+			return false
+		end
+		if weightLeft - weightOf(def) * it.qty < -0.001 then
+			return false
+		end
+		weightLeft -= weightOf(def) * it.qty
+		local cap, remaining = stackMax(def), it.qty
+		for n = 1, maxSlots do
+			if remaining <= 0 then
+				break
+			end
+			if sItem[n] == it.itemId then
+				local add = math.min(remaining, cap - sQty[n])
+				if add > 0 then
+					sQty[n] += add
+					remaining -= add
+				end
+			end
+		end
+		for n = 1, maxSlots do
+			if remaining <= 0 then
+				break
+			end
+			if sItem[n] == "" then
+				local take = math.min(remaining, cap)
+				sItem[n] = it.itemId
+				sQty[n] = take
+				remaining -= take
+			end
+		end
+		if remaining > 0 then
+			return false
+		end
+	end
+
+	return true
+end
+
 -- Directly restore an item into an EMPTY equip slot (the loot-bag pickup path: re-equipping a
 -- dropped satchel FIRST re-grows slots/weight before ordinary stacks restore). Validates the def
 -- actually belongs in that slot.
