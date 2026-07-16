@@ -8,8 +8,15 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
 ## Unreleased
 
 ### Added
+- **Player interact window** — walk up to another player and an **"[E] Interact"** badge appears
+  over *their* head; press **E** (or tap) to open a window with their name + survival stats and an
+  **action list** (Trade ships built-in). Targeting is a client-side nearest-*other*-player scan, so
+  it can never point at you — this **replaces** the earlier per-character server ProximityPrompt
+  (which wrongly showed on your own character). Games extend it with
+  `SurvivorCore.Interact.addAction{…}`; interact key is `UI.Keybinds.Interact` (default `E`). Ported
+  from The Counter Earth. See [docs/interact.md](docs/interact.md).
 - **Player trading** (#15) — secure, server-authoritative, **dupe-proof** face-to-face item swaps.
-  Walk up and trigger a **"Trade"** prompt; the target Accepts/Declines; both stage loose backpack
+  Open a player's interact window and choose **Trade**; the target Accepts/Declines; both stage loose backpack
   stacks (drag from the inventory grid, with −/+ qty steppers) and must **Confirm** before anything
   moves. The swap is one synchronous, no-yield commit — re-validate holds → pre-flight both
   receivers have room (new **`Inventory.canAccept`**) → remove both → grant with `addUpTo` → refund

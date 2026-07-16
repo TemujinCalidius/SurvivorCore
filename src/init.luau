@@ -336,6 +336,12 @@ function SurvivorCore.startClient(_options: { [string]: any }?)
 	-- Player-to-player trading window (server-driven; drag items from the inventory grid to offer).
 	require(script.client.TradeUi).start(_options)
 
+	-- Walk-up interact window (nearest other player → actions like Trade). Exposes an action
+	-- registry so games add their own entries.
+	local interact = require(script.client.PlayerInteract)
+	interact.start(_options)
+	SurvivorCore.Interact = interact
+
 	-- Tool-swing harvesting input (click an equipped tool at a gatherable node).
 	require(script.client.ToolHarvest).start(_options)
 
