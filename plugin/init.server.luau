@@ -1,107 +1,79 @@
 --!nonstrict
 --[[
-	SurvivorCore — admin plugin (main).
+	SurvivorCore Studio — admin plugin (main).
 
-	ONE dock widget, a tab bar across the top, one feature per tab:
-	  • Stats   — tune the survival stats (deltas-only, locked) on SurvivalStatsConfig + HUD preview.
-	  • Content — create/edit/delete Items + Gatherable resources (no-code) as SurvivorCoreContent
-	              instances the engine loads at start().
-	Every mutation is wrapped in a single ChangeHistoryService recording (one undo step) and then
-	both editors refresh. All real logic lives in the requirable modules (StatAdmin / ContentAdmin);
-	the forms in StatAdminUi / ContentAdminUi. This is the Builder / Admin plugin (issue #11), and
-	new sections (Movement / Consequences, #21) slot in as more tabs.
+	ONE floating (dockable) window with a sidebar rail and a detail pane, one page per editor:
+	  • Overview      — engine status + content counts (click-through) + how-it-works.
+	  • Survival Stats — tune stats (deltas-only, locked) on SurvivalStatsConfig + HUD preview.
+	  • Engine Config — every engine Config section (Movement/Combat/Mobs/…/UI theme) as
+	                    deltas-only overrides on SurvivorCoreEngineConfig (issue #21).
+	  • Content       — create/edit/delete Items/Weapons/Arrows/Resources/Mobs/Quests/Achievements
+	                    as SurvivorCoreContent instances, plus OVERRIDES that tune code-registered
+	                    defs (issue #40). A rail search box finds any entry by id/name.
+
+	Every mutation is wrapped in a single ChangeHistoryService recording (one undo step), then the
+	active page refreshes (others refresh on next show). All real logic lives in the requirable
+	modules (StatAdmin / ConfigAdmin / ContentAdmin); the forms in the *Ui modules; the shared look
+	in Theme. This is the Builder / Admin plugin (issue #11).
 ]]
 
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
-local CollectionService = game:GetService("CollectionService")
-local Selection = game:GetService("Selection")
-local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
 
+local Theme = require(script.Theme)
+local Nav = require(script.Nav)
+local SpawnHelpers = require(script.SpawnHelpers)
+local OverviewPage = require(script.OverviewPage)
+local SearchPage = require(script.SearchPage)
 local StatAdmin = require(script.StatAdmin)
 local StatAdminUi = require(script.StatAdminUi)
 local HudPreview = require(script.HudPreview)
 local ContentAdmin = require(script.ContentAdmin)
 local ContentAdminUi = require(script.ContentAdminUi)
+local ConfigAdmin = require(script.ConfigAdmin)
+local ConfigAdminUi = require(script.ConfigAdminUi)
 
-local COL_BG = Color3.fromRGB(18, 21, 28)
-local COL_TAB = Color3.fromRGB(28, 32, 42)
-local COL_TAB_ON = Color3.fromRGB(52, 58, 74)
-local COL_TEXT = Color3.fromRGB(235, 238, 245)
-local TAB_H = 30
+local SETTING_LAST_PAGE = "SurvivorCoreStudio.lastPage"
 
 local toolbar = plugin:CreateToolbar("SurvivorCore")
-local button = toolbar:CreateButton("Admin Panel", "Tune stats + create items/weapons/gatherables/mobs (no-code)", "")
+local button = toolbar:CreateButton("Studio", "Tune the engine + create items/weapons/gatherables/mobs (no-code)", "")
 button.ClickableWhenViewportHidden = true
 
 -- CreateDockWidgetPluginGui is flagged deprecated by the tooling, but it is still the only API for
--- a dockable plugin widget (there is no replacement) — so allow it here.
+-- a dockable plugin widget (there is no replacement) — so allow it here. NOTE: the widget ID is
+-- "SurvivorCoreStudio" (was "SurvivorCoreAdmin") — Studio persists dock state PER ID and ignores
+-- new initial values for known IDs, so the rename is what makes the floating default reach
+-- existing users (their old dock position resets once).
 -- selene: allow(deprecated)
 local widget = plugin:CreateDockWidgetPluginGui(
-	"SurvivorCoreAdmin",
-	DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Right, false, false, 340, 560, 320, 400)
+	"SurvivorCoreStudio",
+	DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, false, false, 660, 580, 480, 380)
 )
-widget.Title = "SurvivorCore Admin"
-widget.Name = "SurvivorCoreAdmin"
+widget.Title = "SurvivorCore Studio"
+widget.Name = "SurvivorCoreStudio"
 
 local root = Instance.new("Frame")
 root.Size = UDim2.fromScale(1, 1)
-root.BackgroundColor3 = COL_BG
+root.BackgroundColor3 = Theme.COLOR.BG
 root.BorderSizePixel = 0
 root.Parent = widget
 
--- Tab bar + content region.
-local tabBar = Instance.new("Frame")
-tabBar.Size = UDim2.new(1, 0, 0, TAB_H)
-tabBar.BackgroundColor3 = COL_BG
-tabBar.BorderSizePixel = 0
-tabBar.Parent = root
-local tabLayout = Instance.new("UIListLayout")
-tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.Padding = UDim.new(0, 4)
-tabLayout.Parent = tabBar
-local tabPad = Instance.new("UIPadding")
-tabPad.PaddingLeft = UDim.new(0, 8)
-tabPad.PaddingTop = UDim.new(0, 4)
-tabPad.Parent = tabBar
+local nav -- assigned after the pages are assembled; closures below capture it
 
-local region = Instance.new("Frame")
-region.Position = UDim2.fromOffset(0, TAB_H)
-region.Size = UDim2.new(1, 0, 1, -TAB_H)
-region.BackgroundTransparency = 1
-region.BorderSizePixel = 0
-region.Parent = root
-
-local statFrame = Instance.new("Frame")
-statFrame.Size = UDim2.fromScale(1, 1)
-statFrame.BackgroundTransparency = 1
-statFrame.Parent = region
-
-local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.fromScale(1, 1)
-contentFrame.BackgroundTransparency = 1
-contentFrame.Visible = false
-contentFrame.Parent = region
-
-local statUi: { refresh: () -> () }? = nil
-local contentUi: { refresh: () -> () }? = nil
-
--- Wrap a mutation in one ChangeHistory recording (one undo step), then refresh both editors.
+-- Wrap a mutation in one ChangeHistory recording (one undo step), then refresh the UI.
 local function record(name: string, mutate: () -> any): any
 	local recording = ChangeHistoryService:TryBeginRecording(name)
 	local result = mutate()
 	if recording then
 		ChangeHistoryService:FinishRecording(recording, Enum.FinishRecordingOperation.Commit)
 	end
-	if statUi then
-		statUi.refresh()
-	end
-	if contentUi then
-		contentUi.refresh()
+	if nav then
+		nav.refreshAll()
 	end
 	return result
 end
 
--- Stats callbacks.
+-- ── Stats callbacks ───────────────────────────────────────────────────────────
 local function applyEdit(statName: string, attr: string, raw: any, default: any): any
 	return record(`Stats: {statName}.{attr}`, function()
 		return StatAdmin.setOverride(statName, attr, raw, default)
@@ -123,178 +95,221 @@ local function applyClear(): any
 	end)
 end
 
--- Content callbacks.
-local function applySet(catKey: string, id: string, field: any, raw: any): any
-	return record(`Content: {catKey} {id}.{field.attr}`, function()
-		return ContentAdmin.set(catKey, id, field, raw)
+-- ── Engine Config callbacks ───────────────────────────────────────────────────
+local function applyConfigEdit(sectionId: string, groupName: string?, field: any, raw: any, default: any): any
+	return record(`Config: {sectionId}.{field.attr}`, function()
+		return ConfigAdmin.setOverride(sectionId, groupName, field, raw, default)
 	end)
 end
-local function applyCreate(catKey: string, rawId: any): any
-	return record(`Content: create {catKey}`, function()
-		return ContentAdmin.create(catKey, rawId)
+local function applyConfigReset(sectionId: string, groupName: string?, attr: string): any
+	return record(`Config: reset {sectionId}.{attr}`, function()
+		return ConfigAdmin.resetOverride(sectionId, groupName, attr)
 	end)
 end
-local function applyDelete(catKey: string, id: string): any
-	return record(`Content: delete {catKey} {id}`, function()
-		ContentAdmin.delete(catKey, id)
-	end)
-end
-
-local function spawnPosition(): Vector3
-	local cam = Workspace.CurrentCamera
-	return if cam then cam.CFrame.Position + cam.CFrame.LookVector * 16 else Vector3.new(0, 5, 0)
-end
-
--- A minimal placeholder mob rig (Model + HumanoidRootPart + Humanoid + head), tagged "Mob" with the
--- MobType set — exactly what the engine adopts at play. The creator swaps in their own rig later.
-local function buildMobRig(id: string): Model
-	local model = Instance.new("Model")
-	model.Name = id
-	local rootPart = Instance.new("Part")
-	rootPart.Name = "HumanoidRootPart"
-	rootPart.Size = Vector3.new(2, 3, 1)
-	rootPart.Color = Color3.fromRGB(150, 60, 60)
-	rootPart.Anchored = false
-	rootPart.Parent = model
-	local head = Instance.new("Part")
-	head.Name = "Head"
-	head.Shape = Enum.PartType.Ball
-	head.Size = Vector3.new(1.4, 1.4, 1.4)
-	head.Color = rootPart.Color
-	head.CanCollide = false
-	head.Massless = true
-	head.CFrame = rootPart.CFrame * CFrame.new(0, 2, 0)
-	head.Parent = model
-	local weld = Instance.new("WeldConstraint")
-	weld.Part0 = rootPart
-	weld.Part1 = head
-	weld.Parent = rootPart
-	local hum = Instance.new("Humanoid")
-	hum.Parent = model
-	model.PrimaryPart = rootPart
-	return model
-end
-
--- "Add to World": drop a tagged, def-linked instance in front of the camera, then select it. The
--- no-code way to place one — tag + def-id attribute is exactly what the engine reads at play.
---   Resources → a Part tagged "Gatherable" with Resource = id.
---   Mobs       → a placeholder rig Model tagged "Mob" with MobType = id.
-local function applySpawn(catKey: string, id: string): any
-	return record(`Content: add {catKey} '{id}' to world`, function()
-		if catKey == "Mobs" then
-			local model = buildMobRig(id)
-			model:SetAttribute("MobType", id)
-			model:PivotTo(CFrame.new(spawnPosition()))
-			CollectionService:AddTag(model, "Mob")
-			model.Parent = Workspace
-			Selection:Set({ model })
-			return model
-		end
-		if catKey == "Quests" then
-			-- Drop a quest-giver post: tag + Quest attribute is exactly what the engine reads. The
-			-- creator swaps in their own NPC/notice-board model later (tag it and set Quest).
-			local post = Instance.new("Part")
-			post.Name = id .. "_giver"
-			post.Size = Vector3.new(1, 5, 1)
-			post.Anchored = true
-			post.Color = Color3.fromRGB(120, 170, 255)
-			post.Material = Enum.Material.Wood
-			post.Position = spawnPosition()
-			post:SetAttribute("Quest", id)
-			CollectionService:AddTag(post, "QuestGiver")
-			post.Parent = Workspace
-			Selection:Set({ post })
-			return post
-		end
-		if catKey == "Weapons" then
-			-- Drop a starter Tool you can model the look on. It carries the weapon's ToolType /
-			-- WeaponKind so it's recognisable; move it under ReplicatedStorage.SurvivorCoreContent.Tools
-			-- (named by this id) to make it the equipped look the hotbar clones.
-			local node = ContentAdmin.getNode("Weapons", id)
-			local tool = Instance.new("Tool")
-			tool.Name = id
-			tool.RequiresHandle = true
-			tool.CanBeDropped = false
-			local handle = Instance.new("Part")
-			handle.Name = "Handle"
-			handle.Size = Vector3.new(0.5, 3, 0.5)
-			handle.Color = Color3.fromRGB(120, 90, 60)
-			handle.Anchored = true
-			handle.Position = spawnPosition()
-			handle.Parent = tool
-			for _, attr in { "toolType", "weaponKind" } do
-				local v = node and node:GetAttribute(attr)
-				if typeof(v) == "string" and v ~= "" then
-					tool:SetAttribute(attr == "toolType" and "ToolType" or "WeaponKind", v)
-				end
-			end
-			tool.Parent = Workspace
-			Selection:Set({ tool })
-			return tool
-		end
-		local part = Instance.new("Part")
-		part.Name = id
-		part.Size = Vector3.new(4, 4, 4)
-		part.Anchored = true
-		part.Position = spawnPosition()
-		part:SetAttribute("Resource", id)
-		CollectionService:AddTag(part, "Gatherable")
-		part.Parent = Workspace
-		Selection:Set({ part })
-		return part
+local function applyConfigResetSection(section: any): any
+	return record(`Config: reset section {section.id}`, function()
+		return ConfigAdmin.resetSection(section)
 	end)
 end
 
-statUi = StatAdminUi.mount(statFrame, StatAdmin, applyEdit, applyReset, applyPreview, applyClear)
-contentUi = ContentAdminUi.mount(contentFrame, ContentAdmin, applySet, applyCreate, applyDelete, applySpawn)
-
--- Tabs.
-local TABS = {
-	{ id = "stats", label = "Stats", frame = statFrame },
-	{ id = "content", label = "Content", frame = contentFrame },
+-- ── Content callbacks (authored + overrides), bundled for the pages ──────────
+local actions = {
+	set = function(catKey: string, id: string, field: any, raw: any): any
+		return record(`Content: {catKey} {id}.{field.attr}`, function()
+			return ContentAdmin.set(catKey, id, field, raw)
+		end)
+	end,
+	create = function(catKey: string, rawId: any): any
+		return record(`Content: create {catKey}`, function()
+			local ok, message = ContentAdmin.create(catKey, rawId)
+			return { ok = ok, message = message }
+		end)
+	end,
+	delete = function(catKey: string, id: string): any
+		return record(`Content: delete {catKey} {id}`, function()
+			ContentAdmin.delete(catKey, id)
+		end)
+	end,
+	spawn = function(catKey: string, id: string): any
+		return record(`Content: add {catKey} '{id}' to world`, function()
+			return SpawnHelpers.spawn(ContentAdmin, catKey, id)
+		end)
+	end,
+	createOverride = function(catKey: string, rawId: any): any
+		return record(`Content: override {catKey}`, function()
+			local ok, message = ContentAdmin.createOverride(catKey, rawId)
+			return { ok = ok, message = message }
+		end)
+	end,
+	setOverride = function(catKey: string, id: string, field: any, raw: any): any
+		return record(`Content: override {catKey} {id}.{field.attr}`, function()
+			return ContentAdmin.setOverrideField(catKey, id, field, raw)
+		end)
+	end,
+	deleteOverride = function(catKey: string, id: string): any
+		return record(`Content: remove override {catKey} {id}`, function()
+			ContentAdmin.deleteOverride(catKey, id)
+		end)
+	end,
 }
-local tabButtons: { [string]: TextButton } = {}
 
-local function showTab(id: string)
-	for _, t in TABS do
-		t.frame.Visible = t.id == id
-		local b = tabButtons[t.id]
-		if b then
-			b.BackgroundColor3 = if t.id == id then COL_TAB_ON else COL_TAB
+-- ── Search state (rail box → hidden results page) ─────────────────────────────
+local currentQuery = ""
+local searchGeneration = 0
+local lastNonSearchId = "overview"
+
+-- ── NAV assembly (data-driven; new editors slot in as more pages) ─────────────
+-- The whole window is built by mountUi() so it can REBUILD: opening an engine-less place yields
+-- a single Engine Config explainer page whose Refresh remounts everything once the engine syncs.
+local restoring = false
+
+local function mountUi()
+	for _, child in root:GetChildren() do
+		child:Destroy()
+	end
+
+	local pages = {}
+
+	table.insert(pages, {
+		id = "overview",
+		label = "Overview",
+		section = "",
+		mount = function(frame)
+			return OverviewPage.mount(frame, {
+				StatAdmin = StatAdmin,
+				ContentAdmin = ContentAdmin,
+				selectPage = function(id: string)
+					nav.selectPage(id)
+				end,
+			})
+		end,
+	})
+
+	table.insert(pages, {
+		id = "stats",
+		label = "Survival Stats",
+		section = "Stats",
+		mount = function(frame)
+			return StatAdminUi.mount(frame, StatAdmin, applyEdit, applyReset, applyPreview, applyClear)
+		end,
+	})
+
+	local configPages = ConfigAdminUi.pages(
+		ConfigAdmin,
+		applyConfigEdit,
+		applyConfigReset,
+		applyConfigResetSection,
+		function() -- onEngineFound: remount with the full section list
+			task.defer(mountUi)
+		end
+	)
+	for _, page in configPages do
+		table.insert(pages, page)
+	end
+
+	for _, catKey in ContentAdmin.ORDER do
+		local cat = ContentAdmin.CATEGORIES[catKey]
+		table.insert(pages, {
+			id = "content/" .. catKey,
+			label = cat.title,
+			section = "Content",
+			badge = function()
+				return #ContentAdmin.listRoster(catKey)
+			end,
+			mount = function(frame)
+				return ContentAdminUi.mountCategory(frame, catKey, ContentAdmin, actions)
+			end,
+		})
+	end
+
+	table.insert(pages, {
+		id = "search",
+		label = "Search",
+		section = "",
+		hidden = true,
+		mount = function(frame)
+			return SearchPage.mount(frame, {
+				ContentAdmin = ContentAdmin,
+				ContentAdminUi = ContentAdminUi,
+				actions = actions,
+				getQuery = function()
+					return currentQuery
+				end,
+			})
+		end,
+	})
+
+	-- Restore the last-open page (validated against the live page list — ids may change across
+	-- plugin versions or when the engine's schema grows/shrinks).
+	local restoredId = "overview"
+	local saved = plugin:GetSetting(SETTING_LAST_PAGE)
+	if typeof(saved) == "string" then
+		for _, page in pages do
+			if page.id == saved and not page.hidden then
+				restoredId = saved
+				break
+			end
 		end
 	end
+
+	-- The mount-time selectPage must NOT write the setting: an engine-less session falls back to
+	-- "overview", and persisting that would clobber a saved config page the user will want back.
+	restoring = true
+	nav = Nav.mount(root, pages, {
+		initialId = restoredId,
+		onNavigate = function(id: string)
+			lastNonSearchId = id
+			searchGeneration += 1 -- explicit navigation cancels any pending search-page jump
+			if restoring then
+				return
+			end
+			if plugin:GetSetting(SETTING_LAST_PAGE) ~= id then
+				plugin:SetSetting(SETTING_LAST_PAGE, id)
+			end
+		end,
+		onSearch = function(text: string)
+			currentQuery = text
+			searchGeneration += 1
+			local generation = searchGeneration
+			task.delay(0.25, function()
+				if generation ~= searchGeneration or not widget.Enabled then
+					return
+				end
+				if string.match(currentQuery, "^%s*$") then
+					if nav.getActiveId() == "search" then
+						nav.selectPage(lastNonSearchId)
+					end
+				else
+					nav.selectPage("search")
+					nav.refreshAll() -- re-render the results with the new query
+				end
+			end)
+		end,
+	})
+	restoring = false
 end
 
-for _, t in TABS do
-	local b = Instance.new("TextButton")
-	b.Size = UDim2.fromOffset(92, TAB_H - 6)
-	b.BackgroundColor3 = COL_TAB
-	b.AutoButtonColor = true
-	b.Text = t.label
-	b.TextColor3 = COL_TEXT
-	b.TextSize = 13
-	b.Font = Enum.Font.GothamMedium
-	b.BorderSizePixel = 0
-	b.Parent = tabBar
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, 4)
-	c.Parent = b
-	tabButtons[t.id] = b
-	b.MouseButton1Click:Connect(function()
-		showTab(t.id)
-	end)
+mountUi()
+
+-- An undo/redo can revert any edit the pages show — refresh so they never go stale. Skip while
+-- the user is mid-edit in one of OUR text boxes (the rebuild would destroy the focused box and
+-- eat the typed text); the per-page Refresh button covers that rare overlap.
+local function onHistoryChanged()
+	local focused = UserInputService:GetFocusedTextBox()
+	if focused and focused:IsDescendantOf(widget) then
+		return
+	end
+	if nav then
+		nav.refreshAll()
+	end
 end
-showTab("stats")
+ChangeHistoryService.OnUndo:Connect(onHistoryChanged)
+ChangeHistoryService.OnRedo:Connect(onHistoryChanged)
 
 button.Click:Connect(function()
 	widget.Enabled = not widget.Enabled
 	if widget.Enabled then
-		if statUi then
-			statUi.refresh()
-		end
-		if contentUi then
-			contentUi.refresh()
-		end
+		nav.refreshAll()
 	end
 end)
 widget:GetPropertyChangedSignal("Enabled"):Connect(function()

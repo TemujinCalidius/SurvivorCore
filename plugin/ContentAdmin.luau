@@ -337,6 +337,10 @@ function ContentAdmin.create(catKey: string, rawId: any): (boolean, string)
 	if folder:FindFirstChild(id) then
 		return false, `'{id}' already exists.`
 	end
+	if ContentAdmin.getOverrideNode(catKey, id) then
+		-- Authoring over an override would leave ONE roster entry masking the other.
+		return false, `'{id}' has an override — remove the override first (or keep editing it).`
+	end
 	local node = Instance.new("Configuration")
 	node.Name = id
 	for _, f in cat.fields do
@@ -368,6 +372,133 @@ function ContentAdmin.set(catKey: string, id: string, field: FieldSpec, raw: any
 	local node = ContentAdmin.getNode(catKey, id)
 	if not node then
 		return false, "missing entry"
+	end
+	local ok, value, err = coerce(field.kind, raw)
+	if not ok then
+		return false, err
+	end
+	node:SetAttribute(field.attr, value)
+	return true, nil
+end
+
+-- ── Overrides (issue #40) ─────────────────────────────────────────────────────
+--
+-- SurvivorCoreContent/Overrides/<folder>/<id> tunes a def registered FROM CODE (which the
+-- authoring folders can't touch — the engine's loadFromFolder skips already-registered keys).
+-- The engine field-merges these at start(), so an override child carries ONLY the attributes it
+-- changes: BLANK = INHERIT the code value. The plugin can't display code defaults in Edit mode
+-- (registries fill at runtime), which is exactly why these are deltas with empty placeholders —
+-- and why an unknown id can only be caught at Play (the engine warns in Output).
+
+ContentAdmin.OVERRIDES_FOLDER = "Overrides"
+
+function ContentAdmin.getOverrideFolder(catKey: string): Instance?
+	local cat = ContentAdmin.CATEGORIES[catKey]
+	local root = ContentAdmin.getRoot()
+	local overrides = root and root:FindFirstChild(ContentAdmin.OVERRIDES_FOLDER)
+	return overrides and cat and overrides:FindFirstChild(cat.folder) or nil
+end
+
+-- Find-or-create SurvivorCoreContent/Overrides/<folder>. Only called from the write path.
+function ContentAdmin.ensureOverrideFolder(catKey: string): Instance
+	local cat = ContentAdmin.CATEGORIES[catKey]
+	ContentAdmin.ensureFolder(catKey) -- guarantees the root exists
+	local root = ContentAdmin.getRoot() :: Instance
+	local overrides = root:FindFirstChild(ContentAdmin.OVERRIDES_FOLDER)
+	if not overrides then
+		overrides = Instance.new("Folder")
+		overrides.Name = ContentAdmin.OVERRIDES_FOLDER
+		overrides.Parent = root
+	end
+	local folder = overrides:FindFirstChild(cat.folder)
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = cat.folder
+		folder.Parent = overrides
+	end
+	return folder
+end
+
+function ContentAdmin.getOverrideNode(catKey: string, id: string): Instance?
+	local folder = ContentAdmin.getOverrideFolder(catKey)
+	return folder and folder:FindFirstChild(id) or nil
+end
+
+export type RosterEntry = { id: string, authored: boolean, override: boolean }
+
+-- The merged category roster: authored entries + override entries, sorted by id.
+function ContentAdmin.listRoster(catKey: string): { RosterEntry }
+	local byId: { [string]: RosterEntry } = {}
+	for _, id in ContentAdmin.list(catKey) do
+		byId[id] = { id = id, authored = true, override = false }
+	end
+	local overrideFolder = ContentAdmin.getOverrideFolder(catKey)
+	if overrideFolder then
+		for _, child in overrideFolder:GetChildren() do
+			local entry = byId[child.Name]
+			if entry then
+				entry.override = true -- authored + override shouldn't happen (createOverride refuses)
+			else
+				byId[child.Name] = { id = child.Name, authored = false, override = true }
+			end
+		end
+	end
+	local out = {}
+	for _, entry in byId do
+		table.insert(out, entry)
+	end
+	table.sort(out, function(a, b)
+		return a.id < b.id
+	end)
+	return out
+end
+
+-- Create an EMPTY override (no attributes — deltas-only; NOT create()'s seed-all-defaults).
+function ContentAdmin.createOverride(catKey: string, rawId: any): (boolean, string)
+	local cat = ContentAdmin.CATEGORIES[catKey]
+	if not cat then
+		return false, "unknown category"
+	end
+	local id = ContentAdmin.sanitizeId(rawId)
+	if id == "" then
+		return false, "Enter a valid id (letters, numbers, _)."
+	end
+	if ContentAdmin.getNode(catKey, id) then
+		return false, `'{id}' is authored here — edit the entry itself.`
+	end
+	local folder = ContentAdmin.ensureOverrideFolder(catKey)
+	if folder:FindFirstChild(id) then
+		return false, `'{id}' already has an override.`
+	end
+	local node = Instance.new("Configuration")
+	node.Name = id
+	node.Parent = folder
+	return true, id
+end
+
+function ContentAdmin.deleteOverride(catKey: string, id: string)
+	local node = ContentAdmin.getOverrideNode(catKey, id)
+	if node then
+		node:Destroy()
+	end
+end
+
+-- Read one override field: { value?, hasOverride } — value is nil when inheriting.
+function ContentAdmin.readOverrideField(catKey: string, id: string, field: FieldSpec): any
+	local node = ContentAdmin.getOverrideNode(catKey, id)
+	local v = node and node:GetAttribute(field.attr)
+	return { value = v, hasOverride = v ~= nil }
+end
+
+-- Write one override field. BLANK (or nil) = remove the attribute → inherit the code value.
+function ContentAdmin.setOverrideField(catKey: string, id: string, field: FieldSpec, raw: any): (boolean, string?)
+	local node = ContentAdmin.getOverrideNode(catKey, id)
+	if not node then
+		return false, "missing override"
+	end
+	if raw == nil or (typeof(raw) == "string" and string.match(raw, "^%s*$")) then
+		node:SetAttribute(field.attr, nil)
+		return true, nil
 	end
 	local ok, value, err = coerce(field.kind, raw)
 	if not ok then

@@ -63,9 +63,14 @@ require(script.shared.AchievementsConfig)
 -- before start().
 require(script.shared.LootBagsConfig)
 
+-- The no-code layer over ALL of the sections above: the persisted SurvivorCoreEngineConfig
+-- instance (written by the admin plugin, deltas-only). apply() runs as the first step of
+-- start()/startClient(), AFTER game-code Config.override calls — the instance wins.
+local EngineConfig = require(script.shared.EngineConfig)
+
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.7.4"
+SurvivorCore.VERSION = "0.8.0"
 
 -- Foundation
 SurvivorCore.Config = Config
@@ -105,6 +110,11 @@ function SurvivorCore.start(_options: { [string]: any }?)
 	assert(not started, "SurvivorCore.start() called twice")
 	started = true
 
+	-- No-code engine tuning: layer the persisted SurvivorCoreEngineConfig instance's deltas onto
+	-- every Config section BEFORE anything boots, so systems that cache config at start (and the
+	-- ones that read live) all see the same resolved values. Edits apply on the next server start.
+	EngineConfig.apply()
+
 	-- No-code content: register item/resource defs authored as instances (the admin plugin writes
 	-- these under ReplicatedStorage.SurvivorCoreContent), complementing code register(). Done first,
 	-- so Gatherable nodes can resolve their Resource def and systems see the full roster. Recipes
@@ -122,6 +132,45 @@ function SurvivorCore.start(_options: { [string]: any }?)
 		-- achievement defs are flat by design, so they load verbatim.
 		Registries.Quests.loadFromFolder(content:FindFirstChild("Quests"))
 		Registries.Achievements.loadFromFolder(content:FindFirstChild("Achievements"))
+
+		-- Owner overrides (issue #40): SurvivorCoreContent/Overrides mirrors the folders above and
+		-- field-merges deltas onto ALREADY-registered defs — including code-registered ones, which
+		-- the folders themselves can't touch (loadFromFolder skips existing keys). Applied here,
+		-- before Components.scan and system starts, so bind-time stamps and the replicated data
+		-- caches (ItemData/RecipeData/QuestData/AchievementData) all serialize the merged defs.
+		local overrides = content:FindFirstChild("Overrides")
+		if overrides then
+			Registries.Items.applyOverrides(overrides:FindFirstChild("Items"))
+			Registries.Items.applyOverrides(overrides:FindFirstChild("Weapons"))
+			Registries.Items.applyOverrides(overrides:FindFirstChild("Arrows"))
+			Registries.Resources.applyOverrides(overrides:FindFirstChild("Resources"))
+			Registries.Mobs.applyOverrides(overrides:FindFirstChild("Mobs"))
+			Registries.Quests.applyOverrides(overrides:FindFirstChild("Quests"))
+			Registries.Achievements.applyOverrides(overrides:FindFirstChild("Achievements"))
+
+			-- Quest-override caveat, made LOUD: QuestData.normalize prefers a def's nested
+			-- objectives/rewards tables, so flat objective*/reward* override fields silently do
+			-- nothing on a code-registered quest that uses the canonical nested shape. The id
+			-- matched, so applyOverrides' typo warning didn't fire — surface it here instead.
+			local questOverrides = overrides:FindFirstChild("Quests")
+			if questOverrides then
+				for _, child in questOverrides:GetChildren() do
+					local def = Registries.Quests.get(child.Name)
+					if def and typeof(def.objectives) == "table" then
+						for attr in child:GetAttributes() do
+							if string.match(attr, "^objective") or string.match(attr, "^reward") then
+								warn(
+									`[SurvivorCore] quest override '{child.Name}': objective*/reward* fields are`
+										.. " ignored for code quests with nested objectives — only name/description/"
+										.. "autoStart/requires/turnIn merge"
+								)
+								break
+							end
+						end
+					end
+				end
+			end
+		end
 	end
 
 	-- Load built-in components so their tags are recognised.
@@ -241,6 +290,10 @@ function SurvivorCore.startClient(_options: { [string]: any }?)
 		return SurvivorCore
 	end
 	clientStarted = true
+
+	-- Same no-code tuning layer as the server (idempotent per VM; the client cares about the UI
+	-- section — theme, keybinds, layout — which the client-side builders read at start).
+	EngineConfig.apply()
 
 	require(script.client.Hud).start(_options)
 
