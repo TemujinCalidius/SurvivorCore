@@ -5,7 +5,7 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
-## Unreleased
+## 0.8.0 — 2026-07-16
 
 ### Added
 - **Engine Config, no-code** (#21) — a new persisted instance, **`SurvivorCoreEngineConfig`**,
