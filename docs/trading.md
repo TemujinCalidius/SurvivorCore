@@ -7,8 +7,9 @@ moves in one atomic step that can never create or destroy an item.
 
 ## How a trade goes
 
-1. **Start it.** Walk up to another player and trigger the **"Trade"** prompt on them. They get an
-   **Accept / Decline** request; the requester waits.
+1. **Start it.** Walk up to another player — an **"[E] Interact"** badge appears over *their* head.
+   Press **E** (or tap it) to open the [interact window](interact.md), then choose **Trade**. They
+   get an **Accept / Decline** request; the requester waits.
 2. **Stage your offer.** Once open, both players see a two-column window — *your offer* and *their
    offer*. **Drag an item from your inventory grid** onto your column to offer it; the **−/+**
    steppers set the quantity and **✕** removes it. Changing either offer **clears both confirms**

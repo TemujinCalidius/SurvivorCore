@@ -21,10 +21,10 @@
 	  5. Reconcile any residue back to the original owner (unreachable if canAccept is honest).
 	Item count is conserved on every branch.
 
-	Initiation: a "Trade" ProximityPrompt on each player's character; triggering it asks that player
-	to trade with you (they Accept/Decline). Tuning: the "Trading" Config section. v1 trades loose
-	backpack stacks only (worn gear/satchels reserved behind AllowEquippedItems). Started by
-	SurvivorCore.start().
+	Initiation: the client PlayerInteract window (walk up to a player → interact → the "Trade"
+	action) fires the TradeRequest remote; the target Accepts/Declines. Tuning: the "Trading" Config
+	section. v1 trades loose backpack stacks only (worn gear/satchels reserved behind
+	AllowEquippedItems). Started by SurvivorCore.start().
 ]]
 
 local Players = game:GetService("Players")
@@ -452,25 +452,14 @@ function Trade._activeFor(player: Player): any
 	return activeTrade[player]
 end
 
--- ── Initiation + character lifecycle ───────────────────────────────────────────
+-- ── Character lifecycle (abort on death) ───────────────────────────────────────
+-- Initiation lives client-side now: the PlayerInteract window's "Trade" action fires the
+-- TradeRequest remote (server-validated by _startTrade). This hook only cancels a live trade
+-- when a participant dies.
 
 local function onCharacter(player: Player, character: Model)
-	local hrp = character:WaitForChild("HumanoidRootPart", 10)
-	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	if hrp and hrp:IsA("BasePart") and TradingConfig.get().Enabled ~= false then
-		local prompt = Instance.new("ProximityPrompt")
-		prompt.Name = "SC_TradePrompt"
-		prompt.ActionText = "Trade"
-		prompt.ObjectText = player.Name
-		prompt.HoldDuration = 0.3
-		prompt.RequiresLineOfSight = false
-		prompt.MaxActivationDistance = maxDistance()
-		prompt.Parent = hrp
-		prompt.Triggered:Connect(function(triggerer)
-			Trade._startTrade(triggerer, player)
-		end)
-	end
-	if humanoid then
+	local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
+	if humanoid and humanoid:IsA("Humanoid") then
 		humanoid.Died:Once(function()
 			local session = activeTrade[player]
 			if session then

@@ -27,6 +27,7 @@ UiConfig.DEFAULTS = {
 		Codex = "K",
 		Achievements = "J",
 		Quests = "L",
+		Interact = "E", -- open the interact window on the nearest other player (Trade, …)
 	},
 
 	-- Roblox's CoreGui owns some keys — notably Tab opens the built-in player roster, which
