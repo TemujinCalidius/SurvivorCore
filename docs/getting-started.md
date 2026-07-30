@@ -34,7 +34,7 @@ Once published, add it to your game's `wally.toml`:
 
 ```toml
 [dependencies]
-SurvivorCore = "temujincalidius/survivorcore@0.8.0"
+SurvivorCore = "temujincalidius/survivorcore@0.9.0"
 ```
 
 Then:

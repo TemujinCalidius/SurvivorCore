@@ -1,5 +1,7 @@
 # Player interact window
 
+> 📹 **Demo:** [the interact window + player trading](https://makertube.net/w/sJmS6L15jRmwxhQCE4Zgmi)
+
 Walk up to another player and a **"[E] Interact"** badge appears over *their* head. Press **E** (or
 tap the badge) to open an **interact window** showing that player's name and survival stats, plus a
 list of **actions** — **Trade** ships built-in; games add their own

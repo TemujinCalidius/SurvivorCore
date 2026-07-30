@@ -1,5 +1,7 @@
 # Player trading
 
+> 📹 **Demo:** [walk up, offer, confirm — a dupe-proof player trade](https://makertube.net/w/sJmS6L15jRmwxhQCE4Zgmi)
+
 Two survivors standing near each other can **trade items** face-to-face
 ([`src/systems/Trade.luau`](../src/systems/Trade.luau), issue #15). The swap is fully
 server-authoritative and **dupe-proof**: nothing moves until both players confirm, and even then it
