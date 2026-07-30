@@ -49,8 +49,11 @@ local function countAdvanced(specs: { any }): number
 end
 
 -- One clickable "what is this?" card. Ineligible components render dim and inert, with the reason.
-local function chooserCard(schema: any, display: any, eligible: boolean, reason: string?, onPick): Frame
-	local panel = Theme.panel()
+-- The CARD ITSELF is the button when it's pickable: a full-size button parented INTO a panel would
+-- be laid out by the panel's UIListLayout as another row (no opt-out; ZIndex doesn't affect
+-- layout), leaving the card body dead and the button spilling onto the next card.
+local function chooserCard(schema: any, display: any, eligible: boolean, reason: string?, onPick): GuiObject
+	local panel: any = if eligible then Theme.panelButton() else Theme.panel()
 	local title = Theme.label({
 		Size = UDim2.new(1, 0, 0, 20),
 		Text = display.title,
@@ -74,15 +77,7 @@ local function chooserCard(schema: any, display: any, eligible: boolean, reason:
 		panel
 
 	if eligible then
-		-- A transparent button over the whole card keeps the panel's styling but makes it clickable.
-		local hit = Theme.make("TextButton", {
-			Size = UDim2.fromScale(1, 1),
-			BackgroundTransparency = 1,
-			Text = "",
-			ZIndex = 3,
-		}) :: TextButton
-		hit.Parent = panel
-		hit.MouseButton1Click:Connect(function()
+		(panel :: TextButton).MouseButton1Click:Connect(function()
 			onPick(schema)
 		end)
 		Theme.hover(panel, Theme.COLOR.PANEL, Theme.COLOR.PANEL_HOVER)
@@ -160,12 +155,13 @@ function BuildAdminUi.mount(container: Frame, BuildAdmin: any, ContentAdmin: any
 		end
 	end
 
-	local function clearType(instances: { Instance }, all: { any })
-		local res = actions.clear(instances, all)
+	local function clearType(instances: { Instance }, all: { any }, extraTags: { string }?)
+		local res = actions.clear(instances, all, extraTags)
 		chooserOpen = false
 		refresh()
 		if typeof(res) == "table" then
-			say(`✓ cleared {res.cleared or 0} object(s)`)
+			local n = res.cleared or 0
+			say(if n > 0 then `✓ cleared {n} object(s)` else "nothing to clear on that object")
 		end
 	end
 
@@ -432,7 +428,8 @@ function BuildAdminUi.mount(container: Frame, BuildAdmin: any, ContentAdmin: any
 			})
 			clearBtn.Parent = scroll
 			clearBtn.MouseButton1Click:Connect(function()
-				clearType({ instance }, all)
+				-- Pass the unknown tags we just listed, so Clear removes exactly what was shown.
+				clearType({ instance }, all, id.unknownTags)
 			end)
 		end
 

@@ -267,8 +267,11 @@ function BuildAdmin.applyType(instances: { Instance }, schema: any, all: { any }
 end
 
 -- The honest inverse of applyType: remove every known component tag, its attributes, and the
--- engine's `_`-prefixed stamps. Returns { cleared }.
-function BuildAdmin.clear(instances: { Instance }, all: { any }): any
+-- engine's `_`-prefixed stamps. `extraTags` removes specific additional tags by name — the page
+-- passes the unknown tags it just displayed, so its "Clear" button actually clears what the user
+-- was shown. Tags are never removed speculatively: an unlisted tag may belong to another plugin.
+-- Returns { cleared }.
+function BuildAdmin.clear(instances: { Instance }, all: { any }, extraTags: { string }?): any
 	local cleared = 0
 	for _, instance in instances do
 		if not alive(instance) then
@@ -281,6 +284,15 @@ function BuildAdmin.clear(instances: { Instance }, all: { any }): any
 				stripComponent(instance, schema)
 				touched = true
 			end
+		end
+		for _, tag in (extraTags or {}) :: { string } do
+			if CollectionService:HasTag(instance, tag) then
+				CollectionService:RemoveTag(instance, tag)
+				touched = true
+			end
+		end
+		if instance:GetAttribute(BOUND_ATTR) ~= nil then
+			touched = true
 		end
 		stripEngineStamps(instance)
 		if touched then

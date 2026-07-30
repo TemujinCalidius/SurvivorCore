@@ -140,18 +140,20 @@ function FieldRow.build(opts: any): Frame
 	end
 
 	if hasHelp then
-		Theme.label({
+		-- `row` owns a UIListLayout, which overwrites child Position — so the indent under the
+		-- label column has to come from padding, not Position.
+		local help = Theme.label({
 			Size = UDim2.fromScale(1, 0),
 			AutomaticSize = Enum.AutomaticSize.Y,
-			Position = UDim2.fromOffset(22, 0),
 			Text = spec.help,
 			TextColor3 = Theme.COLOR.DIM,
 			TextWrapped = true,
 			TextSize = 11,
 			TextTruncate = Enum.TextTruncate.None,
 			LayoutOrder = 2,
-		}).Parent =
-			row
+		})
+		Theme.pad(22, 0, 0, 2).Parent = help
+		help.Parent = row
 	end
 
 	return row

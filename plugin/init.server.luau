@@ -123,9 +123,9 @@ local buildActions = {
 			return BuildAdmin.applyType(instances, schema, all)
 		end)
 	end,
-	clear = function(instances: { Instance }, all: { any }): any
+	clear = function(instances: { Instance }, all: { any }, extraTags: { string }?): any
 		return record("Build: clear component", function()
-			return BuildAdmin.clear(instances, all)
+			return BuildAdmin.clear(instances, all, extraTags)
 		end)
 	end,
 	setField = function(instance: Instance, spec: any, raw: any): any
