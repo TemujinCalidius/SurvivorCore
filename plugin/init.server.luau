@@ -138,6 +138,13 @@ local buildActions = {
 			return BuildAdmin.resetField(instance, spec)
 		end)
 	end,
+	-- Not a mutation (no recording): jump to a Content page so a field that references authored
+	-- content can send a first-time creator somewhere useful instead of dead-ending.
+	selectPage = function(id: string)
+		if nav then
+			nav.selectPage(id)
+		end
+	end,
 }
 
 -- ── Content callbacks (authored + overrides), bundled for the pages ──────────

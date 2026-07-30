@@ -220,6 +220,27 @@ function BuildAdminUi.mount(container: Frame, BuildAdmin: any, ContentAdmin: any
 				})
 				row.LayoutOrder = i
 				row.Parent = panel
+
+				-- First-run dead end: a field that points at authored content is useless until some
+				-- exists, and the picker simply isn't there to hint at it. Say where to go, and
+				-- offer to take them.
+				if spec.ref and (not choices or #choices == 0) then
+					local cat = ContentAdmin.CATEGORIES and ContentAdmin.CATEGORIES[spec.ref]
+					local catTitle = (cat and cat.title) or spec.ref
+					local jump = Theme.button({
+						Size = UDim2.new(1, 0, 0, 22),
+						Text = `No {catTitle} yet — create one →`,
+						TextColor3 = Theme.COLOR.ACCENT,
+						TextSize = 11,
+						LayoutOrder = i,
+					})
+					jump.Parent = panel
+					jump.MouseButton1Click:Connect(function()
+						if actions.selectPage then
+							actions.selectPage("content/" .. spec.ref)
+						end
+					end)
+				end
 			end
 		end
 
