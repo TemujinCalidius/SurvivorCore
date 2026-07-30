@@ -127,9 +127,14 @@ end)
 ```lua
 Config.override("Combat", {
     MeleeRange = 8, MeleeCooldown = 0.6, RequireLineOfSight = true, FriendlyFire = false,
-    Bow = { Gravity = 80, ProjectileSpeed = 180, MaxRange = 300, MinDrawDamageMult = 0.3, StepSize = 4 },
+    Bow = {
+        Gravity = 80, ProjectileSpeed = 180, MaxRange = 300, MinDrawDamageMult = 0.3, StepSize = 4,
+        Cooldown = 0.35, -- seconds between accepted shots (fallback when a bow sets no weaponCooldown)
+    },
 })
 ```
 
-Per-weapon `weapon*` values override these fallbacks. **Out of scope:** durability, blocking/parrying,
+Per-weapon `weapon*` values override these fallbacks — including **`weaponCooldown`, which governs
+both melee swings and bow shots**. Every shot is rate-limited server-side before any arrow is spent
+or any arc is simulated, so a client can't out-run its own fire rate. **Out of scope:** durability, blocking/parrying,
 and AoE are creator content via the hooks above; mob AI lives in [mobs.md](mobs.md).
