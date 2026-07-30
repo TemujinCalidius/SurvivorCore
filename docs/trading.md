@@ -10,10 +10,12 @@ moves in one atomic step that can never create or destroy an item.
 1. **Start it.** Walk up to another player — an **"[E] Interact"** badge appears over *their* head.
    Press **E** (or tap it) to open the [interact window](interact.md), then choose **Trade**. They
    get an **Accept / Decline** request; the requester waits.
-2. **Stage your offer.** Once open, both players see a two-column window — *your offer* and *their
-   offer*. **Drag an item from your inventory grid** onto your column to offer it; the **−/+**
-   steppers set the quantity and **✕** removes it. Changing either offer **clears both confirms**
-   (so nobody can confirm and then swap the goods out from under you).
+2. **Stage your offer.** Once open, both players see the trade window: *your offer* and *their
+   offer* side by side, with **your backpack listed underneath** — click a row to offer one, or
+   **All** for the whole stack. (You can also drag straight from the inventory grid if you have the
+   menu open.) The **−/+** steppers on a staged row set the quantity and **✕** removes it. Changing
+   either offer **clears both confirms** (so nobody can confirm and then swap the goods out from
+   under you). Drag the window by its **header** to move it out of the way.
 3. **Confirm.** Both players press **Confirm**. The instant both are confirmed, the server runs the
    atomic swap and the items change hands.
 
