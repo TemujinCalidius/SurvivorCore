@@ -15,6 +15,7 @@
 ]]
 
 local Components = require(script.Parent)
+local Schema = require(script.Parent.Schema)
 local Registries = require(script.Parent.Parent.registries)
 local Harvesting = require(script.Parent.Parent.systems.Harvesting)
 
@@ -64,22 +65,15 @@ local function resolve(values: { [string]: any })
 	}
 end
 
+-- Attributes, their defaults and their creator-facing help text live in the schema, so the Studio
+-- plugin renders this component's setup form from the same source the engine binds from.
+local SCHEMA = Schema.COMPONENTS.Gatherable
+
 return Components.define({
-	name = "Gatherable",
-	tag = "Gatherable",
-	attributes = {
-		Resource = "", -- named resource def to inherit from (optional)
-		ItemId = "", -- override / bare-hand item id
-		Yield = 0, -- legacy single per-hit yield (use YieldMin/Max for a range)
-		YieldMin = 0,
-		YieldMax = 0,
-		HP = 0, -- 0 = inherit from the resource def (or default 3)
-		RequireTool = "", -- tool type needed (e.g. "axe"); "" = bare-hand
-		Interaction = "auto", -- "auto" | "prompt" | "tool"
-		DestroyOnDeplete = true, -- false keeps the node for a reaction to transform (stump/fell)
-		PromptText = "", -- prompt-mode ActionText override ("Butcher", "Pick"); "" = "Gather"
-		PromptObject = "", -- prompt-mode ObjectText override; "" = resource / item id
-	},
+	name = SCHEMA.name,
+	tag = SCHEMA.tag,
+	display = SCHEMA.display,
+	attributes = SCHEMA.attributes,
 	onSetup = function(instance, values)
 		local r = resolve(values)
 

@@ -12,24 +12,18 @@
 ]]
 
 local Components = require(script.Parent)
+local Schema = require(script.Parent.Schema)
 local Mobs = require(script.Parent.Parent.systems.Mobs)
 
+-- Attributes + their creator-facing help text live in the schema (the Studio plugin renders this
+-- component's setup form from it).
+local SCHEMA = Schema.COMPONENTS.Mob
+
 return Components.define({
-	name = "Mob",
-	tag = "Mob",
-	attributes = {
-		MobType = "", -- the Mobs def id to inherit from; blank = use the model's Name
-		Faction = "", -- "hostile" | "passive" | "neutral"; blank = inherit the def (default "neutral")
-		Health = 0, -- 0 = inherit the def (or 50)
-		WalkSpeed = 0, -- 0 = inherit
-		RunSpeed = 0, -- 0 = inherit
-		AggroRange = 0, -- 0 = inherit / Config default
-		LeashRange = 0, -- 0 = inherit / Config default
-		AttackRange = 0, -- 0 = inherit / Config default
-		AttackDamage = 0, -- 0 = inherit / Config default
-		AttackCooldown = 0, -- 0 = inherit / Config default
-		WanderRadius = 0, -- 0 = inherit / Config default
-	},
+	name = SCHEMA.name,
+	tag = SCHEMA.tag,
+	display = SCHEMA.display,
+	attributes = SCHEMA.attributes,
 	onSetup = function(instance, _values)
 		-- The server Mobs runtime reads the instance attributes directly (one merge path:
 		-- override attr › registry def › "Mobs" Config), so nothing to stash here — just adopt it.

@@ -32,6 +32,8 @@ local ContentAdmin = require(script.ContentAdmin)
 local ContentAdminUi = require(script.ContentAdminUi)
 local ConfigAdmin = require(script.ConfigAdmin)
 local ConfigAdminUi = require(script.ConfigAdminUi)
+local BuildAdmin = require(script.BuildAdmin)
+local BuildAdminUi = require(script.BuildAdminUi)
 
 local SETTING_LAST_PAGE = "SurvivorCoreStudio.lastPage"
 
@@ -112,6 +114,32 @@ local function applyConfigResetSection(section: any): any
 	end)
 end
 
+-- ── Build callbacks (world objects: tag + attributes) ────────────────────────
+-- One ChangeHistory recording per call, kept strictly at this boundary: BuildAdmin functions must
+-- never call each other through here, since a nested TryBeginRecording returns nil.
+local buildActions = {
+	applyType = function(instances: { Instance }, schema: any, all: { any }): any
+		return record(`Build: {BuildAdmin.displayOf(schema).title}`, function()
+			return BuildAdmin.applyType(instances, schema, all)
+		end)
+	end,
+	clear = function(instances: { Instance }, all: { any }): any
+		return record("Build: clear component", function()
+			return BuildAdmin.clear(instances, all)
+		end)
+	end,
+	setField = function(instance: Instance, spec: any, raw: any): any
+		return record(`Build: {spec.attr}`, function()
+			return BuildAdmin.setField(instance, spec, raw)
+		end)
+	end,
+	resetField = function(instance: Instance, spec: any): any
+		return record(`Build: reset {spec.attr}`, function()
+			return BuildAdmin.resetField(instance, spec)
+		end)
+	end,
+}
+
 -- ── Content callbacks (authored + overrides), bundled for the pages ──────────
 local actions = {
 	set = function(catKey: string, id: string, field: any, raw: any): any
@@ -182,6 +210,17 @@ local function mountUi()
 					nav.selectPage(id)
 				end,
 			})
+		end,
+	})
+
+	-- Build: select a world object → "what is this?" → a schema-rendered setup form. Registered
+	-- unconditionally; it renders its own explainer when the engine (or its schemas) is missing.
+	table.insert(pages, {
+		id = "build",
+		label = "Build",
+		section = "",
+		mount = function(frame)
+			return BuildAdminUi.mount(frame, BuildAdmin, ContentAdmin, buildActions)
 		end,
 	})
 

@@ -13,16 +13,20 @@
 ]]
 
 local Components = require(script.Parent)
+local Schema = require(script.Parent.Schema)
 local Registries = require(script.Parent.Parent.registries)
 local Quests = require(script.Parent.Parent.systems.Quests)
 local QuestData = require(script.Parent.Parent.shared.QuestData)
 
+-- Attributes + their creator-facing help text live in the schema (the Studio plugin renders this
+-- component's setup form from it).
+local SCHEMA = Schema.COMPONENTS.QuestGiver
+
 return Components.define({
-	name = "QuestGiver",
-	tag = "QuestGiver",
-	attributes = {
-		Quest = "", -- the quest id this giver offers / accepts turn-ins for
-	},
+	name = SCHEMA.name,
+	tag = SCHEMA.tag,
+	display = SCHEMA.display,
+	attributes = SCHEMA.attributes,
 	onSetup = function(instance, values)
 		local questId = tostring(values.Quest or "")
 		if questId == "" then
