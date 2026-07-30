@@ -80,7 +80,10 @@ components, hooks, and the foundation. See [Architecture Overview](#architecture
   - **Registries** — developers call `register()` from code (`Items`, `Recipes`, `Stats`,
     `Mobs`, …).
   - **Components** — creators tag their own objects and set Attributes (`Gatherable`, and the
-    component family that follows).
+    component family that follows). **A new creator-facing component must declare an attribute
+    schema** (a `Schema.COMPONENTS` entry in `src/components/Schema.luau`, plus a `display` block),
+    so the admin plugin's **Build** page can render its setup form — no creator should have to
+    memorise attribute names. See [docs/extending.md](docs/extending.md#declaring-a-schema-so-the-builder-can-render-a-form).
 - **Extend via Hooks, don't fork.** Game-specific flourish (felling physics, station VFX,
   custom drops) belongs in a `Hooks.on(...)` handler in the *game*, not baked into the engine.
   If you need a new extension point, add a `Hooks.run("…")` call and document it.
