@@ -9,15 +9,19 @@
 	  • "open"    → two columns (your offer / their offer), each side's confirm state, Confirm/Cancel.
 	  • "cancelled" / "done" → the window closes (a toast explains why).
 
-	Staging is drag-to-offer: drag a slot out of the inventory grid onto the "Your offer" column and
-	the server stages that item (cross-ScreenGui drag via DragDrop). Each staged row has −/+ steppers
-	and a remove button. Both sides must Confirm; the server does the atomic swap. `mine` renders
-	from the pushed list; `theirs` is built manually (SlotGrid reads only the local player).
+	The window is SELF-CONTAINED: your carried stacks are listed inside it (read from the replicated
+	inventory attributes), so trading never depends on the separate inventory menu being open — click
+	a backpack row to offer one, "All" for the stack. Dragging a slot from the inventory grid onto
+	the "Your offer" column still works when that menu happens to be open (cross-ScreenGui DragDrop).
+	Each staged row has −/+ steppers and a remove button. The header is a DRAG HANDLE, so the window
+	can be moved out of the way. Both sides must Confirm; the server does the atomic swap. `mine`
+	renders from the pushed list; `theirs` is built manually (SlotGrid reads only the local player).
 	Styled from the UI Config Theme. Booted by SurvivorCore.startClient().
 ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 assert(RunService:IsClient(), "SurvivorCore.TradeUi is client-only — boot it via SurvivorCore.startClient()")
 
@@ -27,7 +31,6 @@ local InventoryTypes = require(script.Parent.Parent.shared.InventoryTypes)
 local ItemData = require(script.Parent.Parent.shared.ItemData)
 local SlotGrid = require(script.Parent.SlotGrid)
 local DragDrop = require(script.Parent.DragDrop)
-local PanelManager = require(script.Parent.PanelManager)
 
 local TradeUi = {}
 
@@ -94,6 +97,58 @@ local function slotHolding(itemId: string): number?
 	return nil
 end
 
+-- The local player's carried stacks, read straight off the replicated attributes — so the trade
+-- window can show your backpack WITHOUT the separate inventory menu being open.
+local function carriedStacks(): { { slot: number, itemId: string, qty: number } }
+	local out = {}
+	local maxN = math.floor(tonumber(localPlayer:GetAttribute(InventoryTypes.MAX_SLOTS_ATTR)) or 0)
+	for n = 1, maxN do
+		local id = localPlayer:GetAttribute(InventoryTypes.invSlotAttr(n))
+		local qty = tonumber(localPlayer:GetAttribute(InventoryTypes.invQtyAttr(n))) or 0
+		if typeof(id) == "string" and id ~= "" and qty > 0 then
+			table.insert(out, { slot = n, itemId = id, qty = math.floor(qty) })
+		end
+	end
+	return out
+end
+
+-- Drag the window by its header, so it never sits on top of something you need to see.
+local function makeDraggable(panel: Frame, handle: GuiObject)
+	local dragging = false
+	local dragStart = Vector3.zero
+	local startPos = panel.Position
+
+	handle.InputBegan:Connect(function(input)
+		if
+			input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch
+		then
+			dragging = true
+			dragStart = input.Position
+			startPos = panel.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if
+			dragging
+			and (
+				input.UserInputType == Enum.UserInputType.MouseMovement
+				or input.UserInputType == Enum.UserInputType.Touch
+			)
+		then
+			local delta = input.Position - dragStart
+			panel.Position =
+				UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+end
+
 -- ── GUI scaffold ────────────────────────────────────────────────────────────
 
 local function ensureGui(): Frame?
@@ -115,8 +170,8 @@ local function ensureGui(): Frame?
 	local panel = Instance.new("Frame")
 	panel.Name = "Panel"
 	panel.AnchorPoint = Vector2.new(1, 0.5)
-	panel.Position = UDim2.new(1, -20, 0.5, 0) -- right side, leaving the centred menu reachable
-	panel.Size = UDim2.fromOffset(380, 400)
+	panel.Position = UDim2.new(1, -20, 0.5, 0) -- right side by default; the header drags it anywhere
+	panel.Size = UDim2.fromOffset(420, 476)
 	panel.BackgroundColor3 = t.PanelColor or Color3.fromRGB(20, 23, 30)
 	panel.BackgroundTransparency = 0.1
 	panel.BorderSizePixel = 0
@@ -131,15 +186,34 @@ local function ensureGui(): Frame?
 	pad.PaddingRight = UDim.new(0, 14)
 	pad.Parent = panel
 
-	local head = label({
+	-- Header doubles as the drag handle (Active so it receives input).
+	local head = Instance.new("Frame")
+	head.Name = "Head"
+	head.BackgroundTransparency = 1
+	head.Active = true
+	head.Size = UDim2.new(1, 0, 0, 22)
+	head.Parent = panel
+
+	local headText = label({
 		text = "Trade",
 		font = t.FontBold or Enum.Font.GothamBold,
 		size = 16,
 		color = t.Accent or Color3.fromRGB(204, 166, 102),
-		size2 = UDim2.new(1, 0, 0, 22),
+		size2 = UDim2.fromScale(1, 1),
 	})
-	head.Name = "Head"
-	head.Parent = panel
+	headText.Name = "Title"
+	headText.Parent = head
+
+	local dragHint = label({
+		text = "⠿ drag",
+		size = 11,
+		color = t.TextSecondary or Color3.fromRGB(150, 160, 180),
+		align = Enum.TextXAlignment.Right,
+		size2 = UDim2.fromScale(1, 1),
+	})
+	dragHint.Parent = head
+
+	makeDraggable(panel, head)
 
 	local content = Instance.new("Frame")
 	content.Name = "Body"
@@ -281,7 +355,7 @@ local function offerColumn(title: string, entries: { any }, mineControls: boolea
 
 	if #entries == 0 then
 		local hint = label({
-			text = if mineControls then "Drag items here" else "Nothing yet",
+			text = if mineControls then "Offer items below" else "Nothing yet",
 			color = t.TextSecondary or Color3.fromRGB(150, 160, 180),
 			size = 12,
 			align = Enum.TextXAlignment.Center,
@@ -298,6 +372,125 @@ local function offerColumn(title: string, entries: { any }, mineControls: boolea
 
 	list.Parent = col
 	return col
+end
+
+-- Your carried stacks, INSIDE the trade window — click to offer one more, "All" for the stack.
+-- Self-contained on purpose: the trade no longer depends on the separate inventory menu being open.
+local function backpackSection(state: any): Frame
+	local t = theme()
+
+	local staged: { [string]: number } = {}
+	for _, e in state.mine or {} do
+		staged[e.itemId] = e.qty
+	end
+
+	local holder = Instance.new("Frame")
+	holder.BackgroundTransparency = 1
+
+	local heading = label({
+		text = "Your backpack — click to offer",
+		font = t.FontBold or Enum.Font.GothamBold,
+		size = 13,
+		color = t.TextSecondary or Color3.fromRGB(200, 205, 215),
+		size2 = UDim2.new(1, 0, 0, 18),
+	})
+	heading.Parent = holder
+
+	local list = Instance.new("ScrollingFrame")
+	list.Position = UDim2.fromOffset(0, 22)
+	list.Size = UDim2.new(1, 0, 1, -22)
+	list.BackgroundColor3 = t.PanelColor or Color3.fromRGB(20, 23, 30)
+	list.BackgroundTransparency = 0.5
+	list.BorderSizePixel = 0
+	list.ScrollBarThickness = 5
+	list.CanvasSize = UDim2.new()
+	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	list.Active = true
+	corner(list, 6)
+	local ll = Instance.new("UIListLayout")
+	ll.Padding = UDim.new(0, 4)
+	ll.SortOrder = Enum.SortOrder.LayoutOrder
+	ll.Parent = list
+	local lp = Instance.new("UIPadding")
+	lp.PaddingTop = UDim.new(0, 4)
+	lp.PaddingBottom = UDim.new(0, 4)
+	lp.PaddingLeft = UDim.new(0, 4)
+	lp.PaddingRight = UDim.new(0, 4)
+	lp.Parent = list
+
+	local stacks = carriedStacks()
+	if #stacks == 0 then
+		local hint = label({
+			text = "Your backpack is empty",
+			color = t.TextSecondary or Color3.fromRGB(150, 160, 180),
+			size = 12,
+			align = Enum.TextXAlignment.Center,
+			size2 = UDim2.new(1, 0, 0, 24),
+		})
+		hint.Parent = list
+	else
+		for i, s in stacks do
+			local row = Instance.new("TextButton")
+			row.Size = UDim2.new(1, 0, 0, 28)
+			row.BackgroundColor3 = t.SlotColor or Color3.fromRGB(30, 34, 44)
+			row.BackgroundTransparency = 0.25
+			row.BorderSizePixel = 0
+			row.AutoButtonColor = true
+			row.Text = ""
+			row.LayoutOrder = i
+			corner(row, 6)
+
+			local icon = Instance.new("ImageLabel")
+			icon.Size = UDim2.fromOffset(20, 20)
+			icon.Position = UDim2.fromOffset(4, 4)
+			icon.BackgroundTransparency = 1
+			icon.Image = SlotGrid.resolveItemIcon(s.itemId)
+			icon.Parent = row
+
+			local def = ItemData.get(s.itemId)
+			local nameLabel = label({
+				text = (def and def.name) or s.itemId,
+				size2 = UDim2.new(1, -150, 1, 0),
+				pos = UDim2.fromOffset(30, 0),
+			})
+			nameLabel.Parent = row
+
+			local offered = staged[s.itemId] or 0
+			local qtyLabel = label({
+				text = if offered > 0 then `{offered}/{s.qty} offered` else `×{s.qty}`,
+				align = Enum.TextXAlignment.Right,
+				color = if offered > 0
+					then (t.Accent or Color3.fromRGB(204, 166, 102))
+					else (t.TextSecondary or Color3.fromRGB(200, 205, 215)),
+				size = 12,
+				size2 = UDim2.fromOffset(90, 28),
+				pos = UDim2.new(1, -140, 0, 0),
+			})
+			qtyLabel.Parent = row
+
+			local all = button("All", t.SlotColor or Color3.fromRGB(48, 54, 68))
+			all.Size = UDim2.fromOffset(40, 20)
+			all.Position = UDim2.new(1, -46, 0.5, -10)
+			all.TextSize = 12
+			all.Parent = row
+			all.MouseButton1Click:Connect(function()
+				Remotes.event("TradeStage"):FireServer(s.slot, s.qty)
+			end)
+
+			-- Clicking the row itself offers one more.
+			row.MouseButton1Click:Connect(function()
+				local next = math.min(offered + 1, s.qty)
+				if next > offered then
+					Remotes.event("TradeStage"):FireServer(s.slot, next)
+				end
+			end)
+
+			row.Parent = list
+		end
+	end
+
+	list.Parent = holder
+	return holder
 end
 
 -- ── State views ────────────────────────────────────────────────────────────────
@@ -350,17 +543,26 @@ end
 local function buildOpen(state: any)
 	local t = theme()
 
+	-- Top half: the two offers side by side. Bottom half: your backpack (so the window is
+	-- self-contained — no dependency on the separate inventory menu).
+	local OFFERS_H = 168
+
 	local mineCol = offerColumn("You offer", state.mine or {}, true, state.myConfirm == true)
 	mineCol.Position = UDim2.fromOffset(0, 0)
-	mineCol.Size = UDim2.new(0.5, -6, 1, -84)
+	mineCol.Size = UDim2.new(0.5, -6, 0, OFFERS_H)
 	mineCol.Parent = body
 	offerZone = mineCol
 
 	local theirsTitle = if state.theirConfirm then `{state.partner} ✓` else `{state.partner} offers`
 	local theirsCol = offerColumn(theirsTitle, state.theirs or {}, false, state.theirConfirm == true)
 	theirsCol.Position = UDim2.new(0.5, 6, 0, 0)
-	theirsCol.Size = UDim2.new(0.5, -6, 1, -84)
+	theirsCol.Size = UDim2.new(0.5, -6, 0, OFFERS_H)
 	theirsCol.Parent = body
+
+	local pack = backpackSection(state)
+	pack.Position = UDim2.fromOffset(0, OFFERS_H + 10)
+	pack.Size = UDim2.new(1, 0, 1, -(OFFERS_H + 10) - 80)
+	pack.Parent = body
 
 	-- Footer: status line + Confirm + Cancel.
 	local statusLabel = label({
@@ -400,11 +602,14 @@ end
 
 -- ── Render ─────────────────────────────────────────────────────────────────────
 
+local lastState: any = nil
+
 local function render(state: any)
 	local panel = ensureGui()
 	if not panel then
 		return
 	end
+	lastState = state
 
 	local status = state and state.status
 	if not status or status == "cancelled" or status == "done" then
@@ -422,12 +627,6 @@ local function render(state: any)
 		buildWaiting(state)
 	elseif status == "open" then
 		buildOpen(state)
-		-- Pop the inventory menu open on entering a trade so items are draggable.
-		if lastStatus ~= "open" then
-			pcall(function()
-				PanelManager.open("inventory")
-			end)
-		end
 	end
 	lastStatus = status
 end
@@ -454,6 +653,25 @@ function TradeUi.start(_options: { [string]: any }?)
 
 	Remotes.event("TradeState").OnClientEvent:Connect(function(state)
 		render(state)
+	end)
+
+	-- Keep the in-window backpack honest if the inventory changes mid-trade (a pickup, a craft…).
+	-- Coalesced to one re-render per frame; only while an open trade is on screen.
+	local refreshQueued = false
+	localPlayer.AttributeChanged:Connect(function(name: string)
+		if lastStatus ~= "open" or refreshQueued then
+			return
+		end
+		if not (string.match(name, "^InvSlot_%d+$") or string.match(name, "^InvQty_%d+$")) then
+			return
+		end
+		refreshQueued = true
+		task.defer(function()
+			refreshQueued = false
+			if lastStatus == "open" and lastState then
+				render(lastState)
+			end
+		end)
 	end)
 end
 

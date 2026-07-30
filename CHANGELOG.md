@@ -16,7 +16,10 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
   `SurvivorCore.Interact.addAction{…}`; interact key is `UI.Keybinds.Interact` (default `E`). Ported
   from The Counter Earth. See [docs/interact.md](docs/interact.md).
 - **Player trading** (#15) — secure, server-authoritative, **dupe-proof** face-to-face item swaps.
-  Open a player's interact window and choose **Trade**; the target Accepts/Declines; both stage loose backpack
+  Open a player's interact window and choose **Trade**; the target Accepts/Declines. The trade
+  window is **self-contained** — your carried stacks are listed inside it (click to offer, "All" for
+  the whole stack), so trading never depends on the separate inventory menu being open — and its
+  header is a **drag handle** so it can be moved out of the way. Both stage loose backpack
   stacks (drag from the inventory grid, with −/+ qty steppers) and must **Confirm** before anything
   moves. The swap is one synchronous, no-yield commit — re-validate holds → pre-flight both
   receivers have room (new **`Inventory.canAccept`**) → remove both → grant with `addUpTo` → refund
