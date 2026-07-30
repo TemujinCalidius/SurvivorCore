@@ -161,6 +161,7 @@ EngineConfig.SECTIONS = {
 					num("MaxRange", "Max range (studs)", 1),
 					num("MinDrawDamageMult", "Min-draw damage mult (0-1)", 0, 1),
 					num("StepSize", "Sim step size (studs)", 1),
+					num("Cooldown", "Shot cooldown (s)", 0),
 				},
 			},
 		},

@@ -7,6 +7,17 @@ is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
 ## Unreleased
 
+### Security
+- **Bow shots are now rate-limited server-side.** The bow release handler enforced no cooldown — the
+  one client-driven action in the engine that didn't — so a client could fire far faster than a bow's
+  design rate, and each release costs the server up to `MaxRange / Bow.StepSize` raycasts to simulate
+  the arc. The gate runs **before** the arrow is spent and before the simulation, honours a bow's own
+  **`weaponCooldown`** (which previously only melee read, despite being offered for every weapon), and
+  falls back to the new **`Combat.Bow.Cooldown`** (0.35s, tunable in SurvivorCore Studio). A release
+  with no matching draw is rejected, `BowDraw` now validates the sender is alive and holding a bow,
+  and aim points are checked for finiteness so a malformed one can't consume an arrow. Affects
+  v0.8.0 and earlier.
+
 ### Added
 - **Player interact window** — walk up to another player and an **"[E] Interact"** badge appears
   over *their* head; press **E** (or tap) to open a window with their name + survival stats and an

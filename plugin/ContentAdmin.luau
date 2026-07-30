@@ -64,7 +64,13 @@ ContentAdmin.CATEGORIES = {
 			{ attr = "weaponKind", kind = "string", label = "Kind", default = "melee", placeholder = "melee / bow" },
 			{ attr = "weaponDamage", kind = "number", label = "Damage", default = 10 },
 			{ attr = "weaponRange", kind = "number", label = "Range (melee)", default = 8 },
-			{ attr = "weaponCooldown", kind = "number", label = "Cooldown", default = 0.6 },
+			{
+				attr = "weaponCooldown",
+				kind = "number",
+				label = "Cooldown (s)",
+				default = 0.6,
+				placeholder = "melee swings AND bow shots",
+			},
 			{ attr = "weaponDrawTime", kind = "number", label = "Draw time (bow)", default = 1 },
 			{ attr = "weaponProjectileSpeed", kind = "number", label = "Arrow speed (bow)", default = 180 },
 			{
