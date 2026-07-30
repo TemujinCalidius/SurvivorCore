@@ -14,7 +14,7 @@
 
 </div>
 
-> **Status: v0.8.0 — pre-release.** The core survival loop is in and working; the engine is
+> **Status: v0.9.0 — pre-release.** The core survival loop is in and working; the engine is
 > being grown toward v1.0 and APIs may still shift. Production-tested in
 > [The Counter Earth](https://thecounterearth.com).
 
@@ -40,6 +40,8 @@ authoring tools. If you know Roblox Studio, you can build a survival game.
 - **Hunting & loot bags** — slain animals leave butcherable carcasses (knife required, real
   yields); player death drops everything into a lootable bag with a countdown — get back to it
   before it's gone.
+- **Player trading** — walk up, offer items, both confirm: a server-authoritative, **dupe-proof**
+  face-to-face swap (nothing moves until both agree, then atomically).
 - **SurvivorCore Studio (no-code admin plugin)** — one floating window with sidebar + search:
   tune **every engine config section** (movement, combat, mobs, loot bags, UI theme colors &
   fonts, …) as locked deltas that survive engine updates; create items, weapons, ammo, mobs,
@@ -69,7 +71,7 @@ into `ReplicatedStorage`, or add it via [Wally](https://wally.run):
 ```toml
 # wally.toml
 [dependencies]
-SurvivorCore = "temujincalidius/survivorcore@0.8.0"
+SurvivorCore = "temujincalidius/survivorcore@0.9.0"
 ```
 
 Working from source? Clone and `rojo serve` the `demo.project.json` place.
@@ -100,6 +102,7 @@ The **admin plugin** turns all of this into Studio forms — see
 [Inventory](docs/inventory.md) · [Harvesting](docs/harvesting.md) · [Crafting](docs/crafting.md) ·
 [Combat](docs/combat.md) · [Mobs & AI](docs/mobs.md) · [Quests](docs/quests.md) ·
 [Achievements](docs/achievements.md) · [Loot bags](docs/loot-bags.md) ·
+[Player trading](docs/trading.md) · [Interact window](docs/interact.md) ·
 [No-code content](docs/content-authoring.md) ·
 [Admin plugin](docs/admin-plugin.md) · [Design language](docs/design-language.md) ·
 [Extending](docs/extending.md)

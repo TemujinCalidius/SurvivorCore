@@ -5,6 +5,42 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.9.0 — 2026-07-30
+
+### Security
+- **Bow shots are now rate-limited server-side.** The bow release handler enforced no cooldown — the
+  one client-driven action in the engine that didn't — so a client could fire far faster than a bow's
+  design rate, and each release costs the server up to `MaxRange / Bow.StepSize` raycasts to simulate
+  the arc. The gate runs **before** the arrow is spent and before the simulation, honours a bow's own
+  **`weaponCooldown`** (which previously only melee read, despite being offered for every weapon), and
+  falls back to the new **`Combat.Bow.Cooldown`** (0.35s, tunable in SurvivorCore Studio). A release
+  with no matching draw is rejected, `BowDraw` now validates the sender is alive and holding a bow,
+  and aim points are checked for finiteness so a malformed one can't consume an arrow. Affects
+  v0.8.0 and earlier.
+
+### Added
+- **Player interact window** — walk up to another player and an **"[E] Interact"** badge appears
+  over *their* head; press **E** (or tap) to open a window with their name + survival stats and an
+  **action list** (Trade ships built-in). Targeting is a client-side nearest-*other*-player scan, so
+  it can never point at you — this **replaces** the earlier per-character server ProximityPrompt
+  (which wrongly showed on your own character). Games extend it with
+  `SurvivorCore.Interact.addAction{…}`; interact key is `UI.Keybinds.Interact` (default `E`). Ported
+  from The Counter Earth. See [docs/interact.md](docs/interact.md).
+- **Player trading** (#15) — secure, server-authoritative, **dupe-proof** face-to-face item swaps.
+  Open a player's interact window and choose **Trade**; the target Accepts/Declines. The trade
+  window is **self-contained** — your carried stacks are listed inside it (click to offer, "All" for
+  the whole stack), so trading never depends on the separate inventory menu being open — and its
+  header is a **drag handle** so it can be moved out of the way. Both stage loose backpack
+  stacks (drag from the inventory grid, with −/+ qty steppers) and must **Confirm** before anything
+  moves. The swap is one synchronous, no-yield commit — re-validate holds → pre-flight both
+  receivers have room (new **`Inventory.canAccept`**) → remove both → grant with `addUpTo` → refund
+  any residue — so item count is conserved on every path. Auto-cancels on death / leave / walking
+  out of range (`MaxDistance`) / request timeout; a staging change resets both confirms. New
+  `Trade` server system + `TradeUi` client window, the `"Trading"` Config section (tunable in
+  SurvivorCore Studio), hooks `trade:started` / `trade:completed`, and a `trades_total` progression
+  counter. v1 trades loose backpack stacks only (worn gear reserved behind `AllowEquippedItems`).
+  See [docs/trading.md](docs/trading.md).
+
 ## 0.8.0 — 2026-07-16
 
 ### Added

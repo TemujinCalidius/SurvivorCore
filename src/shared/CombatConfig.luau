@@ -26,6 +26,8 @@ CombatConfig.DEFAULTS = {
 		MaxRange = 300, -- studs the server simulates a projectile before giving up
 		MinDrawDamageMult = 0.3, -- damage multiplier at zero draw; scales up to 1.0 at full draw
 		StepSize = 4, -- studs per raycast step when simulating the arc (smaller = more precise, costlier)
+		Cooldown = 0.35, -- seconds between accepted shots per player (fallback when a bow def
+		-- sets no weaponCooldown). Rate-limits BOTH the damage and the arc simulation's raycasts.
 	},
 }
 

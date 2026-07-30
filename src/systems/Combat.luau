@@ -40,6 +40,20 @@ local Combat = {}
 local started = false
 local lastSwing: { [Player]: number } = {}
 local drawStart: { [Player]: number } = {}
+local lastShot: { [Player]: number } = {} -- bow release rate limit (see onBowRelease)
+
+-- A client-supplied aim point must be a real, finite, sanely-bounded position. `typeof == "Vector3"`
+-- alone is not enough: a NaN/inf component defeats magnitude comparisons (every comparison against
+-- NaN is false), which would poison the arc simulation's raycasts.
+local MAX_AIM_MAGNITUDE = 1e6
+local function isSanePoint(p: Vector3): boolean
+	local x, y, z = p.X, p.Y, p.Z
+	-- NaN never equals itself; the abs() bound rejects ±inf and absurd coordinates alike.
+	if x ~= x or y ~= y or z ~= z then
+		return false
+	end
+	return math.abs(x) < MAX_AIM_MAGNITUDE and math.abs(y) < MAX_AIM_MAGNITUDE and math.abs(z) < MAX_AIM_MAGNITUDE
+end
 
 local function playerRoot(player: Player): BasePart?
 	local char = player.Character
@@ -270,7 +284,7 @@ end
 -- server recomputes the true fire direction from the bow's own origin, eliminating shoulder-camera
 -- parallax and any client direction spoofing.
 local function onBowRelease(player: Player, targetPoint: any, _clientAlpha: any)
-	if not isAlive(player) or typeof(targetPoint) ~= "Vector3" then
+	if not isAlive(player) or typeof(targetPoint) ~= "Vector3" or not isSanePoint(targetPoint) then
 		drawStart[player] = nil
 		return
 	end
@@ -285,10 +299,32 @@ local function onBowRelease(player: Player, targetPoint: any, _clientAlpha: any)
 		return
 	end
 
-	-- Server-timed draw (anti-cheat): how long the player actually held, clamped to the draw time.
 	local cfg = CombatConfig.get()
+
+	-- Rate limit, mirroring the melee path. This gate sits BEFORE the ammo spend and before
+	-- simulateArrow on purpose: a release costs up to MaxRange/StepSize server raycasts, so an
+	-- ungated handler lets one client burn the server's heartbeat regardless of ammo — and an
+	-- ammo-free bow (weaponAmmo = "", the authoring default) would otherwise have no limit at all.
+	-- Honours a bow's own weaponCooldown, which until now only the melee path read.
+	local cooldown = tonumber(def.weaponCooldown) or tonumber(cfg.Bow.Cooldown) or 0.35
+	local now = os.clock()
+	if lastShot[player] and now - lastShot[player] < cooldown then
+		drawStart[player] = nil
+		return
+	end
+
+	-- A release with no matching draw is not a real shot: the client fires BowDraw on press and
+	-- BowRelease on release. Without this, a spammed release still lands damage at the
+	-- MinDrawDamageMult floor without ever paying the draw time.
+	if not drawStart[player] then
+		return
+	end
+
+	lastShot[player] = now
+
+	-- Server-timed draw (anti-cheat): how long the player actually held, clamped to the draw time.
 	local drawTime = math.max(0.01, tonumber(def.weaponDrawTime) or 1)
-	local held = drawStart[player] and (os.clock() - drawStart[player]) or 0
+	local held = os.clock() - drawStart[player]
 	drawStart[player] = nil
 	local alpha = math.clamp(held / drawTime, 0, 1)
 
@@ -350,6 +386,11 @@ function Combat.start(_options: { [string]: any }?)
 		onMeleeSwing(player)
 	end)
 	Remotes.event("BowDraw").OnServerEvent:Connect(function(player)
+		-- Validated like every other client-driven entry point: only a living player holding a bow
+		-- may open a draw (the timestamp feeds the release's damage scaling).
+		if not isAlive(player) or not equippedWeapon(player, "bow") then
+			return
+		end
 		drawStart[player] = os.clock()
 	end)
 	Remotes.event("BowRelease").OnServerEvent:Connect(function(player, targetPoint, clientAlpha)
@@ -359,6 +400,7 @@ function Combat.start(_options: { [string]: any }?)
 	Players.PlayerRemoving:Connect(function(player)
 		lastSwing[player] = nil
 		drawStart[player] = nil
+		lastShot[player] = nil
 	end)
 end
 
