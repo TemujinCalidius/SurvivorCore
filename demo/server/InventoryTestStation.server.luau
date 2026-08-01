@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local SurvivorCore = require(ReplicatedStorage:WaitForChild("SurvivorCore"))
+local Stage = require(script.Parent.Stage)
 
 local PICKUPS = {
 	{ label = "PICK UP  Stone Axe", item = "stone_axe", amount = 1, color = Color3.fromRGB(120, 130, 140) },
@@ -67,8 +68,10 @@ local function buildPickup(def: any, position: Vector3)
 	end)
 end
 
-local BASE = Vector3.new(0, 4, 16) -- opposite side from the stat test stations
-for i, def in PICKUPS do
-	local x = (i - (#PICKUPS + 1) / 2) * 4
-	buildPickup(def, BASE + Vector3.new(x, 0, 0))
+if Stage.TestStations then
+	local BASE = Vector3.new(0, 4, 16) -- opposite side from the stat test stations
+	for i, def in PICKUPS do
+		local x = (i - (#PICKUPS + 1) / 2) * 4
+		buildPickup(def, BASE + Vector3.new(x, 0, 0))
+	end
 end

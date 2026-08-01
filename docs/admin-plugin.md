@@ -31,7 +31,7 @@ This is the [Builder / Admin plugin](https://github.com/TemujinCalidius/Survivor
 > Studio forgets the old panel's dock position **once** — the new window opens floating; dock it
 > wherever you like and Studio remembers from then on.
 
-> 📹 **Demos:** [HUD, survival stats & the admin plugin](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P) · [no-code item & gatherable creation](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE) · [no-code weapon, ammo & mob creation](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU) · [no-code quest & achievement creation](https://makertube.net/w/uSGJ2MHEFjSSKxMiJBJ6Y5) · [SurvivorCore Studio — the no-code admin window](https://makertube.net/w/g4oySJeXD4Th7f1zYEu9Bz)
+> 📹 **Demos:** [HUD, survival stats & the admin plugin](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P) · [no-code item & gatherable creation](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE) · [no-code weapon, ammo & mob creation](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU) · [no-code quest & achievement creation](https://makertube.net/w/uSGJ2MHEFjSSKxMiJBJ6Y5) · [SurvivorCore Studio — the no-code admin window](https://makertube.net/w/g4oySJeXD4Th7f1zYEu9Bz) · [Build — a plain Part into a working iron node](https://makertube.net/w/2kkyPbDWqoyuKcgbiCGwQG)
 
 ## Install
 

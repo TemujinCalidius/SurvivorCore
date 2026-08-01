@@ -14,7 +14,7 @@
 
 </div>
 
-> **Status: v0.9.0 — pre-release.** The core survival loop is in and working; the engine is
+> **Status: v0.10.0 — pre-release.** The core survival loop is in and working; the engine is
 > being grown toward v1.0 and APIs may still shift. Production-tested in
 > [The Counter Earth](https://thecounterearth.com).
 
@@ -71,7 +71,7 @@ into `ReplicatedStorage`, or add it via [Wally](https://wally.run):
 ```toml
 # wally.toml
 [dependencies]
-SurvivorCore = "temujincalidius/survivorcore@0.9.0"
+SurvivorCore = "temujincalidius/survivorcore@0.10.0"
 ```
 
 Working from source? Clone and `rojo serve` the `demo.project.json` place.
