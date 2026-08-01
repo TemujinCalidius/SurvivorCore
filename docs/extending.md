@@ -117,6 +117,44 @@ SurvivorCore.Components.define({
 tagged and keeps binding new instances as they appear. Each instance is bound once (guarded by
 an internal `_scBound` attribute).
 
+Attributes prefixed with **`_`** are engine-internal (the `_scBound` bind marker, and any values a
+component resolves and stashes for its server system). Never author them by hand.
+
+### Declaring a schema (so the Builder can render a form)
+
+`attributes` also accepts a **schema array**, which adds the kind, label, help text and options for
+each attribute. That's what lets the Studio plugin's **Build** page render a setup form for your
+component — select a part, pick your component, fill the fields — with **no UI code on your side**:
+
+```lua
+SurvivorCore.Components.define({
+    name = "Campfire",
+    tag = "Campfire",
+    display = {
+        title = "Campfire",
+        summary = "A fire players light for warmth and cooking.",
+        instance = "any", -- or "Model" / "BasePart" — what the Builder will let you tag
+    },
+    attributes = {
+        { attr = "FuelSeconds", kind = "number", label = "Fuel (seconds)", default = 60, min = 0,
+          help = "How long one load of fuel burns." },
+        { attr = "Lit", kind = "boolean", label = "Starts lit", default = false },
+    },
+    onSetup = function(instance, values)
+        -- `values` is identical either way: the instance's attribute, else the default.
+    end,
+})
+```
+
+Both forms bind identically — the shorthand map is still supported and nothing changes for
+components that use it. Field `kind` is `number` | `boolean` | `string` | `enum` (with `choices`);
+a field may also carry `min`/`max`/`integer`, a `placeholder`, a `group` (form section), and `ref`
+(a content category whose authored ids the Builder offers as a picker). The engine's own components
+declare theirs in [`src/components/Schema.luau`](../src/components/Schema.luau).
+
+**Convention:** every creator-facing component should declare a schema, so it is Builder-drivable
+rather than requiring the creator to know attribute names.
+
 ---
 
 ## 3. Hooks — react to engine lifecycle events

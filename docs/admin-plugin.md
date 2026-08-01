@@ -5,6 +5,9 @@ Attributes in the Explorer. One **SurvivorCore › Studio** toolbar button opens
 window** (drag-dock it anywhere) with a sidebar of editors:
 
 - **Overview** — is the engine synced, what content exists (click through), how the model works.
+- **Build** — select a Part or Model in the viewport, answer **"what is this object?"**, and fill a
+  form: it becomes a gatherable node, a mob, or a quest giver. No tags to memorise, no attribute
+  names to type. See [Build: world objects](#build-world-objects) below.
 - **Survival Stats** — tune the survival-stat rates/thresholds/HUD on the `SurvivalStatsConfig`
   instance (the deltas-only, locked model below), with an Edit-mode **HUD preview**.
 - **Engine Config** — every engine Config section (issue #21): Movement (speeds, energy, audio,
@@ -28,7 +31,7 @@ This is the [Builder / Admin plugin](https://github.com/TemujinCalidius/Survivor
 > Studio forgets the old panel's dock position **once** — the new window opens floating; dock it
 > wherever you like and Studio remembers from then on.
 
-> 📹 **Demos:** [HUD, survival stats & the admin plugin](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P) · [no-code item & gatherable creation](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE) · [no-code weapon, ammo & mob creation](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU) · [no-code quest & achievement creation](https://makertube.net/w/uSGJ2MHEFjSSKxMiJBJ6Y5) · [SurvivorCore Studio — the no-code admin window](https://makertube.net/w/g4oySJeXD4Th7f1zYEu9Bz)
+> 📹 **Demos:** [HUD, survival stats & the admin plugin](https://makertube.net/w/xqX7wfRpTqd9L9BkozCS1P) · [no-code item & gatherable creation](https://makertube.net/w/mCneurjoY3Av6yi48VsGQE) · [no-code weapon, ammo & mob creation](https://makertube.net/w/tyn8JEMG3CaMbTXid8osdU) · [no-code quest & achievement creation](https://makertube.net/w/uSGJ2MHEFjSSKxMiJBJ6Y5) · [SurvivorCore Studio — the no-code admin window](https://makertube.net/w/g4oySJeXD4Th7f1zYEu9Bz) · [Build — a plain Part into a working iron node](https://makertube.net/w/2kkyPbDWqoyuKcgbiCGwQG)
 
 ## Install
 
@@ -65,6 +68,47 @@ the window.
 > instructional empty state and writes nothing. Note that restarting Studio drops an *unsaved*
 > Rojo-synced place, so reconnect Rojo and re-sync (or save the place before restarting) to bring
 > the engine back.
+
+## Build: world objects
+
+The **Build** page is how a creator turns their *own* geometry into engine content. Select a Part or
+Model and it asks **"What is this object?"** — pick **Gatherable**, **Mob (creature)** or **Quest
+giver** and the plugin applies the tag for you, then renders that component's setup form.
+
+The form is generated from the **engine's own component schema**
+([`src/components/Schema.luau`](../src/components/Schema.luau)) — the same source the engine binds
+from — so the fields, their defaults and their help text can never drift from what actually runs.
+**Any component that declares a schema gets a form here automatically; there is no per-component UI
+code.**
+
+### Your first tree, in 60 seconds
+
+1. **Author the resource.** *Content › Gatherables › + Create* → id `oak_tree`, yields item `wood`,
+   HP 4.
+2. **Build the mesh.** Insert a Part (or your own tree model) and select it.
+3. **Say what it is.** Open **Build** → click the **Gatherable** card.
+4. **Point it at the resource.** In the form, click the **⌄** next to *Resource* until it reads
+   `oak_tree` — that's it; item, HP, tool and yield all follow the entry.
+5. **Play.** Walk up and hold **E**. Wood lands in your inventory.
+
+Change your mind later: **Change type** swaps the component (clearing the old one's settings), and
+**Clear** removes the tag and every attribute the engine added.
+
+### How it behaves
+
+- **Deltas only.** Applying a component writes **no attributes** — the object follows every default
+  until you change something, and a changed field that you set back to its default is removed again.
+  The ○/● dot next to each field tells you which is which.
+- **Pickers, not memory.** Fields that reference authored content (a resource, a mob type, a quest)
+  offer a **⌄** that cycles the ids you've created in *Content*.
+- **Eligibility is enforced.** *Mob* needs a Model (Humanoid + PrimaryPart), so it's dimmed with the
+  reason when a plain Part is selected.
+- **Multi-select** applies to every eligible object at once, as one undo step.
+- **Undo** — every apply, clear and field edit is a single Studio undo step.
+- **Needs SurvivorCore ≥ 0.9.** Against an older engine the page explains that instead of failing.
+
+> Components a game defines **at runtime** (in its own code) can't appear here — the plugin reads a
+> static module in Edit mode, where your server scripts haven't run. Tag those by hand as before.
 
 ## Survival Stats
 

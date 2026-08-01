@@ -5,6 +5,33 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
+## 0.10.0 — 2026-08-01
+
+### Changed
+- **Demo: one switch for what the world contains** — `demo/server/Stage.luau` toggles the gather
+  field + quest post, the mobs, the starting inventory and the hand-test prop rows independently.
+  The **test stations now default OFF**: that labelled row of DAMAGE / FEED / POISON / BLEED
+  prompts (plus the item pickups) is scaffolding for working *on* the engine, and it crowded the
+  spawn area for everyone else. Flip any flag on to get that piece back; turn them all off for a
+  clean stage when filming or when building your own world on the engine. Content *definitions*
+  register regardless, so the admin plugin's pickers still list the demo's items and mobs.
+
+### Added
+- **Build: no-code world objects** (#11) — select a Part or Model in Studio, answer **"what is this
+  object?"**, and fill a form: it becomes a gatherable node, a mob or a quest giver, tag and
+  attributes applied for you. The form is generated from the engine's own **component schema**, so
+  fields, defaults and help text can never drift from what runs — and **any component that declares
+  a schema gets a form for free, with no per-component UI code**. Fields that reference authored
+  content (a resource, a mob type, a quest) offer a picker instead of asking you to remember ids;
+  writes are deltas-only (an attribute exists only where you diverged from the default); *Change
+  type* and *Clear* are the honest inverses; multi-select applies in bulk as one undo step.
+- **`Components.define` accepts an attribute schema** — `attributes` may now be an array of
+  `{ attr, kind, label, default, help, choices, min/max, group, ref }` specs (plus a `display` block
+  naming the component for the chooser) instead of the `attr = default` shorthand. **Both forms bind
+  identically**; existing components and game code are unaffected. New `Components.getSchema` /
+  `listSchemas`, and `src/components/Schema.luau` — a dependency-free module the Studio plugin reads
+  live at edit time. See [docs/extending.md](docs/extending.md).
+
 ## 0.9.0 — 2026-07-30
 
 ### Security

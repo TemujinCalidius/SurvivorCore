@@ -171,6 +171,27 @@ function Theme.panel(): Frame
 	}) :: Frame
 end
 
+-- A CLICKABLE panel: identical styling to Theme.panel, but the card itself is the button.
+-- Use this instead of parenting a full-size button "overlay" into a panel — the panel's own
+-- UIListLayout lays out EVERY GuiObject child (there is no opt-out, and ZIndex doesn't change
+-- layout), so such an "overlay" becomes another list row: the card body stops being clickable and
+-- the oversized button spills onto whatever is rendered next.
+function Theme.panelButton(): TextButton
+	return Theme.make("TextButton", {
+		BackgroundColor3 = Theme.COLOR.PANEL,
+		BorderSizePixel = 0,
+		Size = UDim2.fromScale(1, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		Text = "",
+		AutoButtonColor = false, -- Theme.hover owns the highlight, matching the other cards
+	}, {
+		Theme.corner(8),
+		Theme.stroke(),
+		Theme.pad(8, 8, 6, 8),
+		Theme.make("UIListLayout", { Padding = UDim.new(0, 2), SortOrder = Enum.SortOrder.LayoutOrder }),
+	}) :: TextButton
+end
+
 -- A small count/status pill (rail badges, entry badges).
 function Theme.badge(text: string, textColor: Color3?): TextLabel
 	return Theme.make("TextLabel", {

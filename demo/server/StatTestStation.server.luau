@@ -16,6 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local SurvivorCore = require(ReplicatedStorage:WaitForChild("SurvivorCore"))
+local Stage = require(script.Parent.Stage)
 
 local POISON_SOURCE = "TestStation:poison"
 local BLEED_SOURCE = "TestStation:bleed"
@@ -149,8 +150,10 @@ end
 -- (The engine syncs the "Health" stat to the Humanoid + resets stats on respawn now, so the
 -- DAMAGE part's real damage shows on the HUD and death/respawn comes out clean on its own.)
 
-local BASE = Vector3.new(0, 4, -16)
-for i, def in STATIONS do
-	local x = (i - (#STATIONS + 1) / 2) * 4
-	buildStation(def, BASE + Vector3.new(x, 0, 0))
+if Stage.TestStations then
+	local BASE = Vector3.new(0, 4, -16)
+	for i, def in STATIONS do
+		local x = (i - (#STATIONS + 1) / 2) * 4
+		buildStation(def, BASE + Vector3.new(x, 0, 0))
+	end
 end
