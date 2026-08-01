@@ -5,7 +5,16 @@ All notable changes to SurvivorCore are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). At release time, `## Unreleased`
 is promoted to the new version and `main` is tagged `vX.Y.Z`.
 
-## Unreleased
+## 0.10.0 — 2026-08-01
+
+### Changed
+- **Demo: one switch for what the world contains** — `demo/server/Stage.luau` toggles the gather
+  field + quest post, the mobs, the starting inventory and the hand-test prop rows independently.
+  The **test stations now default OFF**: that labelled row of DAMAGE / FEED / POISON / BLEED
+  prompts (plus the item pickups) is scaffolding for working *on* the engine, and it crowded the
+  spawn area for everyone else. Flip any flag on to get that piece back; turn them all off for a
+  clean stage when filming or when building your own world on the engine. Content *definitions*
+  register regardless, so the admin plugin's pickers still list the demo's items and mobs.
 
 ### Added
 - **Build: no-code world objects** (#11) — select a Part or Model in Studio, answer **"what is this

@@ -74,7 +74,7 @@ local EngineConfig = require(script.shared.EngineConfig)
 
 local SurvivorCore = {}
 
-SurvivorCore.VERSION = "0.9.0"
+SurvivorCore.VERSION = "0.10.0"
 
 -- Foundation
 SurvivorCore.Config = Config

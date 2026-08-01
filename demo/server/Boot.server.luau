@@ -12,6 +12,9 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SurvivorCore = require(ReplicatedStorage:WaitForChild("SurvivorCore"))
 
+-- What this demo places in the world — see demo/server/Stage.luau to turn any of it off.
+local STAGE = require(script.Parent.Stage)
+
 -- 1. Programmatic content -----------------------------------------------------
 -- NOTE: the `icon` ids below are PLACEHOLDERS (the engine's stat icons) so the demo grid
 -- isn't empty. A real game registers proper item icons (per-item `icon` or the "ItemIcons"
@@ -416,10 +419,12 @@ local function seedPlayer(player: Player)
 	player:SetAttribute("EquipSlot_Head", "straw_hat") -- a pre-filled equipment slot
 	player:SetAttribute("EquipSlot_Back", "reed_satchel") -- equipped for +slots / +carry weight
 end
-for _, player in Players:GetPlayers() do
-	seedPlayer(player)
+if STAGE.SeedInventory then
+	for _, player in Players:GetPlayers() do
+		seedPlayer(player)
+	end
+	Players.PlayerAdded:Connect(seedPlayer)
 end
-Players.PlayerAdded:Connect(seedPlayer)
 
 SurvivorCore.start()
 
@@ -509,10 +514,12 @@ local function buildReed(position: Vector3)
 	reed.Parent = Workspace
 end
 
-buildTree(Vector3.new(10, 0, 28))
-buildTree(Vector3.new(18, 0, 28))
-buildReed(Vector3.new(-8, 0, 28))
-buildReed(Vector3.new(-12, 0, 28))
+if STAGE.WorldContent then
+	buildTree(Vector3.new(10, 0, 28))
+	buildTree(Vector3.new(18, 0, 28))
+	buildReed(Vector3.new(-8, 0, 28))
+	buildReed(Vector3.new(-12, 0, 28))
+end
 
 -- Reaction juice (per resource type) — pure creator content via the engine's reaction API.
 local SWAY = TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 0, true)
@@ -582,9 +589,11 @@ buildWeaponTemplates()
 
 -- Husks live out past their aggro+wander reach of spawn — new players shouldn't get farmed at
 -- the spawn point before they've picked up a weapon (they'll still hunt you in their territory).
-SurvivorCore.Mobs.spawn("husk", CFrame.new(70, 5, 45), { respawn = true })
-SurvivorCore.Mobs.spawn("husk", CFrame.new(82, 5, 58), { respawn = true })
-SurvivorCore.Mobs.spawn("boar", CFrame.new(-30, 5, 18))
+if STAGE.Mobs then
+	SurvivorCore.Mobs.spawn("husk", CFrame.new(70, 5, 45), { respawn = true })
+	SurvivorCore.Mobs.spawn("husk", CFrame.new(82, 5, 58), { respawn = true })
+	SurvivorCore.Mobs.spawn("boar", CFrame.new(-30, 5, 18))
+end
 
 -- The quest-giver post: offers `slay_husk` (hold E to accept; return to turn in). Any mesh works —
 -- tag it "QuestGiver" + set Quest — this demo just uses a marked wooden post.
@@ -608,7 +617,9 @@ local function buildQuestPost(position: Vector3)
 	CollectionService:AddTag(post, "QuestGiver")
 	post.Parent = Workspace
 end
-buildQuestPost(Vector3.new(8, 0, 8))
+if STAGE.WorldContent then
+	buildQuestPost(Vector3.new(8, 0, 8))
+end
 
 -- Flourish hooks: print quest + achievement milestones to the output.
 SurvivorCore.Hooks.on("quest:completed", function(ctx)
